@@ -74,10 +74,19 @@ if (commits.length === 0) {
 }
 
 // ─── Determine bump type ──────────────────────────────────────────────────────
+// Conventional commits spec:
+//   major  →  subject has `!` before the colon  OR  body/footer starts a line with "BREAKING CHANGE:"
+//   minor  →  subject starts with "feat:"
+//   patch  →  everything else (fix, chore, docs, ci, refactor, …)
 
 let bump = 'patch';
 for (const { subject, body } of commits) {
-  if (/BREAKING CHANGE/.test(body) || /^[a-z]+(\(.+\))?!:/.test(subject)) {
+  // Breaking: explicit `!` in subject (e.g. feat!: or fix(ci)!:)
+  const subjectBreaking = /^[a-z]+(\(.+\))?!:/.test(subject);
+  // Breaking: "BREAKING CHANGE:" at the start of a footer line (requires the colon)
+  const bodyBreaking = /^BREAKING CHANGE:/m.test(body);
+
+  if (subjectBreaking || bodyBreaking) {
     bump = 'major';
     break;
   }
@@ -111,7 +120,7 @@ try {
 
 // ─── Categorise commits ───────────────────────────────────────────────────────
 
-const isBreaking = c => /BREAKING CHANGE/.test(c.body) || /^[a-z]+(\(.+\))?!:/.test(c.subject);
+const isBreaking = c => /^BREAKING CHANGE:/m.test(c.body) || /^[a-z]+(\(.+\))?!:/.test(c.subject);
 const isFeat     = c => /^feat(\(.+\))?:/.test(c.subject);
 const isFix      = c => /^fix(\(.+\))?:/.test(c.subject);
 const isOther    = c => /^(refactor|perf|chore|docs|style|ci|build|test)(\(.+\))?:/.test(c.subject);
