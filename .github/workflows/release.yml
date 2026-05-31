@@ -1,0 +1,66 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+
+# Prevent concurrent release runs
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: write   # push tags + commits, create releases
+
+jobs:
+  release:
+    name: Version, tag & release
+    runs-on: ubuntu-latest
+
+    # Skip commits that the release job itself produces (chore(release): …)
+    # Note: pushes made with GITHUB_TOKEN don't re-trigger workflows by default,
+    # but this guard protects against PAT-based setups too.
+    if: "!startsWith(github.event.head_commit.message, 'chore(release):')"
+
+    steps:
+      - name: Checkout full history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0          # need all commits + tags for version calculation
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Fetch all tags
+        run: git fetch --tags --force
+
+      - name: Configure git identity
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Compute next version and update files
+        id: release
+        run: node .github/scripts/release.mjs
+
+      - name: Commit version bump
+        if: steps.release.outputs.skip != 'true'
+        run: |
+          git add package.json CHANGELOG.md
+          git commit -m "chore(release): ${{ steps.release.outputs.tag }}"
+
+      - name: Create and push tag
+        if: steps.release.outputs.skip != 'true'
+        run: |
+          TAG="${{ steps.release.outputs.tag }}"
+          git tag -a "$TAG" -m "Release $TAG"
+          git push origin main
+          git push origin "$TAG"
+
+      - name: Create GitHub Release
+        if: steps.release.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ steps.release.outputs.tag }}" \
+            --title "Release ${{ steps.release.outputs.tag }}" \
+            --notes-file .release-notes.md
