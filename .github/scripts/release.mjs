@@ -27,11 +27,18 @@ function git(cmd) {
   return execSync(`git ${cmd}`, { encoding: 'utf-8' }).trim();
 }
 
-// ─── Get latest tag ───────────────────────────────────────────────────────────
+// ─── Get latest tag (by semver sort, not ancestry) ───────────────────────────
+// git describe --abbrev=0 only finds tags reachable from HEAD.
+// After a rebase or force-push the tag may no longer be in the ancestry chain,
+// so we sort all tags by version number instead.
 
 let latestTag;
 try {
-  latestTag = git('describe --tags --abbrev=0');
+  const tags = git("tag --sort=-v:refname --list 'v*'")
+    .split('\n')
+    .map(t => t.trim())
+    .filter(t => /^v\d+\.\d+\.\d+$/.test(t));
+  latestTag = tags[0] ?? 'v0.0.0';
 } catch {
   latestTag = 'v0.0.0';
 }
@@ -91,6 +98,16 @@ else { patch += 1; }
 const newTag = `v${major}.${minor}.${patch}`;
 const newVersion = `${major}.${minor}.${patch}`;
 console.log(`${latestTag} → ${newTag}`);
+
+// Guard: skip if the tag already exists (e.g., manually created or rebase artifact)
+try {
+  const existingTags = git('tag --list').split('\n').map(t => t.trim());
+  if (existingTags.includes(newTag)) {
+    console.log(`Tag ${newTag} already exists — skipping release.`);
+    setOutput('skip', 'true');
+    process.exit(0);
+  }
+} catch { /* ignore */ }
 
 // ─── Categorise commits ───────────────────────────────────────────────────────
 
