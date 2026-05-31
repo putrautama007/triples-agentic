@@ -1,0 +1,69 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+---
+
+## [1.0.0] — 2026-05-31
+
+### Added
+
+#### Agents (`src/agents/`)
+11 TripleS-named software engineering agents, each with a professional persona, domain knowledge references, and a create → review → evaluate → update skill loop:
+
+| Agent | TripleS Member | Persona |
+|-------|---------------|---------|
+| `seoyeon` | S1 SeoYeon | Engineering Manager — main orchestrator |
+| `jiwoo-prd` | S3 JiWoo | Senior Product Manager — PRD lifecycle |
+| `yooyeon-rfc` | S5 YooYeon | Staff Engineer / Tech Lead — RFC lifecycle |
+| `nakyoung-tasks` | S7 NaKyoung | Technical Program Manager — task breakdown |
+| `yubin-frontend` | S8 YuBin | Principal Frontend Engineer — web UI |
+| `kaede-backend` | S9 Kaede | Principal Backend Engineer — APIs & services |
+| `yeonji-android` | S12 YeonJi | Senior Android Engineer — Kotlin / Jetpack |
+| `sohyun-ios` | S14 SoHyun | Senior iOS Engineer — Swift / SwiftUI |
+| `kotone-flutter` | S11 Kotone | Senior Flutter Engineer — Dart cross-platform |
+| `lynn-testcase` | S17 Lynn | QA Lead / Test Lead — test case design |
+| `shion-qa` | S20 ShiOn | Senior QA Automation Engineer — execution |
+
+#### Knowledge (`src/knowledge/`)
+20 domain expertise files organised into 4 groups:
+- `planning/` — orchestration, prd, product, rfc, architecture, task-breakdown, estimation
+- `web/` — frontend, web, backend, api
+- `mobile/` — android, kotlin, ios, swift, flutter, dart
+- `quality/` — testing, test-case, qa
+
+#### Templates (`src/templates/`)
+4 structured output templates:
+- `prd.md` — Product Requirements Document
+- `rfc.md` — Request for Comments
+- `task-breakdown.md` — Task breakdown with story points and time estimates
+- `test-case.md` — Test case suite with traceability matrix
+
+#### Setup CLI (`src/bin/setup.js`)
+Zero-dependency interactive skill installer:
+- **Interactive wizard** (`npx triples-agentic`) — choose platform and install scope via prompts
+- **Direct install** (`npx triples-agentic claude`) — non-interactive, project-level
+- **Global install** (`npx triples-agentic claude --global`) — installs to user home config
+- **All platforms** (`npx triples-agentic all`) — installs for every supported assistant
+
+#### Platform support
+Skills are generated on demand and installed into the correct directory for each coding assistant:
+
+| Platform | Project-level | Global |
+|----------|--------------|--------|
+| Claude Code | `.claude/skills/` | `~/.claude/skills/` |
+| Cursor AI | `.cursor/rules/` | `~/.cursor/rules/` |
+| GitHub Copilot | `.github/instructions/` | — |
+| OpenAI Codex | `AGENTS.md` | — |
+| Windsurf | `.windsurfrules` | `~/.codeium/windsurf/rules/` |
+
+#### Human-in-the-loop review gates
+JiWoo (PRD), YooYeon (RFC), NaKyoung (Tasks), and Lynn (Test Cases) each run an iterative create → review → evaluate → update loop. The agent pauses and presents a numbered gap list to the user when quality gates fail, then incorporates clarifications before re-evaluating.
+
+#### Orchestration workflow
+Full pipeline diagram in `docs/workflow.md` (Mermaid). Full pipeline available via `/seoyeon run`.
+
+[1.0.0]: https://github.com/pauplayground007/triples-agentic/releases/tag/v1.0.0

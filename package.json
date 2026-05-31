@@ -1,0 +1,53 @@
+{
+  "name": "triples-agentic",
+  "version": "1.0.0",
+  "description": "TripleS software engineering agent orchestrator — skill plugin for Claude Code, Cursor, Copilot, Codex, and Windsurf",
+  "type": "module",
+  "bin": {
+    "triples-agentic": "./src/bin/setup.js"
+  },
+  "files": [
+    "src/",
+    "docs/",
+    "README.md"
+  ],
+  "scripts": {
+    "setup": "node src/bin/setup.js",
+    "setup:claude": "node src/bin/setup.js claude",
+    "setup:claude:global": "node src/bin/setup.js claude --global",
+    "setup:cursor": "node src/bin/setup.js cursor",
+    "setup:cursor:global": "node src/bin/setup.js cursor --global",
+    "setup:copilot": "node src/bin/setup.js copilot",
+    "setup:codex": "node src/bin/setup.js codex",
+    "setup:windsurf": "node src/bin/setup.js windsurf",
+    "setup:windsurf:global": "node src/bin/setup.js windsurf --global",
+    "setup:all": "node src/bin/setup.js all"
+  },
+  "keywords": [
+    "triples-agentic",
+    "software-engineering",
+    "agent",
+    "orchestrator",
+    "skill",
+    "plugin",
+    "claude",
+    "copilot",
+    "cursor",
+    "codex",
+    "windsurf",
+    "prd",
+    "rfc"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pauplayground007/triples-agentic.git"
+  },
+  "bugs": {
+    "url": "https://github.com/pauplayground007/triples-agentic/issues"
+  },
+  "homepage": "https://github.com/pauplayground007/triples-agentic#readme"
+}
