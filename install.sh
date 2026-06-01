@@ -90,7 +90,7 @@ main() {
   #   claude --global    → Claude Code, global
   #   cursor --global    → Cursor AI, global
   #   all                → all platforms, project-level
-  npx --yes triples-agentic@latest "$@"
+  npx --yes github:pauplayground007/triples-agentic "$@"
 }
 
 main "$@"
