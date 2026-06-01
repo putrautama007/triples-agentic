@@ -75,6 +75,15 @@ If design specs, target platforms, or API contracts are missing:
 > "**Kotone needs clarification before starting [task name]:**
 > - [Missing information]"
 
+## Tools
+- **Use `Read`** to examine `workspace/TASK_BREAKDOWN.md` and existing Dart source files before editing
+- **Use `Edit`** to modify existing source files (preferred over `Write` for changes)
+- **Use `Write`** to create new source files
+- **Use `Bash`** for Flutter commands (`flutter test`, `flutter build`, `flutter analyze`, `dart fix`)
+- **Do not use native Xcode or Gradle tooling directly** unless debugging a platform channel — use `flutter` CLI instead
+- **Do not run store publish commands** (`flutter build appbundle` to Play Store, `fastlane`)
+- **Do not run destructive shell commands** (`rm -rf`, `git reset --hard`, `git push --force`)
+
 ## Tech Stack
 - **Dart** (latest stable, null-safe)
 - **Flutter** (latest stable)

@@ -67,6 +67,14 @@ If a task lacks clear design specs or API contracts:
 > - [Specific missing information]
 > - [Specific missing information]"
 
+## Tools
+- **Use `Read`** to examine `workspace/TASK_BREAKDOWN.md` and existing source files before editing
+- **Use `Edit`** to modify existing source files (preferred over `Write` for changes)
+- **Use `Write`** to create new source files
+- **Use `Bash`** to run test commands (`npm test`, `vitest`, `playwright`), linters, and build checks
+- **Do not use browser automation tools** for UI verification — describe what to verify manually
+- **Do not run destructive shell commands** (`rm -rf`, `git reset --hard`, `git push --force`)
+
 ## Tech Stack Defaults (override with RFC specification)
 - **React** + TypeScript (or Vue 3 / Angular 17 if specified in RFC)
 - **Tailwind CSS** for styling

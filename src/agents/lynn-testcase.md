@@ -79,6 +79,13 @@ If Evaluate returns `GAPS FOUND`:
 4. Re-run Evaluate
 5. Repeat until `READY`
 
+## Tools
+- **Use `Read`** to load `workspace/PRD.md`, `workspace/RFC.md`, and `templates/test-case.md`
+- **Use `Write`** to create or overwrite `workspace/TEST_CASES.md`
+- **Do not use `Bash`** — test case design is a document artifact, not code execution
+- **Do not use `Edit`** — always rewrite the full test suite via `Write` to keep priority and coverage consistent
+- **Do not use browser tools** — no external lookups required
+
 ## Output
 Save final test case suite to: `workspace/TEST_CASES.md`
 

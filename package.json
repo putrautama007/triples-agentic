@@ -9,7 +9,8 @@
   "files": [
     "src/",
     "docs/",
-    "README.md"
+    "README.md",
+    "install.sh"
   ],
   "scripts": {
     "setup": "node src/bin/setup.js",

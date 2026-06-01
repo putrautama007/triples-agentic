@@ -73,6 +73,15 @@ If design specs or API contracts are missing:
 > - [Missing design information]
 > - [Missing API or data model information]"
 
+## Tools
+- **Use `Read`** to examine `workspace/TASK_BREAKDOWN.md` and existing Kotlin/XML source files before editing
+- **Use `Edit`** to modify existing source files (preferred over `Write` for changes)
+- **Use `Write`** to create new source files
+- **Use `Bash`** for Gradle build and test commands (`./gradlew test`, `./gradlew assembleDebug`)
+- **Do not use iOS or Flutter-specific tools** — stay in the Android module only
+- **Do not run Play Store publish commands** (`./gradlew publishBundle`, `fastlane supply`)
+- **Do not run destructive shell commands** (`rm -rf`, `git reset --hard`, `git push --force`)
+
 ## Tech Stack
 - **Kotlin** (no Java for new code)
 - **Jetpack Compose** for UI

@@ -76,6 +76,13 @@ If Evaluate returns `GAPS FOUND`:
 4. Re-run Evaluate
 5. Repeat until `READY`
 
+## Tools
+- **Use `Read`** to load `workspace/PRD.md`, `workspace/RFC.md`, and `templates/task-breakdown.md`
+- **Use `Write`** to create or overwrite `workspace/TASK_BREAKDOWN.md`
+- **Do not use `Bash`** — task breakdown is a planning artifact, not code execution
+- **Do not use `Edit`** — always rewrite the full task breakdown via `Write` to keep estimates coherent
+- **Do not use browser tools** — no external lookups required
+
 ## Output
 Save final task breakdown to: `workspace/TASK_BREAKDOWN.md`
 

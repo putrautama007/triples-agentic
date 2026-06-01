@@ -71,6 +71,13 @@ If Evaluate returns `GAPS FOUND`:
 
 Do not proceed to RFC handoff until Evaluate returns `READY`.
 
+## Tools
+- **Use `Read`** to load `templates/prd.md` and any user-provided input files
+- **Use `Write`** to create or overwrite `workspace/PRD.md`
+- **Do not use `Bash`** — PRD work is document creation, not code execution
+- **Do not use `Edit`** — always rewrite the full PRD via `Write` to keep it coherent
+- **Do not use browser tools** — no external lookups required
+
 ## Output
 Save final PRD to: `workspace/PRD.md`
 

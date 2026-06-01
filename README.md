@@ -42,13 +42,37 @@ Full Mermaid diagram: [docs/workflow.md](docs/workflow.md)
 
 ## Installation
 
-### Interactive setup wizard (recommended)
+### Install via curl (recommended)
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/pauplayground007/triples-agentic/main/install.sh | bash
+```
+
+Checks Node.js ≥ 18, then launches the interactive wizard.
+
+Pass a platform directly to skip the wizard:
+
+```bash
+# Claude Code — project-level
+curl -fsSL https://raw.githubusercontent.com/pauplayground007/triples-agentic/main/install.sh | bash -s -- claude
+
+# Claude Code — global (all projects on your machine)
+curl -fsSL https://raw.githubusercontent.com/pauplayground007/triples-agentic/main/install.sh | bash -s -- claude --global
+
+# Cursor AI — global
+curl -fsSL https://raw.githubusercontent.com/pauplayground007/triples-agentic/main/install.sh | bash -s -- cursor --global
+
+# All platforms at once
+curl -fsSL https://raw.githubusercontent.com/pauplayground007/triples-agentic/main/install.sh | bash -s -- all
+```
+
+---
+
+### Interactive wizard
 
 ```bash
 npx triples-agentic
 ```
-
-Launches a guided setup — choose your coding assistant and install scope:
 
 ```
 ╔══════════════════════════════════════════════════╗
@@ -74,47 +98,88 @@ Install scope?
 ### Direct install (non-interactive)
 
 ```bash
-# Project-level (inside your project directory)
-npx triples-agentic claude      # → .claude/skills/         (Claude Code)
-npx triples-agentic cursor      # → .cursor/rules/           (Cursor AI)
-npx triples-agentic copilot     # → .github/instructions/    (GitHub Copilot)
-npx triples-agentic codex       # → AGENTS.md                (OpenAI Codex)
-npx triples-agentic windsurf    # → .windsurfrules           (Windsurf)
-npx triples-agentic all         # → all platforms
+# Project-level (run inside your project directory)
+npx triples-agentic claude      # Claude Code
+npx triples-agentic cursor      # Cursor AI
+npx triples-agentic copilot     # GitHub Copilot
+npx triples-agentic codex       # OpenAI Codex
+npx triples-agentic windsurf    # Windsurf
+npx triples-agentic all         # all platforms
 
-# Global install (applies to every project on your machine)
+# Global install
 npx triples-agentic claude --global     # → ~/.claude/skills/
 npx triples-agentic cursor --global     # → ~/.cursor/rules/
 npx triples-agentic windsurf --global   # → ~/.codeium/windsurf/rules/
 
-# Install into a specific project directory
+# Install into a specific directory
 npx triples-agentic claude --target /path/to/project
 ```
 
 ---
 
-### Install via npm (global CLI)
+### Install as a global CLI
 
 ```bash
 npm install -g triples-agentic
-
-# Then from any project:
 triples-agentic              # interactive wizard
 triples-agentic claude       # direct install for Claude Code
-triples-agentic claude --global   # install globally
 ```
 
 ---
 
-### Skill file locations after install
+### Files installed per platform
 
-| Coding Assistant | Project-level | Global |
+| Platform | Agent skills | Hook config |
 |---|---|---|
-| Claude Code | `.claude/skills/*.md` | `~/.claude/skills/*.md` |
-| Cursor AI | `.cursor/rules/*.mdc` | `~/.cursor/rules/*.mdc` |
-| GitHub Copilot | `.github/instructions/*.instructions.md` | — |
-| OpenAI Codex | `AGENTS.md` | — |
-| Windsurf | `.windsurfrules` | `~/.codeium/windsurf/rules/.windsurfrules` |
+| **Claude Code** | `.claude/skills/*.md` | `.claude/settings.json` (PreToolUse hook) |
+| **Cursor AI** | `.cursor/rules/*.mdc` | `.cursor/rules/triples-safety.mdc` (always-applied rule) |
+| **GitHub Copilot** | `.github/instructions/*.instructions.md` | `.github/instructions/triples-safety.instructions.md` |
+| **OpenAI Codex** | `AGENTS.md` | `.codex/config.toml` (PreToolUse hook) |
+| **Windsurf** | `.windsurfrules` | `.windsurf/hooks.json` (pre_run_command hook) |
+
+Global install paths:
+
+| Platform | Skills | Hook config |
+|---|---|---|
+| Claude Code | `~/.claude/skills/` | `~/.claude/settings.json` |
+| Cursor AI | `~/.cursor/rules/` | `~/.cursor/rules/triples-safety.mdc` |
+| Windsurf | `~/.codeium/windsurf/rules/` | `~/.codeium/windsurf/hooks.json` |
+
+---
+
+## Safety Guardrails
+
+Every install includes safety enforcement that blocks dangerous shell commands before they run.
+
+### How it works per platform
+
+| Platform | Mechanism | Enforcement |
+|---|---|---|
+| **Claude Code** | `PreToolUse` hook in `.claude/settings.json` | Hard — harness blocks the command |
+| **OpenAI Codex** | `PreToolUse` hook in `.codex/config.toml` | Hard — same engine as Claude Code |
+| **Windsurf** | `pre_run_command` hook in `.windsurf/hooks.json` | Hard — exit code 2 blocks execution |
+| **Cursor AI** | `alwaysApply: true` rule in `.cursor/rules/` | Soft — AI-level instruction |
+| **GitHub Copilot** | `applyTo: "**"` instruction in `.github/instructions/` | Soft — AI-level instruction |
+
+### Blocked commands
+
+- **Filesystem** — `rm -rf`, `rm -fr`, recursive force delete
+- **Git destructive** — `git reset --hard`, `git checkout --`, `git restore .`
+- **Git push force** — `git push --force`, `git push -f`
+- **SQL destructive** — `DROP TABLE`, `DROP DATABASE`, `DELETE FROM <table>;`
+- **Store publish** — `fastlane deliver/supply`, `gradlew publishBundle`, `xcrun altool`
+- **Package publish** — `npm publish`, `npx ... publish`
+
+Safe commands (`npm test`, `git push origin branch`, `flutter test`, etc.) pass through without interruption.
+
+### Adding or editing safety rules
+
+All hook definitions live in [`src/hooks/`](src/hooks/):
+
+- `dangerous-commands.json` — per-platform hook configs (Claude Code, Codex, Windsurf)
+- `dangerous-commands.md` — text-based safety rules (Cursor, Copilot)
+
+Edit these files and reinstall to update the rules across all platforms.
 
 ---
 
@@ -146,80 +211,6 @@ Ask for the agent by name — e.g., "Act as JiWoo and create a PRD for [descript
 
 ---
 
-## Project Structure
-
-```
-triples-agentic/               ← clone this repo
-├── src/
-│   ├── agents/                # 11 agent definitions (persona, skills, workflow)
-│   ├── knowledge/
-│   │   ├── planning/          # orchestration, prd, product, rfc, architecture, task-breakdown, estimation
-│   │   ├── web/               # frontend, web, backend, api
-│   │   ├── mobile/            # android, kotlin, ios, swift, flutter, dart
-│   │   └── quality/           # testing, test-case, qa
-│   ├── templates/             # prd, rfc, task-breakdown, test-case
-│   └── bin/
-│       └── setup.js           # Skill installer CLI
-├── docs/
-│   └── workflow.md            # Full workflow diagram + agent roster
-├── CHANGELOG.md
-├── .gitignore                 # Excludes generated platform files
-└── README.md
-
-── Generated by setup (not committed) ──────────────────────
-your-project/
-├── .claude/skills/            # Claude Code — generated by setup
-├── .cursor/rules/             # Cursor AI   — generated by setup
-├── .github/instructions/      # Copilot     — generated by setup
-├── AGENTS.md                  # Codex       — generated by setup
-└── .windsurfrules             # Windsurf    — generated by setup
-```
-
-### `agents/` — Lean behavioral definitions
-Each agent file defines: identity, persona, knowledge references, skills, and handoff signals. No domain content — that lives in `knowledge/`.
-
-### `knowledge/` — Domain expertise (grouped by domain)
-
-```
-knowledge/
-├── planning/         → SeoYeon, JiWoo, YooYeon, NaKyoung
-│   ├── orchestration.md
-│   ├── prd.md
-│   ├── product.md
-│   ├── rfc.md
-│   ├── architecture.md
-│   ├── task-breakdown.md
-│   └── estimation.md
-├── web/              → YuBin, Kaede (+ shared: api.md → Kotone)
-│   ├── frontend.md
-│   ├── web.md
-│   ├── backend.md
-│   └── api.md
-├── mobile/           → YeonJi, SoHyun, Kotone
-│   ├── android.md
-│   ├── kotlin.md
-│   ├── ios.md
-│   ├── swift.md
-│   ├── flutter.md
-│   └── dart.md
-└── quality/          → Lynn, ShiOn (testing.md shared by both)
-    ├── testing.md
-    ├── test-case.md
-    └── qa.md
-```
-
-### `templates/` — Output document templates
-
-```
-templates/
-├── prd.md            → JiWoo generates workspace/PRD.md
-├── rfc.md            → YooYeon generates workspace/RFC.md
-├── task-breakdown.md → NaKyoung generates workspace/TASK_BREAKDOWN.md
-└── test-case.md      → Lynn generates workspace/TEST_CASES.md
-```
-
----
-
 ## Human-in-the-Loop Gates
 
 JiWoo, YooYeon, NaKyoung, and Lynn all have built-in review loops:
@@ -235,15 +226,88 @@ This ensures PRD, RFC, task breakdown, and test cases are implementation-ready b
 
 ---
 
-## Platform Adapter Formats
+## Project Structure
 
-| Platform | Format | Location |
-|----------|--------|----------|
-| Claude Code | Markdown skill files | `.claude/skills/*.md` |
-| Cursor | MDC rule files | `.cursor/rules/*.mdc` |
-| GitHub Copilot | Instruction files | `.github/instructions/*.instructions.md` |
-| OpenAI Codex | Single combined file | `AGENTS.md` |
-| Windsurf | Single rules file | `.windsurfrules` |
+```
+triples-agentic/
+├── install.sh                 # curl installer
+├── src/
+│   ├── agents/                # 11 agent definitions (identity, persona, knowledge, tools, workflow)
+│   │   ├── seoyeon.md
+│   │   ├── jiwoo-prd.md
+│   │   ├── yooyeon-rfc.md
+│   │   ├── nakyoung-tasks.md
+│   │   ├── yubin-frontend.md
+│   │   ├── kaede-backend.md
+│   │   ├── yeonji-android.md
+│   │   ├── sohyun-ios.md
+│   │   ├── kotone-flutter.md
+│   │   ├── lynn-testcase.md
+│   │   └── shion-qa.md
+│   ├── hooks/                 # Safety guardrail definitions (source of truth)
+│   │   ├── dangerous-commands.json   # per-platform hook configs
+│   │   └── dangerous-commands.md     # text-based safety rules
+│   ├── knowledge/             # Domain expertise loaded by agents (knowledge-only .md files)
+│   │   ├── general/           # coding principles shared by all developer agents
+│   │   │   └── dry.md, kiss.md, yagni.md, solid.md, slap.md, tdd.md, …
+│   │   ├── planning/          # SeoYeon, JiWoo, YooYeon, NaKyoung
+│   │   │   └── orchestration.md, prd-writing.md, rfc-writing.md, task-decomposition.md, …
+│   │   ├── web/
+│   │   │   ├── frontend/      # YuBin
+│   │   │   │   └── frontend-components.md, frontend-state.md, web-accessibility.md, …
+│   │   │   └── backend/       # Kaede
+│   │   │       └── backend-structure.md, api-design.md, api-security.md, …
+│   │   ├── mobile/
+│   │   │   ├── android/       # YeonJi
+│   │   │   │   └── android-architecture.md, kotlin-core.md, kotlin-concurrency.md, …
+│   │   │   ├── ios/           # SoHyun
+│   │   │   │   └── ios-architecture.md, swift-core.md, swift-concurrency.md, …
+│   │   │   └── flutter/       # Kotone
+│   │   │       └── flutter-architecture.md, dart-core.md, dart-async.md, …
+│   │   └── quality/           # Lynn, ShiOn
+│   │       └── testing-strategy.md, test-case-writing.md, qa-execution.md, …
+│   ├── templates/             # Output document templates
+│   │   ├── prd.md             # → workspace/PRD.md
+│   │   ├── rfc.md             # → workspace/RFC.md
+│   │   ├── task-breakdown.md  # → workspace/TASK_BREAKDOWN.md
+│   │   └── test-case.md       # → workspace/TEST_CASES.md
+│   └── bin/
+│       └── setup.js           # Platform installer CLI
+├── docs/
+│   └── workflow.md            # Full workflow diagram + agent roster
+└── CHANGELOG.md
+
+── Generated by installer (not committed to your repo) ────────────────────
+your-project/
+├── .claude/
+│   ├── skills/                # Claude Code agent + knowledge skills
+│   └── settings.json          # Claude Code PreToolUse safety hook
+├── .cursor/rules/             # Cursor AI agent rules + safety rule
+├── .github/instructions/      # Copilot agent instructions + safety instruction
+├── .codex/config.toml         # Codex PreToolUse safety hook
+├── .windsurf/hooks.json       # Windsurf pre_run_command safety hook
+├── AGENTS.md                  # Codex agent context
+└── .windsurfrules             # Windsurf agent rules
+```
+
+---
+
+### `agents/` — Behavioral definitions
+
+Each agent file defines: identity, persona, knowledge references, tool guardrails, skills (workflows), and handoff signals. Domain content lives in `knowledge/` — agents only reference it.
+
+Each agent includes a `## Tools` section that specifies which tools to use and which to avoid (e.g., planning agents never use `Bash`; QA agent never edits source files).
+
+### `hooks/` — Safety guardrails (source of truth)
+
+Hook definitions live in `src/hooks/` as platform-agnostic source files. The installer reads them and generates the appropriate config for each platform:
+
+- **`.json` files** carry per-platform hook configs under a `platforms` key (`claude`, `codex`, `windsurf`)
+- **`.md` files** carry text-based safety rules for platforms without executable hooks (`cursor`, `copilot`)
+
+### `knowledge/` — Domain expertise
+
+Pure reference `.md` files — no trigger logic, no skills framework. Agents declare which files to load via `<!-- knowledge: ... -->` metadata in their agent file. The knowledge files travel with the agents during install.
 
 ---
 

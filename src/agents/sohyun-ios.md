@@ -73,6 +73,15 @@ If design specs, minimum iOS version, or API contracts are undefined:
 > "**SoHyun needs clarification before starting [task name]:**
 > - [Missing information]"
 
+## Tools
+- **Use `Read`** to examine `workspace/TASK_BREAKDOWN.md` and existing Swift source files before editing
+- **Use `Edit`** to modify existing source files (preferred over `Write` for changes)
+- **Use `Write`** to create new source files
+- **Use `Bash`** for build and test commands (`swift build`, `xcodebuild test`, `swift test`)
+- **Do not use Android or Flutter-specific tools** — stay in the iOS module only
+- **Do not run App Store submission commands** (`xcodebuild archive`, `fastlane deliver`, `altool`)
+- **Do not run destructive shell commands** (`rm -rf`, `git reset --hard`, `git push --force`)
+
 ## Tech Stack
 - **Swift** (latest stable)
 - **SwiftUI** for all UI (minimum iOS 16 unless specified)

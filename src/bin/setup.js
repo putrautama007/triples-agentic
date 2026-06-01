@@ -27,6 +27,7 @@ const AGENTS_DIR = join(ROOT, 'agents');
 const KNOWLEDGE_DIR = join(ROOT, 'knowledge');
 const KNOWLEDGE_GROUPS = ['planning', 'web', 'mobile/android', 'mobile/ios', 'mobile/flutter', 'quality'];
 const HOME = homedir();
+const HOOKS_DIR = join(ROOT, 'hooks');
 
 // ─── Global install paths ─────────────────────────────────────────────────────
 
@@ -129,7 +130,138 @@ function allKnowledgeSkills() {
   return skills;
 }
 
+// ─── Hook loaders ─────────────────────────────────────────────────────────────
+
+function loadHookFiles() {
+  if (!existsSync(HOOKS_DIR)) return [];
+  return readdirSync(HOOKS_DIR)
+    .filter(f => f.endsWith('.json'))
+    .sort()
+    .map(f => JSON.parse(readFileSync(join(HOOKS_DIR, f), 'utf-8')));
+}
+
+/** Returns Claude Code PreToolUse hook entries from src/hooks/*.json platforms.claude */
+function loadClaudeHooks() {
+  return loadHookFiles()
+    .filter(h => h.platforms?.claude)
+    .map(h => h.platforms.claude);
+}
+
+/** Returns Codex PreToolUse hook entries from src/hooks/*.json platforms.codex */
+function loadCodexHooks() {
+  return loadHookFiles()
+    .filter(h => h.platforms?.codex)
+    .map(h => h.platforms.codex);
+}
+
+/** Returns Windsurf hook entries from src/hooks/*.json platforms.windsurf, grouped by event */
+function loadWindsurfHooks() {
+  const byEvent = {};
+  for (const h of loadHookFiles()) {
+    const ws = h.platforms?.windsurf;
+    if (!ws?.event) continue;
+    const { event, ...cfg } = ws;
+    byEvent[event] = byEvent[event] || [];
+    byEvent[event].push(cfg);
+  }
+  return byEvent;
+}
+
+/**
+ * Returns the stripped body of all src/hooks/*.md files joined together.
+ * Used as plain text safety rules for platforms without a hook execution model.
+ */
+function loadSafetyRulesBody() {
+  if (!existsSync(HOOKS_DIR)) return '';
+  return readdirSync(HOOKS_DIR)
+    .filter(f => f.endsWith('.md'))
+    .sort()
+    .map(f => stripFrontmatter(readFileSync(join(HOOKS_DIR, f), 'utf-8')))
+    .join('\n\n')
+    .trim();
+}
+
+/** Escape a string for use inside a TOML double-quoted basic string. */
+function tomlEscape(str) {
+  return str.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+}
+
 // ─── Platform installers ──────────────────────────────────────────────────────
+
+/** Write (or merge) PreToolUse hooks from platforms.claude into .claude/settings.json */
+function installClaudeSettings(claudeDir) {
+  const hookEntries = loadClaudeHooks();
+  if (hookEntries.length === 0) return;
+
+  const settingsPath = join(claudeDir, 'settings.json');
+  let settings = {};
+  if (existsSync(settingsPath)) {
+    try { settings = JSON.parse(readFileSync(settingsPath, 'utf-8')); } catch {}
+  }
+  settings.hooks = settings.hooks || {};
+
+  const events = [...new Set(hookEntries.map(e => e.event).filter(Boolean))];
+  for (const event of events) {
+    const incoming = hookEntries.filter(e => e.event === event);
+    const existing = settings.hooks[event] || [];
+    const matchers = new Set(incoming.map(e => e.matcher));
+    settings.hooks[event] = [
+      ...existing.filter(e => !matchers.has(e.matcher) || !e.hooks?.some(h => h.statusMessage === 'Checking for dangerous commands...')),
+      ...incoming.map(({ event: _e, ...entry }) => entry),
+    ];
+  }
+
+  writeFile(settingsPath, JSON.stringify(settings, null, 2));
+}
+
+/** Write (or append) PreToolUse hooks from platforms.codex into .codex/config.toml */
+function installCodexSettings(base) {
+  const hookEntries = loadCodexHooks().filter(e => e.event === 'PreToolUse');
+  if (hookEntries.length === 0) return;
+
+  const configPath = join(base || projectDir, '.codex', 'config.toml');
+  let existing = existsSync(configPath) ? readFileSync(configPath, 'utf-8') : '';
+
+  // Remove previous triples-agentic block (idempotent reinstall)
+  existing = existing.replace(/\n?# triples-agentic hooks[\s\S]*?# end triples-agentic hooks\n?/g, '');
+
+  let block = '\n# triples-agentic hooks\n';
+  for (const entry of hookEntries) {
+    block += `\n[[hooks.PreToolUse]]\n`;
+    if (entry.matcher) block += `matcher = "${tomlEscape(entry.matcher)}"\n`;
+    for (const hook of (entry.hooks || [])) {
+      block += `\n[[hooks.PreToolUse.hooks]]\n`;
+      block += `type = "command"\n`;
+      block += `command = "${tomlEscape(hook.command)}"\n`;
+      if (hook.statusMessage) block += `statusMessage = "${tomlEscape(hook.statusMessage)}"\n`;
+    }
+  }
+  block += '\n# end triples-agentic hooks\n';
+
+  writeFile(configPath, existing.trimEnd() + block);
+}
+
+/** Write (or merge) Windsurf hooks from platforms.windsurf into .windsurf/hooks.json */
+function installWindsurfSettings(base) {
+  const byEvent = loadWindsurfHooks();
+  if (Object.keys(byEvent).length === 0) return;
+
+  const hooksPath = join(base || projectDir, '.windsurf', 'hooks.json');
+  let config = { hooks: {} };
+  if (existsSync(hooksPath)) {
+    try { config = JSON.parse(readFileSync(hooksPath, 'utf-8')); } catch {}
+  }
+  config.hooks = config.hooks || {};
+
+  for (const [event, incoming] of Object.entries(byEvent)) {
+    const existing = (config.hooks[event] || []).filter(
+      e => e.command !== incoming[0]?.command  // remove previous triples-agentic entry
+    );
+    config.hooks[event] = [...existing, ...incoming];
+  }
+
+  writeFile(hooksPath, JSON.stringify(config, null, 2));
+}
 
 function installClaude(base) {
   const dest = isGlobal && !base ? GLOBAL_PATHS.claude : join(base || projectDir, '.claude', 'skills');
@@ -145,6 +277,9 @@ function installClaude(base) {
   for (const { name, group, content } of allKnowledgeSkills()) {
     writeFile(join(dest, 'knowledge', group, `${name}.md`), content);
   }
+
+  // Settings — dangerous command hook (enforced at harness level)
+  installClaudeSettings(dirname(dest));
 }
 
 function installCursor(base) {
@@ -162,6 +297,13 @@ function installCursor(base) {
     const body = stripFrontmatter(content);
     const rule = ['---', `description: ${description}`, 'alwaysApply: false', '---', '', body].join('\n');
     writeFile(join(dest, 'knowledge', group, `${name}.mdc`), rule);
+  }
+
+  // Safety guardrails — always-applied rule (text-level enforcement)
+  const safetyBody = loadSafetyRulesBody();
+  if (safetyBody) {
+    const safetyRule = ['---', 'description: TripleS safety guardrails — never run dangerous commands without explicit user confirmation', 'alwaysApply: true', '---', '', safetyBody].join('\n');
+    writeFile(join(dest, 'triples-safety.mdc'), safetyRule);
   }
 }
 
@@ -181,13 +323,21 @@ function installCopilot(base) {
     const instruction = ['---', 'applyTo: "**"', '---', '', body].join('\n');
     writeFile(join(dest, 'knowledge', group, `${name}.instructions.md`), instruction);
   }
+
+  // Safety guardrails — always-applied instruction (text-level enforcement)
+  const safetyBody = loadSafetyRulesBody();
+  if (safetyBody) {
+    const safetyInstruction = ['---', 'applyTo: "**"', '---', '', safetyBody].join('\n');
+    writeFile(join(dest, 'triples-safety.instructions.md'), safetyInstruction);
+  }
 }
 
 function installCodex(base) {
   const dest = join(base || projectDir, 'AGENTS.md');
   console.log(`\nInstalling OpenAI Codex → ${display(dest)}`);
 
-  const lines = ['# TripleS Agent Orchestrator\n\n', '## Agents\n\n'];
+  const safetyBody = loadSafetyRulesBody();
+  const lines = ['# TripleS Agent Orchestrator\n\n', ...(safetyBody ? [safetyBody + '\n\n'] : []), '## Agents\n\n'];
   for (const { name, content } of allAgents()) {
     lines.push(`---\n\n${content}\n\n`);
   }
@@ -203,6 +353,9 @@ function installCodex(base) {
 
   writeFileSync(dest, lines.join(''), 'utf-8');
   console.log(`  ✓ ${display(dest)}`);
+
+  // Hooks — enforced at harness level via .codex/config.toml
+  installCodexSettings(base);
 }
 
 function installWindsurf(base) {
@@ -211,7 +364,8 @@ function installWindsurf(base) {
     : join(base || projectDir, '.windsurfrules');
   console.log(`\nInstalling Windsurf rules → ${display(dest)}`);
 
-  const lines = ['# TripleS Agent Orchestrator — Windsurf Rules\n\n', '## Agents\n\n'];
+  const safetyBody = loadSafetyRulesBody();
+  const lines = ['# TripleS Agent Orchestrator — Windsurf Rules\n\n', ...(safetyBody ? [safetyBody + '\n\n'] : []), '## Agents\n\n'];
   for (const { name, content } of allAgents()) {
     lines.push(`### ${name}\n\n${content}\n\n`);
   }
@@ -229,6 +383,9 @@ function installWindsurf(base) {
   if (dir !== '.') ensureDir(dir);
   writeFileSync(dest, lines.join(''), 'utf-8');
   console.log(`  ✓ ${display(dest)}`);
+
+  // Hooks — enforced at harness level via .windsurf/hooks.json
+  installWindsurfSettings(base);
 }
 
 const INSTALLERS = {

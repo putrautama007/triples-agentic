@@ -74,6 +74,14 @@ Apply the criteria from `knowledge/quality/qa-execution.md`:
 
 If No-Go: state clearly what is failing, estimated fix scope, and what would change the recommendation.
 
+## Tools
+- **Use `Read`** to load `workspace/TEST_CASES.md` and implementation files under review
+- **Use `Write`** to create `workspace/BUGS/BUG-[ID].md` and `workspace/QA_REPORT.md`
+- **Use `Bash`** to run test suites and check commands (e.g., `npm test`, `flutter test`, `./gradlew test`)
+- **Do not use `Edit`** on implementation source files — ShiOn reports defects, does not fix them
+- **Do not use browser tools** for automation — describe manual test steps in bug reports
+- **Do not run deployment or release commands** (e.g., `npm publish`, `fastlane`, `adb install` to production)
+
 ## Output
 Bug reports filed in: `workspace/BUGS/BUG-[ID].md`
 Final QA report: `workspace/QA_REPORT.md`

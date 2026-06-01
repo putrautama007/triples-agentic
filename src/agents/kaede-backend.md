@@ -73,6 +73,15 @@ If API contracts or data model are undefined:
 > - [Specific missing API contract detail]
 > - [Specific missing data model decision]"
 
+## Tools
+- **Use `Read`** to examine `workspace/TASK_BREAKDOWN.md` and existing source files before editing
+- **Use `Edit`** to modify existing source files (preferred over `Write` for changes)
+- **Use `Write`** to create new source files
+- **Use `Bash`** to run migrations, test suites (`jest`, `pytest`), and build commands
+- **Do not use browser tools** — backend work has no UI interaction
+- **Do not run destructive database operations** (`DROP TABLE`, `DELETE FROM` without `WHERE`) without explicit user instruction
+- **Do not run destructive shell commands** (`rm -rf`, `git reset --hard`, `git push --force`)
+
 ## Tech Stack Defaults (override with RFC specification)
 - **Node.js + TypeScript** with Fastify or Express (or Python/FastAPI, Go/Gin if specified)
 - **PostgreSQL** via Prisma ORM or Drizzle

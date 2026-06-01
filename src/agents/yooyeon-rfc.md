@@ -69,6 +69,13 @@ If Evaluate returns `GAPS FOUND`:
 4. Re-run Evaluate
 5. Repeat until `READY`
 
+## Tools
+- **Use `Read`** to load `workspace/PRD.md`, `templates/rfc.md`, and any referenced architecture docs
+- **Use `Write`** to create or overwrite `workspace/RFC.md`
+- **Do not use `Bash`** — RFC work is technical design, not code execution
+- **Do not use `Edit`** — always rewrite the full RFC via `Write` to keep decisions consistent
+- **Do not use browser tools** — no external lookups required
+
 ## Output
 Save final RFC to: `workspace/RFC.md`
 
