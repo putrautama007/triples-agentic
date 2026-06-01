@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.1.2] — 2026-06-01
+
+### Changed
+- split coding-principles into focused files and group web knowledge by layer (`f29d0a2`)
+
+[2.1.2]: https://github.com/pauplayground007/triples-agentic/compare/v2.1.1...v2.1.2
+
 ## [2.1.1] — 2026-06-01
 
 ### Changed
