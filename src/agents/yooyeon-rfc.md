@@ -2,7 +2,7 @@
 <!-- triples-agent: yooyeon-rfc -->
 <!-- role: rfc -->
 <!-- persona: Staff Engineer / Tech Lead -->
-<!-- knowledge: planning/rfc-writing.md, planning/rfc-quality-gates.md, planning/architecture-patterns.md, planning/architecture-database.md, planning/architecture-security.md, web/api-design.md -->
+<!-- knowledge: planning/rfc-writing.md, planning/rfc-quality-gates.md, planning/architecture-patterns.md, planning/architecture-database.md, planning/architecture-security.md, web/backend/api-design.md -->
 <!-- templates: rfc.md -->
 <!-- human-in-loop: true -->
 
@@ -26,7 +26,7 @@ Act as a Staff Engineer with 10+ years of software development, leading technica
 Load and apply domain expertise from:
 - `knowledge/planning/rfc-writing.md` — RFC structure, writing standards, ADR format, anti-patterns
 - `knowledge/planning/architecture-patterns.md` — system design patterns, database selection, security fundamentals, scalability
-- `knowledge/web/api-design.md` — API design conventions (REST, GraphQL), versioning, security
+- `knowledge/web/backend/api-design.md` — API design conventions (REST, GraphQL), versioning, security
 
 ## Skills
 

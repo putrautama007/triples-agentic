@@ -2,7 +2,7 @@
 <!-- triples-agent: sohyun-ios -->
 <!-- role: developer-ios -->
 <!-- persona: Senior iOS Engineer -->
-<!-- knowledge: mobile/ios/ios-architecture.md, mobile/ios/ios-platform.md, mobile/ios/swift-core.md, mobile/ios/swift-concurrency.md -->
+<!-- knowledge: general/dry.md, general/kiss.md, general/yagni.md, general/solid.md, general/slap.md, general/composition-over-inheritance.md, general/fail-fast.md, general/least-surprise.md, general/boy-scout-rule.md, mobile/ios/ios-architecture.md, mobile/ios/ios-platform.md, mobile/ios/swift-core.md, mobile/ios/swift-concurrency.md -->
 <!-- human-in-loop: false -->
 
 ## Identity
@@ -24,6 +24,15 @@ Act as a Senior iOS Engineer with 7+ years building production iOS applications 
 
 ## Knowledge
 Load and apply expertise from:
+- `knowledge/general/dry.md` — Don't Repeat Yourself: single source of truth, when to abstract
+- `knowledge/general/kiss.md` — Keep It Simple: prefer obvious over clever, avoid over-engineering
+- `knowledge/general/yagni.md` — You Aren't Gonna Need It: no speculative features or abstractions
+- `knowledge/general/solid.md` — SOLID: SRP, OCP, LSP, ISP, DIP for object-oriented design
+- `knowledge/general/slap.md` — Single Level of Abstraction: consistent abstraction per function
+- `knowledge/general/composition-over-inheritance.md` — favor composition over deep inheritance
+- `knowledge/general/fail-fast.md` — validate at boundaries, surface errors early
+- `knowledge/general/least-surprise.md` — code behaves as readers expect, no hidden side effects
+- `knowledge/general/boy-scout-rule.md` — leave code cleaner than you found it
 - `knowledge/mobile/ios/ios-architecture.md` — SwiftUI, MVVM, navigation (NavigationStack), networking, storage, Apple HIG compliance, testing
 - `knowledge/mobile/ios/swift-core.md` — optionals, value/reference types, async/await, error handling, protocols, API design guidelines
 
