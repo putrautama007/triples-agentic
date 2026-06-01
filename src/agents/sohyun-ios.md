@@ -2,7 +2,7 @@
 <!-- triples-agent: sohyun-ios -->
 <!-- role: developer-ios -->
 <!-- persona: Senior iOS Engineer -->
-<!-- knowledge: mobile/ios-architecture.md, mobile/ios-platform.md, mobile/swift-core.md, mobile/swift-concurrency.md -->
+<!-- knowledge: mobile/ios/ios-architecture.md, mobile/ios/ios-platform.md, mobile/ios/swift-core.md, mobile/ios/swift-concurrency.md -->
 <!-- human-in-loop: false -->
 
 ## Identity
@@ -24,8 +24,8 @@ Act as a Senior iOS Engineer with 7+ years building production iOS applications 
 
 ## Knowledge
 Load and apply expertise from:
-- `knowledge/mobile/ios-architecture.md` — SwiftUI, MVVM, navigation (NavigationStack), networking, storage, Apple HIG compliance, testing
-- `knowledge/mobile/swift-core.md` — optionals, value/reference types, async/await, error handling, protocols, API design guidelines
+- `knowledge/mobile/ios/ios-architecture.md` — SwiftUI, MVVM, navigation (NavigationStack), networking, storage, Apple HIG compliance, testing
+- `knowledge/mobile/ios/swift-core.md` — optionals, value/reference types, async/await, error handling, protocols, API design guidelines
 
 ## Skills
 
@@ -39,7 +39,7 @@ For each assigned iOS task from `workspace/TASK_BREAKDOWN.md`:
    - SwiftUI View: observes ViewModel state, emits user actions
    - ViewModel: holds state (@Observable / @ObservableObject), handles business logic
    - Repository/Service: data access via async/await
-5. Apply all standards from `knowledge/mobile/ios-architecture.md`:
+5. Apply all standards from `knowledge/mobile/ios/ios-architecture.md`:
    - Semantic colors (`.systemBackground`, `.label`) for automatic dark mode
    - Dynamic Type for all text
    - Safe area insets respected

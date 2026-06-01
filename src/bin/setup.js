@@ -25,7 +25,7 @@ const __dirname = dirname(__filename);
 const ROOT = join(__dirname, '..');
 const AGENTS_DIR = join(ROOT, 'agents');
 const KNOWLEDGE_DIR = join(ROOT, 'knowledge');
-const KNOWLEDGE_GROUPS = ['planning', 'web', 'mobile', 'quality'];
+const KNOWLEDGE_GROUPS = ['planning', 'web', 'mobile/android', 'mobile/ios', 'mobile/flutter', 'quality'];
 const HOME = homedir();
 
 // ─── Global install paths ─────────────────────────────────────────────────────
@@ -261,18 +261,18 @@ const AGENT_COMMANDS = [
 ];
 
 const KNOWLEDGE_SUMMARY = {
-  planning: ['orchestration', 'prd-writing', 'prd-quality-gates', 'product-principles',
-             'product-prioritization', 'rfc-writing', 'rfc-quality-gates',
-             'architecture-patterns', 'architecture-database', 'architecture-security',
-             'task-decomposition', 'task-readiness', 'estimation'],
-  web:      ['frontend-components', 'frontend-state', 'frontend-performance',
-             'web-accessibility', 'web-performance', 'web-security',
-             'backend-structure', 'backend-security', 'api-design', 'api-security'],
-  mobile:   ['android-architecture', 'android-platform', 'kotlin-core', 'kotlin-concurrency',
-             'ios-architecture', 'ios-platform', 'swift-core', 'swift-concurrency',
-             'flutter-architecture', 'flutter-platform', 'dart-core', 'dart-async'],
-  quality:  ['testing-strategy', 'testing-types', 'test-case-writing', 'test-case-quality',
-             'qa-execution', 'qa-reporting'],
+  planning:        ['orchestration', 'prd-writing', 'prd-quality-gates', 'product-principles',
+                   'product-prioritization', 'rfc-writing', 'rfc-quality-gates',
+                   'architecture-patterns', 'architecture-database', 'architecture-security',
+                   'task-decomposition', 'task-readiness', 'estimation'],
+  web:             ['frontend-components', 'frontend-state', 'frontend-performance',
+                   'web-accessibility', 'web-performance', 'web-security',
+                   'backend-structure', 'backend-security', 'api-design', 'api-security'],
+  'mobile/android': ['android-architecture', 'android-platform', 'kotlin-core', 'kotlin-concurrency'],
+  'mobile/ios':     ['ios-architecture', 'ios-platform', 'swift-core', 'swift-concurrency'],
+  'mobile/flutter': ['flutter-architecture', 'flutter-platform', 'dart-core', 'dart-async'],
+  quality:         ['testing-strategy', 'testing-types', 'test-case-writing', 'test-case-quality',
+                   'qa-execution', 'qa-reporting'],
 };
 
 function printSuccessBanner() {
@@ -286,7 +286,8 @@ function printSuccessBanner() {
 
   console.log(`\n── Knowledge Skills (${totalKnowledge} skills across 4 groups) ──────────────────`);
   for (const [group, skills] of Object.entries(KNOWLEDGE_SUMMARY)) {
-    console.log(`  ${group.padEnd(10)} ${skills.map(s => `/${s}`).join('  ')}`);
+    const label = group.includes('/') ? group : group; // full path for sub-groups
+    console.log(`  ${label.padEnd(16)} ${skills.map(s => `/${s}`).join('  ')}`);
   }
 
   console.log('\nStart the full pipeline with /seoyeon\n');
