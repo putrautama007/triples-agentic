@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.4.0] — 2026-06-01
+
+### Added
+- add codex global install support and update command (`511774d`)
+
+[2.4.0]: https://github.com/pauplayground007/triples-agentic/compare/v2.3.1...v2.4.0
+
 ## [2.3.1] — 2026-06-01
 
 ### Fixed
