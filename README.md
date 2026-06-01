@@ -64,6 +64,9 @@ curl -fsSL https://raw.githubusercontent.com/pauplayground007/triples-agentic/ma
 
 # All platforms at once
 curl -fsSL https://raw.githubusercontent.com/pauplayground007/triples-agentic/main/install.sh | bash -s -- all
+
+# Update all existing installations (auto-detects platforms and scope)
+curl -fsSL https://raw.githubusercontent.com/pauplayground007/triples-agentic/main/install.sh | bash -s -- update
 ```
 
 ---

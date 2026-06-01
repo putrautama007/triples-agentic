@@ -6,6 +6,7 @@
 #   curl -fsSL https://raw.githubusercontent.com/pauplayground007/triples-agentic/main/install.sh | bash -s -- claude
 #   curl -fsSL https://raw.githubusercontent.com/pauplayground007/triples-agentic/main/install.sh | bash -s -- claude --global
 #   curl -fsSL https://raw.githubusercontent.com/pauplayground007/triples-agentic/main/install.sh | bash -s -- all
+#   curl -fsSL https://raw.githubusercontent.com/pauplayground007/triples-agentic/main/install.sh | bash -s -- update
 
 set -euo pipefail
 
@@ -90,6 +91,7 @@ main() {
   #   claude --global    → Claude Code, global
   #   cursor --global    → Cursor AI, global
   #   all                → all platforms, project-level
+  #   update             → update all existing installations
   npx --yes github:pauplayground007/triples-agentic "$@"
 }
 
