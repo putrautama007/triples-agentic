@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.4.3] — 2026-06-01
+
+### Changed
+- add workflow_dispatch trigger to release workflow (`50d6117`)
+
+[2.4.3]: https://github.com/pauplayground007/triples-agentic/compare/v2.4.2...v2.4.3
+
 ## [2.4.2] — 2026-06-01
 
 ### Changed
