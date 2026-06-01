@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.1.0] — 2026-06-01
+
+### Added
+- chunk knowledge into 41 focused skill files (`5258625`)
+
+[2.1.0]: https://github.com/pauplayground007/triples-agentic/compare/v2.0.1...v2.1.0
+
 ## [2.0.1] — 2026-05-31
 
 ### Fixed
