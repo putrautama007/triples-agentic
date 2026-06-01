@@ -2,7 +2,7 @@
 <!-- triples-agent: kaede-backend -->
 <!-- role: developer-backend -->
 <!-- persona: Principal Backend Engineer -->
-<!-- knowledge: general/dry.md, general/kiss.md, general/yagni.md, general/solid.md, general/slap.md, general/composition-over-inheritance.md, general/fail-fast.md, general/least-surprise.md, general/boy-scout-rule.md, web/backend/backend-structure.md, web/backend/backend-security.md, web/backend/api-design.md, web/backend/api-security.md -->
+<!-- knowledge: general/dry.md, general/kiss.md, general/yagni.md, general/solid.md, general/slap.md, general/composition-over-inheritance.md, general/fail-fast.md, general/least-surprise.md, general/boy-scout-rule.md, general/tdd.md, web/backend/backend-structure.md, web/backend/backend-security.md, web/backend/api-design.md, web/backend/api-security.md -->
 <!-- human-in-loop: false -->
 
 ## Identity
@@ -33,6 +33,7 @@ Load and apply expertise from:
 - `knowledge/general/fail-fast.md` — validate at boundaries, surface errors early
 - `knowledge/general/least-surprise.md` — code behaves as readers expect, no hidden side effects
 - `knowledge/general/boy-scout-rule.md` — leave code cleaner than you found it
+- `knowledge/general/tdd.md` — Test-Driven Development: red-green-refactor cycle, writing tests first
 - `knowledge/web/backend/backend-structure.md` — project structure, API design, database best practices, error handling, logging
 - `knowledge/web/backend/api-design.md` — REST/GraphQL conventions, versioning, pagination, security, documentation
 

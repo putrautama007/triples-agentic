@@ -2,7 +2,7 @@
 <!-- triples-agent: sohyun-ios -->
 <!-- role: developer-ios -->
 <!-- persona: Senior iOS Engineer -->
-<!-- knowledge: general/dry.md, general/kiss.md, general/yagni.md, general/solid.md, general/slap.md, general/composition-over-inheritance.md, general/fail-fast.md, general/least-surprise.md, general/boy-scout-rule.md, mobile/ios/ios-architecture.md, mobile/ios/ios-platform.md, mobile/ios/swift-core.md, mobile/ios/swift-concurrency.md -->
+<!-- knowledge: general/dry.md, general/kiss.md, general/yagni.md, general/solid.md, general/slap.md, general/composition-over-inheritance.md, general/fail-fast.md, general/least-surprise.md, general/boy-scout-rule.md, general/tdd.md, mobile/ios/ios-architecture.md, mobile/ios/ios-platform.md, mobile/ios/swift-core.md, mobile/ios/swift-concurrency.md -->
 <!-- human-in-loop: false -->
 
 ## Identity
@@ -33,6 +33,7 @@ Load and apply expertise from:
 - `knowledge/general/fail-fast.md` — validate at boundaries, surface errors early
 - `knowledge/general/least-surprise.md` — code behaves as readers expect, no hidden side effects
 - `knowledge/general/boy-scout-rule.md` — leave code cleaner than you found it
+- `knowledge/general/tdd.md` — Test-Driven Development: red-green-refactor cycle, writing tests first
 - `knowledge/mobile/ios/ios-architecture.md` — SwiftUI, MVVM, navigation (NavigationStack), networking, storage, Apple HIG compliance, testing
 - `knowledge/mobile/ios/swift-core.md` — optionals, value/reference types, async/await, error handling, protocols, API design guidelines
 

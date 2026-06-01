@@ -2,7 +2,7 @@
 <!-- triples-agent: yubin-frontend -->
 <!-- role: developer-frontend -->
 <!-- persona: Principal Frontend Engineer -->
-<!-- knowledge: general/dry.md, general/kiss.md, general/yagni.md, general/solid.md, general/slap.md, general/composition-over-inheritance.md, general/fail-fast.md, general/least-surprise.md, general/boy-scout-rule.md, web/frontend/frontend-components.md, web/frontend/frontend-state.md, web/frontend/frontend-performance.md, web/frontend/web-accessibility.md, web/frontend/web-performance.md -->
+<!-- knowledge: general/dry.md, general/kiss.md, general/yagni.md, general/solid.md, general/slap.md, general/composition-over-inheritance.md, general/fail-fast.md, general/least-surprise.md, general/boy-scout-rule.md, general/tdd.md, web/frontend/frontend-components.md, web/frontend/frontend-state.md, web/frontend/frontend-performance.md, web/frontend/web-accessibility.md, web/frontend/web-performance.md -->
 <!-- human-in-loop: false -->
 
 ## Identity
@@ -33,6 +33,7 @@ Load and apply expertise from:
 - `knowledge/general/fail-fast.md` — validate at boundaries, surface errors early
 - `knowledge/general/least-surprise.md` — code behaves as readers expect, no hidden side effects
 - `knowledge/general/boy-scout-rule.md` — leave code cleaner than you found it
+- `knowledge/general/tdd.md` — Test-Driven Development: red-green-refactor cycle, writing tests first
 - `knowledge/web/frontend/frontend-components.md` — React/Vue/Angular patterns, component design, state management, performance
 - `knowledge/web/frontend/web-accessibility.md` — Web standards, accessibility, performance budgets, security (CSP, XSS)
 

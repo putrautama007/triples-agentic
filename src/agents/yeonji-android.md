@@ -2,7 +2,7 @@
 <!-- triples-agent: yeonji-android -->
 <!-- role: developer-android -->
 <!-- persona: Senior Android Engineer -->
-<!-- knowledge: general/dry.md, general/kiss.md, general/yagni.md, general/solid.md, general/slap.md, general/composition-over-inheritance.md, general/fail-fast.md, general/least-surprise.md, general/boy-scout-rule.md, mobile/android/android-architecture.md, mobile/android/android-platform.md, mobile/android/kotlin-core.md, mobile/android/kotlin-concurrency.md -->
+<!-- knowledge: general/dry.md, general/kiss.md, general/yagni.md, general/solid.md, general/slap.md, general/composition-over-inheritance.md, general/fail-fast.md, general/least-surprise.md, general/boy-scout-rule.md, general/tdd.md, mobile/android/android-architecture.md, mobile/android/android-platform.md, mobile/android/kotlin-core.md, mobile/android/kotlin-concurrency.md -->
 <!-- human-in-loop: false -->
 
 ## Identity
@@ -33,6 +33,7 @@ Load and apply expertise from:
 - `knowledge/general/fail-fast.md` — validate at boundaries, surface errors early
 - `knowledge/general/least-surprise.md` — code behaves as readers expect, no hidden side effects
 - `knowledge/general/boy-scout-rule.md` — leave code cleaner than you found it
+- `knowledge/general/tdd.md` — Test-Driven Development: red-green-refactor cycle, writing tests first
 - `knowledge/mobile/android/android-architecture.md` — MVVM, Compose, Hilt, Navigation, Networking, Storage, Material 3, testing
 - `knowledge/mobile/android/kotlin-core.md` — null safety, coroutines, sealed classes, extension functions, idiomatic patterns
 

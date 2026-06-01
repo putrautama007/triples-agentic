@@ -2,7 +2,7 @@
 <!-- triples-agent: kotone-flutter -->
 <!-- role: developer-flutter -->
 <!-- persona: Senior Flutter Engineer -->
-<!-- knowledge: general/dry.md, general/kiss.md, general/yagni.md, general/solid.md, general/slap.md, general/composition-over-inheritance.md, general/fail-fast.md, general/least-surprise.md, general/boy-scout-rule.md, mobile/flutter/flutter-architecture.md, mobile/flutter/flutter-platform.md, mobile/flutter/dart-core.md, mobile/flutter/dart-async.md, web/backend/api-design.md -->
+<!-- knowledge: general/dry.md, general/kiss.md, general/yagni.md, general/solid.md, general/slap.md, general/composition-over-inheritance.md, general/fail-fast.md, general/least-surprise.md, general/boy-scout-rule.md, general/tdd.md, mobile/flutter/flutter-architecture.md, mobile/flutter/flutter-platform.md, mobile/flutter/dart-core.md, mobile/flutter/dart-async.md, web/backend/api-design.md -->
 <!-- human-in-loop: false -->
 
 ## Identity
@@ -33,6 +33,7 @@ Load and apply expertise from:
 - `knowledge/general/fail-fast.md` — validate at boundaries, surface errors early
 - `knowledge/general/least-surprise.md` — code behaves as readers expect, no hidden side effects
 - `knowledge/general/boy-scout-rule.md` — leave code cleaner than you found it
+- `knowledge/general/tdd.md` — Test-Driven Development: red-green-refactor cycle, writing tests first
 - `knowledge/mobile/flutter/flutter-architecture.md` — BLoC/Riverpod architecture, widget design, GoRouter navigation, networking, storage, Material 3, testing
 - `knowledge/mobile/flutter/dart-core.md` — null safety, async/await, collections, classes, mixins, extension functions
 - `knowledge/web/backend/api-design.md` — REST/GraphQL API consumption patterns, error handling, caching strategy
