@@ -35,12 +35,13 @@ const GLOBAL_PATHS = {
   claude: join(HOME, '.claude', 'skills'),
   cursor: join(HOME, '.cursor', 'rules'),
   windsurf: join(HOME, '.codeium', 'windsurf', 'rules'),
+  codex: join(HOME, '.codex'),
 };
 
 // ─── CLI args ─────────────────────────────────────────────────────────────────
 
 const rawArgs = process.argv.slice(2);
-const isGlobal = rawArgs.includes('--global');
+let isGlobal = rawArgs.includes('--global');
 const args = rawArgs.filter(a => a !== '--global');
 
 const platformArg = args[0];
@@ -219,7 +220,9 @@ function installCodexSettings(base) {
   const hookEntries = loadCodexHooks().filter(e => e.event === 'PreToolUse');
   if (hookEntries.length === 0) return;
 
-  const configPath = join(base || projectDir, '.codex', 'config.toml');
+  const configPath = isGlobal && !base
+    ? join(GLOBAL_PATHS.codex, 'config.toml')
+    : join(base || projectDir, '.codex', 'config.toml');
   let existing = existsSync(configPath) ? readFileSync(configPath, 'utf-8') : '';
 
   // Remove previous triples-agentic block (idempotent reinstall)
@@ -333,7 +336,9 @@ function installCopilot(base) {
 }
 
 function installCodex(base) {
-  const dest = join(base || projectDir, 'AGENTS.md');
+  const dest = isGlobal && !base
+    ? join(GLOBAL_PATHS.codex, 'AGENTS.md')
+    : join(base || projectDir, 'AGENTS.md');
   console.log(`\nInstalling OpenAI Codex → ${display(dest)}`);
 
   const safetyBody = loadSafetyRulesBody();
@@ -432,6 +437,88 @@ const KNOWLEDGE_SUMMARY = {
                    'qa-execution', 'qa-reporting'],
 };
 
+// ─── Update helpers ───────────────────────────────────────────────────────────
+
+/**
+ * Detect existing TripleS installations by checking sentinel files.
+ * Returns an array of { platform, isGlobal } objects.
+ */
+function detectInstallations() {
+  const found = [];
+
+  const hasFile = (...parts) => existsSync(join(...parts));
+  const hasMarker = (file) => {
+    try { return readFileSync(file, 'utf-8').includes('TripleS Agent Orchestrator'); } catch { return false; }
+  };
+
+  // Claude
+  if (hasFile(GLOBAL_PATHS.claude, 'seoyeon.md'))
+    found.push({ platform: 'claude', isGlobal: true });
+  if (hasFile(projectDir, '.claude', 'skills', 'seoyeon.md'))
+    found.push({ platform: 'claude', isGlobal: false });
+
+  // Cursor
+  if (hasFile(GLOBAL_PATHS.cursor, 'seoyeon.mdc'))
+    found.push({ platform: 'cursor', isGlobal: true });
+  if (hasFile(projectDir, '.cursor', 'rules', 'seoyeon.mdc'))
+    found.push({ platform: 'cursor', isGlobal: false });
+
+  // Copilot — project-only
+  if (hasFile(projectDir, '.github', 'instructions', 'seoyeon.instructions.md'))
+    found.push({ platform: 'copilot', isGlobal: false });
+
+  // Codex
+  const codexGlobal = join(GLOBAL_PATHS.codex, 'AGENTS.md');
+  if (hasFile(codexGlobal) && hasMarker(codexGlobal))
+    found.push({ platform: 'codex', isGlobal: true });
+  const codexProject = join(projectDir, 'AGENTS.md');
+  if (hasFile(codexProject) && hasMarker(codexProject))
+    found.push({ platform: 'codex', isGlobal: false });
+
+  // Windsurf
+  const windsurfGlobal = join(GLOBAL_PATHS.windsurf, '.windsurfrules');
+  if (hasFile(windsurfGlobal) && hasMarker(windsurfGlobal))
+    found.push({ platform: 'windsurf', isGlobal: true });
+  const windsurfProject = join(projectDir, '.windsurfrules');
+  if (hasFile(windsurfProject) && hasMarker(windsurfProject))
+    found.push({ platform: 'windsurf', isGlobal: false });
+
+  return found;
+}
+
+async function runUpdate() {
+  const installations = detectInstallations();
+
+  if (installations.length === 0) {
+    console.log('\n⚠  No existing TripleS Agentic installations detected.\n');
+    console.log('Run the installer to get started:');
+    console.log('  npx triples-agentic\n');
+    return;
+  }
+
+  console.log('\n╔══════════════════════════════════════════════════╗');
+  console.log('║  TripleS Agentic — Update                        ║');
+  console.log('║  Software Engineering Agent Orchestrator         ║');
+  console.log('╚══════════════════════════════════════════════════╝\n');
+  console.log('Detected installations:\n');
+  for (const { platform, isGlobal: g } of installations) {
+    console.log(`  • ${PLATFORM_LABELS[platform]} (${g ? 'global' : 'project'})`);
+  }
+  console.log('');
+
+  const savedIsGlobal = isGlobal;
+  for (const { platform, isGlobal: g } of installations) {
+    isGlobal = g;
+    INSTALLERS[platform](g ? null : projectDir);
+  }
+  isGlobal = savedIsGlobal;
+
+  const totalKnowledge = Object.values(KNOWLEDGE_SUMMARY).reduce((n, g) => n + g.length, 0);
+  console.log(`\n✅  Updated ${installations.length} installation(s) — ${AGENT_COMMANDS.length} agents, ${totalKnowledge} knowledge skills\n`);
+}
+
+// ─── Success banner ───────────────────────────────────────────────────────────
+
 function printSuccessBanner() {
   const totalKnowledge = Object.values(KNOWLEDGE_SUMMARY).reduce((n, g) => n + g.length, 0);
   console.log('\n✅  TripleS Agentic installed successfully!\n');
@@ -447,7 +534,8 @@ function printSuccessBanner() {
     console.log(`  ${label.padEnd(16)} ${skills.map(s => `/${s}`).join('  ')}`);
   }
 
-  console.log('\nStart the full pipeline with /seoyeon\n');
+  console.log('\nStart the full pipeline with /seoyeon');
+  console.log('To update later run: npx triples-agentic update\n');
 }
 
 // ─── Interactive wizard ───────────────────────────────────────────────────────
@@ -523,6 +611,11 @@ async function main() {
     return;
   }
 
+  if (platformArg === 'update') {
+    await runUpdate();
+    return;
+  }
+
   if (platformArg === 'all') {
     for (const installer of Object.values(INSTALLERS)) {
       installer(isGlobal ? null : projectDir);
@@ -533,7 +626,7 @@ async function main() {
 
   if (!INSTALLERS[platformArg]) {
     console.error(`\n❌ Unknown platform: ${platformArg}`);
-    console.error('Supported: claude | cursor | copilot | codex | windsurf | all\n');
+    console.error('Supported: claude | cursor | copilot | codex | windsurf | all | update\n');
     process.exit(1);
   }
 

@@ -109,10 +109,14 @@ npx triples-agentic all         # all platforms
 # Global install
 npx triples-agentic claude --global     # → ~/.claude/skills/
 npx triples-agentic cursor --global     # → ~/.cursor/rules/
+npx triples-agentic codex --global      # → ~/.codex/AGENTS.md
 npx triples-agentic windsurf --global   # → ~/.codeium/windsurf/rules/
 
 # Install into a specific directory
 npx triples-agentic claude --target /path/to/project
+
+# Update all existing installations (auto-detects platforms and scope)
+npx triples-agentic update
 ```
 
 ---
@@ -134,7 +138,7 @@ triples-agentic claude       # direct install for Claude Code
 | **Claude Code** | `.claude/skills/*.md` | `.claude/settings.json` (PreToolUse hook) |
 | **Cursor AI** | `.cursor/rules/*.mdc` | `.cursor/rules/triples-safety.mdc` (always-applied rule) |
 | **GitHub Copilot** | `.github/instructions/*.instructions.md` | `.github/instructions/triples-safety.instructions.md` |
-| **OpenAI Codex** | `AGENTS.md` | `.codex/config.toml` (PreToolUse hook) |
+| **OpenAI Codex** | `AGENTS.md` (project) / `~/.codex/AGENTS.md` (global) | `.codex/config.toml` / `~/.codex/config.toml` (PreToolUse hook) |
 | **Windsurf** | `.windsurfrules` | `.windsurf/hooks.json` (pre_run_command hook) |
 
 Global install paths:
@@ -143,6 +147,7 @@ Global install paths:
 |---|---|---|
 | Claude Code | `~/.claude/skills/` | `~/.claude/settings.json` |
 | Cursor AI | `~/.cursor/rules/` | `~/.cursor/rules/triples-safety.mdc` |
+| OpenAI Codex | `~/.codex/AGENTS.md` | `~/.codex/config.toml` |
 | Windsurf | `~/.codeium/windsurf/rules/` | `~/.codeium/windsurf/hooks.json` |
 
 ---
