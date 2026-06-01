@@ -1,6 +1,6 @@
 {
   "name": "triples-agentic",
-  "version": "2.4.3",
+  "version": "2.4.4",
   "description": "TripleS software engineering agent orchestrator — skill plugin for Claude Code, Cursor, Copilot, Codex, and Windsurf",
   "type": "module",
   "bin": {
