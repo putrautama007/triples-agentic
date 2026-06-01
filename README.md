@@ -112,7 +112,7 @@ npx triples-agentic all         # all platforms
 # Global install
 npx triples-agentic claude --global     # → ~/.claude/skills/
 npx triples-agentic cursor --global     # → ~/.cursor/rules/
-npx triples-agentic codex --global      # → ~/.codex/AGENTS.md
+npx triples-agentic codex --global      # → ~/.codex/skills/
 npx triples-agentic windsurf --global   # → ~/.codeium/windsurf/rules/
 
 # Install into a specific directory
@@ -141,7 +141,7 @@ triples-agentic claude       # direct install for Claude Code
 | **Claude Code** | `.claude/skills/*.md` | `.claude/settings.json` (PreToolUse hook) |
 | **Cursor AI** | `.cursor/rules/*.mdc` | `.cursor/rules/triples-safety.mdc` (always-applied rule) |
 | **GitHub Copilot** | `.github/instructions/*.instructions.md` | `.github/instructions/triples-safety.instructions.md` |
-| **OpenAI Codex** | `AGENTS.md` (project) / `~/.codex/AGENTS.md` (global) | `.codex/config.toml` / `~/.codex/config.toml` (PreToolUse hook) |
+| **OpenAI Codex** | `.codex/skills/<skill>/SKILL.md` (project) / `~/.codex/skills/<skill>/SKILL.md` (global) | `.codex/config.toml` / `~/.codex/config.toml` (PreToolUse hook) |
 | **Windsurf** | `.windsurfrules` | `.windsurf/hooks.json` (pre_run_command hook) |
 
 Global install paths:
@@ -150,7 +150,7 @@ Global install paths:
 |---|---|---|
 | Claude Code | `~/.claude/skills/` | `~/.claude/settings.json` |
 | Cursor AI | `~/.cursor/rules/` | `~/.cursor/rules/triples-safety.mdc` |
-| OpenAI Codex | `~/.codex/AGENTS.md` | `~/.codex/config.toml` |
+| OpenAI Codex | `~/.codex/skills/` | `~/.codex/config.toml` |
 | Windsurf | `~/.codeium/windsurf/rules/` | `~/.codeium/windsurf/hooks.json` |
 
 ---
@@ -212,6 +212,15 @@ SeoYeon walks you through the complete workflow and delegates to each agent.
 /lynn-testcase   Create, review, and finalize test cases
 /shion-qa        Execute tests and produce Go/No-Go report
 /seoyeon status  Check current run state
+```
+
+### In Codex
+Use `/skills` to browse installed TripleS skills, or mention them directly in your prompt:
+
+```text
+Use $seoyeon to orchestrate this feature from PRD through QA.
+Use $jiwoo-prd to draft the PRD for this feature.
+Use $kaede-backend to implement the backend task from the breakdown.
 ```
 
 ### With other coding assistants
@@ -280,7 +289,9 @@ triples-agentic/
 │   │   ├── task-breakdown.md  # → workspace/TASK_BREAKDOWN.md
 │   │   └── test-case.md       # → workspace/TEST_CASES.md
 │   └── bin/
-│       └── setup.js           # Platform installer CLI
+│       ├── setup.js           # Platform installer CLI entrypoint
+│       └── setup/
+│           └── codex.js       # Codex-specific installer
 ├── docs/
 │   └── workflow.md            # Full workflow diagram + agent roster
 └── CHANGELOG.md
@@ -292,9 +303,9 @@ your-project/
 │   └── settings.json          # Claude Code PreToolUse safety hook
 ├── .cursor/rules/             # Cursor AI agent rules + safety rule
 ├── .github/instructions/      # Copilot agent instructions + safety instruction
+├── .codex/skills/             # Codex skill bundles (project install)
 ├── .codex/config.toml         # Codex PreToolUse safety hook
 ├── .windsurf/hooks.json       # Windsurf pre_run_command safety hook
-├── AGENTS.md                  # Codex agent context
 └── .windsurfrules             # Windsurf agent rules
 ```
 

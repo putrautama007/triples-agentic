@@ -2,7 +2,7 @@
 /**
  * TripleS Agentic — Skill Plugin Setup
  *
- * Installs all TripleS skill files (11 agents + 40 knowledge skills)
+ * Installs all TripleS skill files (11 agents + 41 knowledge references)
  * into your coding assistant's config directory.
  *
  * Usage:
@@ -89,16 +89,51 @@ function parseComment(content, key) {
   return m ? m[1].trim() : '';
 }
 
+function parseCommentList(content, key) {
+  const raw = parseComment(content, key);
+  if (!raw) return [];
+  return raw.split(',').map(item => item.trim()).filter(Boolean);
+}
+
+function parseHeading(content) {
+  const m = content.match(/^#\s+(.+)$/m);
+  return m ? m[1].trim() : '';
+}
+
+function stripAgentMetadataComments(content) {
+  return content.replace(/^<!-- .*? -->\r?\n/gm, '').trimStart();
+}
+
+function yamlEscape(value) {
+  return String(value).replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+}
+
+function shortHeading(heading, fallback) {
+  if (!heading) return fallback;
+  return heading.split('—')[0].trim();
+}
+
 // ─── Source collectors ────────────────────────────────────────────────────────
 
 function allAgents() {
   return readdirSync(AGENTS_DIR)
-    .filter(f => f.endsWith('.md'))
+    .filter(f => f.endsWith('.md') && f !== 'README.md')
     .map(f => {
       const name    = f.replace('.md', '');
       const content = readFileSync(join(AGENTS_DIR, f), 'utf-8');
+      const slug = parseComment(content, 'triples-agent') || name;
       const persona = parseComment(content, 'persona') || 'software engineering agent';
-      return { name, content, persona };
+      const heading = parseHeading(content);
+      return {
+        name,
+        slug,
+        content,
+        persona,
+        heading,
+        displayName: shortHeading(heading, name),
+        knowledgePaths: parseCommentList(content, 'knowledge'),
+        templatePaths: parseCommentList(content, 'templates'),
+      };
     })
     .sort((a, b) => a.name.localeCompare(b.name));
 }
@@ -187,6 +222,30 @@ function tomlEscape(str) {
   return str.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 }
 
+function createInstallerContext() {
+  return {
+    ROOT,
+    HOME,
+    AGENTS_DIR,
+    KNOWLEDGE_DIR,
+    KNOWLEDGE_GROUPS,
+    GLOBAL_PATHS,
+    projectDir,
+    isGlobal,
+    allAgents,
+    loadCodexHooks,
+    stripAgentMetadataComments,
+    yamlEscape,
+    tomlEscape,
+    display,
+    writeFile,
+  };
+}
+
+async function loadCodexInstaller() {
+  return import('./setup/codex.js');
+}
+
 // ─── Platform installers ──────────────────────────────────────────────────────
 
 /** Write (or merge) PreToolUse hooks from platforms.claude into .claude/settings.json */
@@ -213,35 +272,6 @@ function installClaudeSettings(claudeDir) {
   }
 
   writeFile(settingsPath, JSON.stringify(settings, null, 2));
-}
-
-/** Write (or append) PreToolUse hooks from platforms.codex into .codex/config.toml */
-function installCodexSettings(base) {
-  const hookEntries = loadCodexHooks().filter(e => e.event === 'PreToolUse');
-  if (hookEntries.length === 0) return;
-
-  const configPath = isGlobal && !base
-    ? join(GLOBAL_PATHS.codex, 'config.toml')
-    : join(base || projectDir, '.codex', 'config.toml');
-  let existing = existsSync(configPath) ? readFileSync(configPath, 'utf-8') : '';
-
-  // Remove previous triples-agentic block (idempotent reinstall)
-  existing = existing.replace(/\n?# triples-agentic hooks[\s\S]*?# end triples-agentic hooks\n?/g, '');
-
-  let block = '\n# triples-agentic hooks\n';
-  for (const entry of hookEntries) {
-    block += `\n[[hooks.PreToolUse]]\n`;
-    if (entry.matcher) block += `matcher = "${tomlEscape(entry.matcher)}"\n`;
-    for (const hook of (entry.hooks || [])) {
-      block += `\n[[hooks.PreToolUse.hooks]]\n`;
-      block += `type = "command"\n`;
-      block += `command = "${tomlEscape(hook.command)}"\n`;
-      if (hook.statusMessage) block += `statusMessage = "${tomlEscape(hook.statusMessage)}"\n`;
-    }
-  }
-  block += '\n# end triples-agentic hooks\n';
-
-  writeFile(configPath, existing.trimEnd() + block);
 }
 
 /** Write (or merge) Windsurf hooks from platforms.windsurf into .windsurf/hooks.json */
@@ -335,32 +365,9 @@ function installCopilot(base) {
   }
 }
 
-function installCodex(base) {
-  const dest = isGlobal && !base
-    ? join(GLOBAL_PATHS.codex, 'AGENTS.md')
-    : join(base || projectDir, 'AGENTS.md');
-  console.log(`\nInstalling OpenAI Codex → ${display(dest)}`);
-
-  const safetyBody = loadSafetyRulesBody();
-  const lines = ['# TripleS Agent Orchestrator\n\n', ...(safetyBody ? [safetyBody + '\n\n'] : []), '## Agents\n\n'];
-  for (const { name, content } of allAgents()) {
-    lines.push(`---\n\n${content}\n\n`);
-  }
-
-  lines.push('## Knowledge Skills\n\n');
-  for (const group of KNOWLEDGE_GROUPS) {
-    lines.push(`### ${group.charAt(0).toUpperCase() + group.slice(1)}\n\n`);
-    for (const { name, content } of allKnowledgeSkills().filter(s => s.group === group)) {
-      const body = stripFrontmatter(content);
-      lines.push(`#### ${name}\n\n${body}\n\n`);
-    }
-  }
-
-  writeFileSync(dest, lines.join(''), 'utf-8');
-  console.log(`  ✓ ${display(dest)}`);
-
-  // Hooks — enforced at harness level via .codex/config.toml
-  installCodexSettings(base);
+async function installCodex(base) {
+  const { installCodex: runCodexInstall } = await loadCodexInstaller();
+  runCodexInstall(base, createInstallerContext());
 }
 
 function installWindsurf(base) {
@@ -443,7 +450,7 @@ const KNOWLEDGE_SUMMARY = {
  * Detect existing TripleS installations by checking sentinel files.
  * Returns an array of { platform, isGlobal } objects.
  */
-function detectInstallations() {
+async function detectInstallations() {
   const found = [];
 
   const hasFile = (...parts) => existsSync(join(...parts));
@@ -468,12 +475,8 @@ function detectInstallations() {
     found.push({ platform: 'copilot', isGlobal: false });
 
   // Codex
-  const codexGlobal = join(GLOBAL_PATHS.codex, 'AGENTS.md');
-  if (hasFile(codexGlobal) && hasMarker(codexGlobal))
-    found.push({ platform: 'codex', isGlobal: true });
-  const codexProject = join(projectDir, 'AGENTS.md');
-  if (hasFile(codexProject) && hasMarker(codexProject))
-    found.push({ platform: 'codex', isGlobal: false });
+  const { detectCodexInstallations } = await loadCodexInstaller();
+  found.push(...detectCodexInstallations(createInstallerContext()));
 
   // Windsurf
   const windsurfGlobal = join(GLOBAL_PATHS.windsurf, '.windsurfrules');
@@ -487,7 +490,7 @@ function detectInstallations() {
 }
 
 async function runUpdate() {
-  const installations = detectInstallations();
+  const installations = await detectInstallations();
 
   if (installations.length === 0) {
     console.log('\n⚠  No existing TripleS Agentic installations detected.\n');
@@ -509,32 +512,33 @@ async function runUpdate() {
   const savedIsGlobal = isGlobal;
   for (const { platform, isGlobal: g } of installations) {
     isGlobal = g;
-    INSTALLERS[platform](g ? null : projectDir);
+    await INSTALLERS[platform](g ? null : projectDir);
   }
   isGlobal = savedIsGlobal;
 
   const totalKnowledge = Object.values(KNOWLEDGE_SUMMARY).reduce((n, g) => n + g.length, 0);
-  console.log(`\n✅  Updated ${installations.length} installation(s) — ${AGENT_COMMANDS.length} agents, ${totalKnowledge} knowledge skills\n`);
+  console.log(`\n✅  Updated ${installations.length} installation(s) — ${AGENT_COMMANDS.length} agents, ${totalKnowledge} knowledge references\n`);
 }
 
 // ─── Success banner ───────────────────────────────────────────────────────────
 
 function printSuccessBanner() {
   const totalKnowledge = Object.values(KNOWLEDGE_SUMMARY).reduce((n, g) => n + g.length, 0);
+  const knowledgeGroups = Object.keys(KNOWLEDGE_SUMMARY).length;
   console.log('\n✅  TripleS Agentic installed successfully!\n');
 
-  console.log('── Agents (invoke as slash commands) ──────────────────────────');
+  console.log('── Agents / Skills ───────────────────────────────────────────');
   for (const [cmd, desc] of AGENT_COMMANDS) {
-    console.log(`  /${cmd.padEnd(18)} ${desc}`);
+    console.log(`  ${cmd.padEnd(18)} ${desc}`);
   }
 
-  console.log(`\n── Knowledge Skills (${totalKnowledge} skills across 4 groups) ──────────────────`);
+  console.log(`\n── Knowledge Library (${totalKnowledge} bundled references across ${knowledgeGroups} groups) ───────`);
   for (const [group, skills] of Object.entries(KNOWLEDGE_SUMMARY)) {
     const label = group.includes('/') ? group : group; // full path for sub-groups
     console.log(`  ${label.padEnd(16)} ${skills.map(s => `/${s}`).join('  ')}`);
   }
 
-  console.log('\nStart the full pipeline with /seoyeon');
+  console.log('\nUse `/seoyeon` in Claude Code, or `/skills` / `$seoyeon` in Codex.');
   console.log('To update later run: npx triples-agentic update\n');
 }
 
@@ -592,7 +596,7 @@ async function runWizard() {
 
     console.log('');
     for (const p of selectedPlatforms) {
-      INSTALLERS[p](useGlobal && GLOBAL_PATHS[p] ? null : projectDir);
+      await INSTALLERS[p](useGlobal && GLOBAL_PATHS[p] ? null : projectDir);
     }
 
     printSuccessBanner();
@@ -618,7 +622,7 @@ async function main() {
 
   if (platformArg === 'all') {
     for (const installer of Object.values(INSTALLERS)) {
-      installer(isGlobal ? null : projectDir);
+      await installer(isGlobal ? null : projectDir);
     }
     printSuccessBanner();
     return;
@@ -630,7 +634,7 @@ async function main() {
     process.exit(1);
   }
 
-  INSTALLERS[platformArg](isGlobal ? null : projectDir);
+  await INSTALLERS[platformArg](isGlobal ? null : projectDir);
   printSuccessBanner();
 }
 
