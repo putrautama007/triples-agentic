@@ -47,7 +47,7 @@ Full Mermaid diagram: [docs/workflow.md](docs/workflow.md)
 ### Install via curl (recommended)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/pauplayground007/triples-agentic/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/putrautama007/triples-agentic/main/install.sh | bash
 ```
 
 Checks Node.js ≥ 18, then launches the interactive wizard.
@@ -56,19 +56,19 @@ Pass a platform directly to skip the wizard:
 
 ```bash
 # Claude Code — project-level
-curl -fsSL https://raw.githubusercontent.com/pauplayground007/triples-agentic/main/install.sh | bash -s -- claude
+curl -fsSL https://raw.githubusercontent.com/putrautama007/triples-agentic/main/install.sh | bash -s -- claude
 
 # Claude Code — global (all projects on your machine)
-curl -fsSL https://raw.githubusercontent.com/pauplayground007/triples-agentic/main/install.sh | bash -s -- claude --global
+curl -fsSL https://raw.githubusercontent.com/putrautama007/triples-agentic/main/install.sh | bash -s -- claude --global
 
 # Cursor AI — global
-curl -fsSL https://raw.githubusercontent.com/pauplayground007/triples-agentic/main/install.sh | bash -s -- cursor --global
+curl -fsSL https://raw.githubusercontent.com/putrautama007/triples-agentic/main/install.sh | bash -s -- cursor --global
 
 # All platforms at once
-curl -fsSL https://raw.githubusercontent.com/pauplayground007/triples-agentic/main/install.sh | bash -s -- all
+curl -fsSL https://raw.githubusercontent.com/putrautama007/triples-agentic/main/install.sh | bash -s -- all
 
 # Update all existing installations (auto-detects platforms and scope)
-curl -fsSL https://raw.githubusercontent.com/pauplayground007/triples-agentic/main/install.sh | bash -s -- update
+curl -fsSL https://raw.githubusercontent.com/putrautama007/triples-agentic/main/install.sh | bash -s -- update
 ```
 
 ---

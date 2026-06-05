@@ -2,11 +2,11 @@
 # TripleS Agentic — Installer
 #
 # Usage:
-#   curl -fsSL https://raw.githubusercontent.com/pauplayground007/triples-agentic/main/install.sh | bash
-#   curl -fsSL https://raw.githubusercontent.com/pauplayground007/triples-agentic/main/install.sh | bash -s -- claude
-#   curl -fsSL https://raw.githubusercontent.com/pauplayground007/triples-agentic/main/install.sh | bash -s -- claude --global
-#   curl -fsSL https://raw.githubusercontent.com/pauplayground007/triples-agentic/main/install.sh | bash -s -- all
-#   curl -fsSL https://raw.githubusercontent.com/pauplayground007/triples-agentic/main/install.sh | bash -s -- update
+#   curl -fsSL https://raw.githubusercontent.com/putrautama007/triples-agentic/main/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/putrautama007/triples-agentic/main/install.sh | bash -s -- claude
+#   curl -fsSL https://raw.githubusercontent.com/putrautama007/triples-agentic/main/install.sh | bash -s -- claude --global
+#   curl -fsSL https://raw.githubusercontent.com/putrautama007/triples-agentic/main/install.sh | bash -s -- all
+#   curl -fsSL https://raw.githubusercontent.com/putrautama007/triples-agentic/main/install.sh | bash -s -- update
 
 set -euo pipefail
 
@@ -92,7 +92,7 @@ main() {
   #   cursor --global    → Cursor AI, global
   #   all                → all platforms, project-level
   #   update             → update all existing installations
-  npx --yes github:pauplayground007/triples-agentic "$@"
+  npx --yes github:putrautama007/triples-agentic "$@"
 }
 
 main "$@"

@@ -45,10 +45,10 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/pauplayground007/triples-agentic.git"
+    "url": "git+https://github.com/putrautama007/triples-agentic.git"
   },
   "bugs": {
-    "url": "https://github.com/pauplayground007/triples-agentic/issues"
+    "url": "https://github.com/putrautama007/triples-agentic/issues"
   },
-  "homepage": "https://github.com/pauplayground007/triples-agentic#readme"
+  "homepage": "https://github.com/putrautama007/triples-agentic#readme"
 }

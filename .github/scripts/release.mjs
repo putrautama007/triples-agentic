@@ -138,7 +138,7 @@ function fmt(c) {
 // ─── Build CHANGELOG entry ────────────────────────────────────────────────────
 
 const date = new Date().toISOString().slice(0, 10);
-const repoUrl = 'https://github.com/pauplayground007/triples-agentic';
+const repoUrl = 'https://github.com/putrautama007/triples-agentic';
 
 const sections = [];
 if (breaking.length) sections.push(`### Breaking Changes\n${breaking.map(fmt).join('\n')}`);
