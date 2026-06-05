@@ -62,6 +62,17 @@ knowledge/
 │   ├── task-readiness.md        Task readiness criteria
 │   └── estimation.md            Fibonacci points, time estimation, planning poker
 │
+├── design/            Loaded by HyeRin
+│   ├── ux-research.md         Interviews, usability testing, synthesis, opportunity framing
+│   ├── interaction-design.md  User flows, IA, forms, feedback, edge states
+│   ├── visual-design.md       Typography, color, spacing, hierarchy, component states
+│   ├── design-system.md       Tokens, component taxonomy, documentation, reuse patterns
+│   ├── design-handoff.md      Annotation standards, component API contracts, implementation-readiness checklist
+│   ├── cross-platform-design.md  Web/iOS/Android/Flutter conventions, navigation, motion adaptation
+│   ├── mobile-design-system.md Mobile token mapping, Dynamic Type, `sp` units, safe areas, iconography, motion, platform component usage
+│   ├── content-design.md      UX writing, microcopy, error messages, empty states, confirmations
+│   └── design-system-audit.md Token health, coverage gaps, component lifecycle, deprecation workflow
+│
 ├── web/
 │   ├── frontend/      Loaded by YuBin
 │   │   ├── frontend-components.md  React/Vue/Angular patterns, component design

@@ -12,10 +12,10 @@ The orchestrator's job is to route work, not do it. Delegate early, track progre
 ## Standard Workflow Sequence
 
 ```
-User Input → PRD → RFC → Task Breakdown → (Dev ∥ Test Cases) → QA → Delivery
+User Input → PRD → Design → RFC → Task Breakdown → (Dev ∥ Test Cases) → QA → Delivery
 ```
 
-Human review gates are mandatory at: PRD, RFC, Task Breakdown, Test Cases.
+Human review gates are mandatory at: PRD, Design, RFC, Task Breakdown, Test Cases.
 Development and Test Case creation run in parallel once Task Breakdown is approved.
 
 ## Delegation Protocol
@@ -41,6 +41,7 @@ All artifacts land in `workspace/` at the project root:
 ```
 workspace/
 ├── PRD.md
+├── DESIGN_SPEC.md
 ├── RFC.md
 ├── TASK_BREAKDOWN.md
 ├── TEST_CASES.md
@@ -56,6 +57,7 @@ Maintain a mental model of which stage the current run is in:
 | Stage | Agent | Status |
 |---|---|---|
 | PRD | JiWoo | pending / in-progress / review / approved |
+| Design | HyeRin | pending / in-progress / review / approved |
 | RFC | YooYeon | pending / in-progress / review / approved |
 | Task Breakdown | NaKyoung | pending / in-progress / review / approved |
 | Development | YuBin, Kaede, YeonJi, SoHyun, Kotone | pending / in-progress / done |

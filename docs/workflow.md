@@ -6,6 +6,7 @@
 |----|-------|---------|------|---------------|
 | S1 | **SeoYeon** | Engineering Manager | Main Orchestrator | `/seoyeon` |
 | S3 | **JiWoo** | Senior Product Manager | PRD Agent | `/jiwoo-prd` |
+| S2 | **HyeRin** | Senior UI/UX Designer | UI/UX Design | `/hyerin-design` |
 | S5 | **YooYeon** | Staff Engineer / Tech Lead | RFC Agent | `/yooyeon-rfc` |
 | S7 | **NaKyoung** | Technical Program Manager | Task Breakdown | `/nakyoung-tasks` |
 | S8 | **YuBin** | Principal Frontend Engineer | Frontend Web Dev | `/yubin-frontend` |
@@ -38,6 +39,18 @@ flowchart TD
     end
 
     PRDEval -->|"✅ READY"| YooYeon
+    PRDEval -->|"✅ READY"| HyeRin
+
+    subgraph DESIGN_LOOP["🎨 Design Phase — HyeRin (Senior UI/UX Designer)"]
+        HyeRin["HyeRin\n/hyerin-design"]
+        HyeRin --> DesignCreate["1. Create Design Spec\n(from design_spec_template.md)"]
+        DesignCreate --> DesignReview["2. Review Design Spec\n(quality checklist)"]
+        DesignReview --> DesignEval{3. Evaluate:\nAll UI/UX quality\ngates passed?}
+        DesignEval -->|"❌ GAPS FOUND"| HumanDesign["🧑 Human Review\nHyeRin presents\ndesign gaps\nUser clarifies"]
+        HumanDesign -->|"4. Update Design"| DesignReview
+    end
+
+    DesignEval -->|"✅ READY"| YooYeon
 
     subgraph RFC_LOOP["⚙️ RFC Phase — YooYeon (Staff Engineer)"]
         YooYeon["YooYeon\n/yooyeon-rfc"]
@@ -61,6 +74,10 @@ flowchart TD
 
     TaskEval -->|"✅ READY"| DevPhase
     TaskEval -->|"✅ READY"| TestPhase
+
+    subgraph note ["📋 Design Spec → Developer Agents"]
+        DesignNote["workspace/DESIGN_SPEC.md\nprovided to all developer agents\nas UI/UX source of truth"]
+    end
 
     subgraph DevPhase["⚡ Development Phase — Parallel"]
         YuBin["🌐 YuBin\nPrincipal Frontend\n/yubin-frontend\n\nReact/Vue/Angular\nTailwind, TypeScript"]
@@ -105,6 +122,7 @@ flowchart TD
 ## Human-in-the-Loop Gates
 
 Human review is required at four stages. Each gate follows the same pattern:
+Human review is required at five stages. Each gate follows the same pattern:
 
 1. Agent **creates** artifact using its template
 2. Agent **reviews** against its quality gate checklist
@@ -117,6 +135,7 @@ Human review is required at four stages. Each gate follows the same pattern:
 | Gate | Agent | Artifact |
 |------|-------|---------|
 | PRD Review | JiWoo (Senior PM) | `workspace/PRD.md` |
+| Design Review | HyeRin (Senior UI/UX Designer) | `workspace/DESIGN_SPEC.md` |
 | RFC Review | YooYeon (Staff Engineer) | `workspace/RFC.md` |
 | Task Breakdown Review | NaKyoung (TPM) | `workspace/TASK_BREAKDOWN.md` |
 | Test Case Review | Lynn (QA Lead) | `workspace/TEST_CASES.md` |
@@ -128,6 +147,7 @@ Human review is required at four stages. Each gate follows the same pattern:
 ```
 workspace/
 ├── PRD.md                    ← JiWoo
+├── DESIGN_SPEC.md            ← HyeRin
 ├── RFC.md                    ← YooYeon
 ├── TASK_BREAKDOWN.md         ← NaKyoung
 ├── TEST_CASES.md             ← Lynn
@@ -150,6 +170,12 @@ SeoYeon walks you through the entire workflow, delegating to each agent in seque
 ### Individual agents
 ```
 /jiwoo-prd       → Start or resume PRD creation
+/hyerin-design   → Start or resume UI/UX design spec
+/hyerin-audit    → Audit feature/system design coverage and gaps
+/hyerin-content  → Produce UX writing and microcopy spec
+/hyerin-mobile   → Define mobile design-system mapping and platform conventions
+/hyerin-mobile-audit → Audit mobile design-system compliance and gaps
+/hyerin-platforms → Define cross-platform adaptation guidance
 /yooyeon-rfc     → Start or resume RFC from PRD
 /nakyoung-tasks  → Start or resume task breakdown
 /yubin-frontend  → Implement frontend web tasks

@@ -55,6 +55,7 @@ What the agent produces and what signal it sends when done.
 Specifies which tools the agent should and should not use. This is a behavioral guardrail — not enforced by the platform, but followed by the AI.
 
 - **Planning/document agents** (SeoYeon, JiWoo, YooYeon, NaKyoung, Lynn): `Read` + `Write` only — no `Bash`, no code editing.
+- **Design agent** (HyeRin): `Read` + `Write` only — no `Bash`, no code editing.
 - **Developer agents** (YuBin, Kaede, YeonJi, SoHyun, Kotone): `Read`, `Edit`, `Write`, `Bash` — blocked from store publish and destructive shell commands.
 - **QA agent** (ShiOn): `Read`, `Write`, `Bash` to run tests — blocked from editing source files.
 

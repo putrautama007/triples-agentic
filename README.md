@@ -2,7 +2,7 @@
 
 A platform-agnostic software engineering agent orchestrator, named after the 24-member K-pop group **TripleS**.
 
-11 specialized agents covering the full product-to-delivery lifecycle — from PRD to RFC, task breakdown, implementation across 5 platforms, test cases, and QA.
+12 specialized agents covering the full product-to-delivery lifecycle — from PRD to UI/UX design, RFC, task breakdown, implementation across 5 platforms, test cases, and QA.
 
 ---
 
@@ -12,6 +12,7 @@ A platform-agnostic software engineering agent orchestrator, named after the 24-
 |----|-------|---------|------|
 | S1 | **SeoYeon** | Engineering Manager | Main Orchestrator |
 | S3 | **JiWoo** | Senior Product Manager | PRD Agent |
+| S2 | **HyeRin** | Senior UI/UX Designer | UI/UX Design |
 | S5 | **YooYeon** | Staff Engineer / Tech Lead | RFC Agent |
 | S7 | **NaKyoung** | Technical Program Manager | Task Breakdown |
 | S8 | **YuBin** | Principal Frontend Engineer | Frontend Web |
@@ -29,6 +30,7 @@ A platform-agnostic software engineering agent orchestrator, named after the 24-
 ```
 User → SeoYeon (EM)
          → JiWoo (PRD) [human review loop]
+         → HyeRin (UI/UX Design) [human review loop]
          → YooYeon (RFC) [human review loop]
          → NaKyoung (Tasks) [human review loop]
          → YuBin + Kaede + YeonJi + SoHyun + Kotone [parallel dev]
