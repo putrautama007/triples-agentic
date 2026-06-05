@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.6.1] — 2026-06-05
+
+
+
+[2.6.1]: https://github.com/pauplayground007/triples-agentic/compare/v2.6.0...v2.6.1
+
 ## [2.6.0] — 2026-06-05
 
 ### Added
