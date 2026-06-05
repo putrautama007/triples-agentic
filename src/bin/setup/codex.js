@@ -1,4 +1,4 @@
-import { readFileSync, existsSync } from 'fs';
+import { readFileSync, existsSync, readdirSync } from 'fs';
 import { join } from 'path';
 
 const CODEX_AGENT_SKILL_METADATA = {
@@ -118,22 +118,103 @@ function codexSkillUiYaml(agent, helpers) {
 }
 
 function writeCodexSkillBundle(skillsRoot, agent, ctx) {
-  const { ROOT, KNOWLEDGE_DIR, writeFile } = ctx;
+  const { KNOWLEDGE_DIR, writeFile } = ctx;
   const skillDir = join(skillsRoot, agent.slug);
   writeFile(join(skillDir, 'SKILL.md'), codexSkillFileContent(agent, ctx));
   writeFile(join(skillDir, 'agents', 'openai.yaml'), codexSkillUiYaml(agent, ctx));
 
   for (const relPath of agent.knowledgePaths) {
-    const sourcePath = join(KNOWLEDGE_DIR, relPath);
+    const normalized = relPath.replace(/\.md$/, '');
+    const refDir = join(KNOWLEDGE_DIR, normalized, 'references');
+    const skillName = normalized.split('/').pop();
+    const refFile = join(refDir, `${skillName}.md`);
+    const sourcePath = existsSync(refFile) ? refFile : join(KNOWLEDGE_DIR, relPath);
     if (existsSync(sourcePath)) {
       writeFile(join(skillDir, 'references', 'knowledge', relPath), readFileSync(sourcePath, 'utf-8'));
     }
   }
 
   for (const relPath of agent.templatePaths) {
-    const sourcePath = join(ROOT, 'templates', relPath);
+    const sourcePath = resolveBundledTemplatePath(KNOWLEDGE_DIR, relPath);
     if (existsSync(sourcePath)) {
       writeFile(join(skillDir, 'references', 'templates', relPath), readFileSync(sourcePath, 'utf-8'));
+    }
+  }
+}
+
+function resolveBundledTemplatePath(skillsRoot, relPath) {
+  const templateSources = {
+    'prd.md': join(skillsRoot, 'planning', 'prd-writing', 'references', 'prd-template.md'),
+    'rfc.md': join(skillsRoot, 'planning', 'rfc-writing', 'references', 'rfc-template.md'),
+    'task-breakdown.md': join(skillsRoot, 'planning', 'task-decomposition', 'references', 'task-breakdown-template.md'),
+    'test-case.md': join(skillsRoot, 'quality', 'test-case-writing', 'references', 'test-case-template.md'),
+    'design-spec.md': join(skillsRoot, 'design', 'design-system', 'references', 'design-spec-template.md'),
+  };
+  return templateSources[relPath] || '';
+}
+
+function parseKnowledgeFrontmatter(content, fallbackName) {
+  const match = content.match(/^---\r?\n([\s\S]+?)\r?\n---/);
+  const fm = match ? match[1] : '';
+  return {
+    name: (fm.match(/^name:\s*(.+)$/m) || [])[1]?.trim() || fallbackName,
+    description: (fm.match(/^description:\s*(.+)$/m) || [])[1]?.trim() || 'TripleS knowledge reference',
+  };
+}
+
+function titleFromSlug(slug) {
+  return slug.split('-').map(part => part.charAt(0).toUpperCase() + part.slice(1)).join(' ');
+}
+
+function codexKnowledgeSkillFileContent({ slug, title, description, group, fileName }, helpers) {
+  const { yamlEscape } = helpers;
+  return [
+    '---',
+    `name: "${yamlEscape(slug)}"`,
+    `description: "${yamlEscape(`${description} Use when the user asks for TripleS ${group} guidance, review criteria, checklists, or domain conventions. Do not use as an implementation agent.`)}"`,
+    '---',
+    '',
+    `# ${title}`,
+    '',
+    '## Purpose',
+    `Use this skill as just-in-time reference material for TripleS ${group} work.`,
+    '',
+    '## Procedure',
+    `1. Read \`references/${fileName}\` only when this domain guidance is needed.`,
+    '2. Apply the checklist, conventions, anti-patterns, and scoring rules from that reference.',
+    '3. Do not treat this knowledge skill as an implementation agent; route behavior through the owning TripleS agent when workflow execution is needed.',
+    '',
+    '## Reference',
+    `- \`references/${fileName}\``,
+    '',
+  ].join('\n');
+}
+
+function writeCodexKnowledgeSkillBundles(skillsRoot, ctx) {
+  const { KNOWLEDGE_DIR, KNOWLEDGE_GROUPS, writeFile } = ctx;
+  for (const group of KNOWLEDGE_GROUPS) {
+    const groupDir = join(KNOWLEDGE_DIR, group);
+    if (!existsSync(groupDir)) continue;
+    for (const skillDirName of readdirSync(groupDir, { withFileTypes: true })
+      .filter(d => d.isDirectory() && existsSync(join(groupDir, d.name, 'SKILL.md')))
+      .map(d => d.name)
+      .sort()) {
+      const skillMdPath = join(groupDir, skillDirName, 'SKILL.md');
+      const skillContent = readFileSync(skillMdPath, 'utf-8');
+      const metadata = parseKnowledgeFrontmatter(skillContent, skillDirName);
+      const slug = `${group.replace(/\//g, '-')}-${metadata.name}`;
+      const refName = `${metadata.name || skillDirName}.md`;
+      const refPath = join(groupDir, skillDirName, 'references', refName);
+      const referenceContent = existsSync(refPath) ? readFileSync(refPath, 'utf-8') : skillContent;
+      const skillDir = join(skillsRoot, slug);
+      writeFile(join(skillDir, 'SKILL.md'), codexKnowledgeSkillFileContent({
+        slug,
+        title: titleFromSlug(metadata.name),
+        description: metadata.description,
+        group,
+        fileName: refName,
+      }, ctx));
+      writeFile(join(skillDir, 'references', refName), referenceContent);
     }
   }
 }
@@ -199,6 +280,8 @@ export function installCodex(base, ctx) {
   for (const agent of allAgents()) {
     writeCodexSkillBundle(skillsRoot, agent, ctx);
   }
+
+  writeCodexKnowledgeSkillBundles(skillsRoot, ctx);
 
   const legacyAgentsPath = isGlobal && !base
     ? join(GLOBAL_PATHS.codex, 'AGENTS.md')

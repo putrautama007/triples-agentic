@@ -2,7 +2,7 @@
 /**
  * TripleS Agentic — Skill Plugin Setup
  *
- * Installs all TripleS skill files (11 agents + 41 knowledge references)
+ * Installs all TripleS skill files (agents + knowledge skills)
  * into your coding assistant's config directory.
  *
  * Usage:
@@ -24,8 +24,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const ROOT = join(__dirname, '..');
 const AGENTS_DIR = join(ROOT, 'agents');
-const KNOWLEDGE_DIR = join(ROOT, 'knowledge');
-const KNOWLEDGE_GROUPS = ['planning', 'web', 'mobile/android', 'mobile/ios', 'mobile/flutter', 'quality'];
+const KNOWLEDGE_DIR = join(ROOT, 'skills');
+const KNOWLEDGE_GROUPS = ['coding-principles', 'planning', 'design', 'web/frontend', 'web/backend', 'mobile/android', 'mobile/ios', 'mobile/flutter', 'quality'];
 const HOME = homedir();
 const HOOKS_DIR = join(ROOT, 'hooks');
 
@@ -148,22 +148,45 @@ function allKnowledgeSkills() {
   for (const group of KNOWLEDGE_GROUPS) {
     const groupDir = join(KNOWLEDGE_DIR, group);
     if (!existsSync(groupDir)) continue;
-    readdirSync(groupDir)
-      .filter(f => f.endsWith('.md'))
+    readdirSync(groupDir, { withFileTypes: true })
+      .filter(entry => entry.isDirectory() && existsSync(join(groupDir, entry.name, 'SKILL.md')))
+      .map(entry => entry.name)
       .sort()
-      .forEach(f => {
-        const content = readFileSync(join(groupDir, f), 'utf-8');
+      .forEach(skillDirName => {
+        const skillPath = join(groupDir, skillDirName, 'SKILL.md');
+        const content = readFileSync(skillPath, 'utf-8');
         const { name: skillName, description } = parseFrontmatter(content);
+        const referenceFile = `${skillName || skillDirName}.md`;
+        const referencePath = join(groupDir, skillDirName, 'references', referenceFile);
+        const referenceContent = existsSync(referencePath) ? readFileSync(referencePath, 'utf-8') : content;
         skills.push({
-          name: f.replace('.md', ''),   // filename slug (e.g. prd-writing)
+          name: skillDirName,
           group,                         // planning | web | mobile | quality
           content,
-          skillName: skillName || f.replace('.md', ''),
+         referenceContent,
+          skillName: skillName || skillDirName,
           description: description || `${group} knowledge skill`,
+          slug: `${group.replace(/\//g, '-')}-${skillName || skillDirName}`,
+          fileName: referenceFile,
+          sourcePath: skillPath,
+          referencePath,
         });
       });
   }
   return skills;
+}
+
+function knowledgeSkillContent(skill) {
+  return skill.content;
+}
+
+function resolveKnowledgeSource(relPath) {
+  const normalized = relPath.replace(/\.md$/, '');
+  const skillPath = join(KNOWLEDGE_DIR, normalized, 'SKILL.md');
+  const referencePath = join(KNOWLEDGE_DIR, normalized, 'references', `${normalized.split('/').pop()}.md`);
+  if (existsSync(referencePath)) return referencePath;
+  if (existsSync(skillPath)) return skillPath;
+  return null;
 }
 
 // ─── Hook loaders ─────────────────────────────────────────────────────────────
@@ -306,9 +329,10 @@ function installClaude(base) {
     writeFile(join(dest, `${name}.md`), skill);
   }
 
-  // Knowledge skills — already have correct frontmatter, install as-is
-  for (const { name, group, content } of allKnowledgeSkills()) {
-    writeFile(join(dest, 'knowledge', group, `${name}.md`), content);
+  // Knowledge skills — best-practice skill bundles with lean SKILL.md + one-level references
+  for (const skill of allKnowledgeSkills()) {
+    writeFile(join(dest, skill.slug, 'SKILL.md'), knowledgeSkillContent(skill));
+    writeFile(join(dest, skill.slug, 'references', skill.fileName), skill.referenceContent);
   }
 
   // Settings — dangerous command hook (enforced at harness level)
@@ -326,8 +350,8 @@ function installCursor(base) {
   }
 
   // Knowledge skills
-  for (const { name, group, content, description } of allKnowledgeSkills()) {
-    const body = stripFrontmatter(content);
+  for (const { name, group, referenceContent, description } of allKnowledgeSkills()) {
+    const body = stripFrontmatter(referenceContent);
     const rule = ['---', `description: ${description}`, 'alwaysApply: false', '---', '', body].join('\n');
     writeFile(join(dest, 'knowledge', group, `${name}.mdc`), rule);
   }
@@ -351,8 +375,8 @@ function installCopilot(base) {
   }
 
   // Knowledge skills
-  for (const { name, group, content } of allKnowledgeSkills()) {
-    const body = stripFrontmatter(content);
+  for (const { name, group, referenceContent } of allKnowledgeSkills()) {
+    const body = stripFrontmatter(referenceContent);
     const instruction = ['---', 'applyTo: "**"', '---', '', body].join('\n');
     writeFile(join(dest, 'knowledge', group, `${name}.instructions.md`), instruction);
   }
@@ -385,8 +409,8 @@ function installWindsurf(base) {
   lines.push('## Knowledge Skills\n\n');
   for (const group of KNOWLEDGE_GROUPS) {
     lines.push(`### ${group.charAt(0).toUpperCase() + group.slice(1)}\n\n`);
-    for (const { name, content } of allKnowledgeSkills().filter(s => s.group === group)) {
-      const body = stripFrontmatter(content);
+    for (const { name, referenceContent } of allKnowledgeSkills().filter(s => s.group === group)) {
+      const body = stripFrontmatter(referenceContent);
       lines.push(`#### ${name}\n\n${body}\n\n`);
     }
   }
@@ -430,13 +454,19 @@ const AGENT_COMMANDS = [
 ];
 
 const KNOWLEDGE_SUMMARY = {
+  'coding-principles': ['dry', 'kiss', 'yagni', 'solid', 'slap', 'composition-over-inheritance',
+                   'fail-fast', 'least-surprise', 'boy-scout-rule', 'tdd'],
+  design:          ['ux-research', 'interaction-design', 'visual-design', 'design-system',
+                   'design-handoff', 'cross-platform-design', 'mobile-design-system',
+                   'content-design', 'design-system-audit'],
   planning:        ['orchestration', 'prd-writing', 'prd-quality-gates', 'product-principles',
                    'product-prioritization', 'rfc-writing', 'rfc-quality-gates',
                    'architecture-patterns', 'architecture-database', 'architecture-security',
                    'task-decomposition', 'task-readiness', 'estimation'],
-  web:             ['frontend-components', 'frontend-state', 'frontend-performance',
+  'web/frontend':  ['frontend-components', 'frontend-state', 'frontend-performance',
                    'web-accessibility', 'web-performance', 'web-security',
-                   'backend-structure', 'backend-security', 'api-design', 'api-security'],
+                   ],
+  'web/backend':   ['backend-structure', 'backend-security', 'api-design', 'api-security'],
   'mobile/android': ['android-architecture', 'android-platform', 'kotlin-core', 'kotlin-concurrency'],
   'mobile/ios':     ['ios-architecture', 'ios-platform', 'swift-core', 'swift-concurrency'],
   'mobile/flutter': ['flutter-architecture', 'flutter-platform', 'dart-core', 'dart-async'],

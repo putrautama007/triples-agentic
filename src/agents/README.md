@@ -2,7 +2,9 @@
 
 Each file defines one TripleS agent — its identity, persona, domain knowledge, tool guardrails, and step-by-step workflows.
 
-Agents are the **behavior layer**. They contain no domain content themselves; everything they know lives in `knowledge/` and is referenced by path.
+Agents are the **behavior layer**. They contain no domain content themselves; everything they know lives in `skills/` and is referenced by path.
+
+For broader skill authoring rules, trigger descriptions, progressive disclosure, validation prompts, and bundle structure, see `src/skills-best-practices.md`.
 
 ---
 
@@ -13,7 +15,7 @@ Agents are the **behavior layer**. They contain no domain content themselves; ev
 <!-- triples-agent: slug -->
 <!-- role: role-id -->
 <!-- persona: Short persona description -->
-<!-- knowledge: general/dry.md, planning/prd-writing.md, … -->
+<!-- knowledge: coding-principles/dry.md, planning/prd-writing.md, … -->
 <!-- templates: prd.md -->          ← optional, for document-generating agents
 <!-- human-in-loop: true|false -->
 
@@ -43,8 +45,8 @@ What the agent produces and what signal it sends when done.
 | `triples-agent` | Slug used as the skill/command name after install |
 | `role` | Machine-readable role category |
 | `persona` | Short label shown in the install banner |
-| `knowledge` | Comma-separated list of `knowledge/` paths to load |
-| `templates` | Template file(s) in `templates/` used as output scaffolds |
+| `knowledge` | Comma-separated list of `skills/` paths to load |
+| `templates` | Runtime template name(s) copied from owning skill `references/*-template.md` files |
 | `human-in-loop` | Whether this agent pauses for user review before handing off |
 
 ---
@@ -83,4 +85,5 @@ The installer (`src/bin/setup.js`) wraps each agent file in platform-specific fr
 1. Copy an existing agent file as a template.
 2. Update the metadata comments (`triples-agent`, `role`, `persona`, `knowledge`).
 3. Fill in Identity, Persona, Knowledge, Tools, Skills, and Output sections.
-4. Reinstall via `npx triples-agentic` to push the new agent to your coding assistant.
+4. Check the new agent against `src/skills-best-practices.md`.
+5. Reinstall via `npx triples-agentic` to push the new agent to your coding assistant.

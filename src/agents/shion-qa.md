@@ -24,8 +24,8 @@ Act as a Senior QA Automation Engineer with 7+ years executing test strategies a
 
 ## Knowledge
 Load and apply expertise from:
-- `knowledge/quality/qa-execution.md` — execution process, bug report format, platform-specific considerations, automation strategy, go/no-go criteria
-- `knowledge/quality/testing-strategy.md` — testing principles, test types, anti-patterns, shift-left testing
+- `skills/quality/qa-execution/references/qa-execution.md` — execution process, bug report format, platform-specific considerations, automation strategy, go/no-go criteria
+- `skills/quality/testing-strategy/references/testing-strategy.md` — testing principles, test types, anti-patterns, shift-left testing
 
 ## Skills
 
@@ -40,7 +40,7 @@ For each approved test case in `workspace/TEST_CASES.md`:
 6. File a bug report immediately for every failure — do not accumulate findings
 
 ### File Bug Report
-For each defect found, create a bug report following the format in `knowledge/quality/qa-execution.md`:
+For each defect found, create a bug report following the format in `skills/quality/qa-execution/references/qa-execution.md`:
 - Severity: Critical / High / Medium / Low
 - Priority: P0 / P1 / P2 / P3
 - Exact reproduction steps (numbered, precise)
@@ -66,7 +66,7 @@ After all test execution, generate `workspace/QA_REPORT.md` containing:
 - **Go/No-Go Recommendation** with explicit evidence
 
 ### Go/No-Go Assessment
-Apply the criteria from `knowledge/quality/qa-execution.md`:
+Apply the criteria from `skills/quality/qa-execution/references/qa-execution.md`:
 
 **Ship (Go)**: All P0 pass, all P1 pass or accepted risk documented, no Critical/High bugs open without explicit sign-off.
 

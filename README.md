@@ -287,30 +287,25 @@ triples-agentic/
 │   ├── hooks/                 # Safety guardrail definitions (source of truth)
 │   │   ├── dangerous-commands.json   # per-platform hook configs
 │   │   └── dangerous-commands.md     # text-based safety rules
-│   ├── knowledge/             # Domain expertise loaded by agents (knowledge-only .md files)
-│   │   ├── general/           # coding principles shared by all developer agents
-│   │   │   └── dry.md, kiss.md, yagni.md, solid.md, slap.md, tdd.md, …
+│   ├── skills/                # Domain expertise — skill bundles (SKILL.md + references/)
+│   │   ├── coding-principles/           # coding principles shared by all developer agents
+│   │   │   └── dry/, kiss/, yagni/, solid/, slap/, tdd/, …
 │   │   ├── planning/          # SeoYeon, JiWoo, YooYeon, NaKyoung
-│   │   │   └── orchestration.md, prd-writing.md, rfc-writing.md, task-decomposition.md, …
+│   │   │   └── orchestration/, prd-writing/, rfc-writing/, task-decomposition/, …
 │   │   ├── web/
 │   │   │   ├── frontend/      # YuBin
-│   │   │   │   └── frontend-components.md, frontend-state.md, web-accessibility.md, …
+│   │   │   │   └── frontend-components/, frontend-state/, web-accessibility/, …
 │   │   │   └── backend/       # Kaede
-│   │   │       └── backend-structure.md, api-design.md, api-security.md, …
+│   │   │       └── backend-structure/, api-design/, api-security/, …
 │   │   ├── mobile/
 │   │   │   ├── android/       # YeonJi
-│   │   │   │   └── android-architecture.md, kotlin-core.md, kotlin-concurrency.md, …
+│   │   │   │   └── android-architecture/, kotlin-core/, kotlin-concurrency/, …
 │   │   │   ├── ios/           # SoHyun
-│   │   │   │   └── ios-architecture.md, swift-core.md, swift-concurrency.md, …
+│   │   │   │   └── ios-architecture/, swift-core/, swift-concurrency/, …
 │   │   │   └── flutter/       # Kotone
-│   │   │       └── flutter-architecture.md, dart-core.md, dart-async.md, …
+│   │   │       └── flutter-architecture/, dart-core/, dart-async/, …
 │   │   └── quality/           # Lynn, ShiOn
-│   │       └── testing-strategy.md, test-case-writing.md, qa-execution.md, …
-│   ├── templates/             # Output document templates
-│   │   ├── prd.md             # → workspace/PRD.md
-│   │   ├── rfc.md             # → workspace/RFC.md
-│   │   ├── task-breakdown.md  # → workspace/TASK_BREAKDOWN.md
-│   │   └── test-case.md       # → workspace/TEST_CASES.md
+│   │       └── testing-strategy/, test-case-writing/, qa-execution/, …
 │   └── bin/
 │       ├── setup.js           # Platform installer CLI entrypoint
 │       └── setup/
@@ -336,7 +331,7 @@ your-project/
 
 ### `agents/` — Behavioral definitions
 
-Each agent file defines: identity, persona, knowledge references, tool guardrails, skills (workflows), and handoff signals. Domain content lives in `knowledge/` — agents only reference it.
+Each agent file defines: identity, persona, knowledge references, tool guardrails, skills (workflows), and handoff signals. Domain content lives in `skills/` — agents only reference it.
 
 Each agent includes a `## Tools` section that specifies which tools to use and which to avoid (e.g., planning agents never use `Bash`; QA agent never edits source files).
 
@@ -347,7 +342,7 @@ Hook definitions live in `src/hooks/` as platform-agnostic source files. The ins
 - **`.json` files** carry per-platform hook configs under a `platforms` key (`claude`, `codex`, `windsurf`)
 - **`.md` files** carry text-based safety rules for platforms without executable hooks (`cursor`, `copilot`)
 
-### `knowledge/` — Domain expertise
+### `skills/` — Domain expertise
 
 Pure reference `.md` files — no trigger logic, no skills framework. Agents declare which files to load via `<!-- knowledge: ... -->` metadata in their agent file. The knowledge files travel with the agents during install.
 
