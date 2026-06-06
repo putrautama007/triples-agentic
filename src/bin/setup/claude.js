@@ -1,4 +1,4 @@
-import { readFileSync, existsSync } from 'fs';
+import { readFileSync, existsSync, rmSync, statSync } from 'fs';
 import { join, dirname } from 'path';
 
 // ─── Hook loaders ─────────────────────────────────────────────────────────────
@@ -45,6 +45,16 @@ export function installClaude(base, ctx) {
   const { GLOBAL_PATHS, isGlobal, projectDir, allAgents, allKnowledgeSkills, knowledgeSkillContent, writeFile, installManagedProjectDoc, display } = ctx;
   const dest = isGlobal && !base ? GLOBAL_PATHS.claude : join(base || projectDir, '.claude', 'skills');
   console.log(`\nInstalling Claude Code skills → ${display(dest)}`);
+
+  // Cleanup: remove stale agent-name directories from previous installs
+  // Agents are files (${name}.md); if a directory with the same base name exists, remove it
+  for (const { name } of allAgents()) {
+    const dirPath = join(dest, name);
+    if (existsSync(dirPath) && statSync(dirPath).isDirectory()) {
+      rmSync(dirPath, { recursive: true, force: true });
+      console.log(`  ✎ removed stale directory ${display(dirPath)}`);
+    }
+  }
 
   // Agents
   for (const { name, content, persona } of allAgents()) {
