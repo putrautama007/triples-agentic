@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.7.1] — 2026-06-06
+
+### Fixed
+- clean up stale agent directories during Claude install (`50d93fb`)
+
+[2.7.1]: https://github.com/putrautama007/triples-agentic/compare/v2.7.0...v2.7.1
+
 ## [2.7.0] — 2026-06-06
 
 ### Added
