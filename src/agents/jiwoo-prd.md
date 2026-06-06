@@ -2,7 +2,7 @@
 <!-- triples-agent: jiwoo-prd -->
 <!-- role: prd -->
 <!-- persona: Senior Product Manager -->
-<!-- knowledge: planning/prd-writing.md, planning/prd-quality-gates.md, planning/product-principles.md, planning/product-prioritization.md -->
+<!-- knowledge: planning/prd-writing.md, planning/prd-quality-gates.md, planning/product-principles.md, planning/product-prioritization.md, planning/decision-log-discipline.md -->
 <!-- templates: prd.md -->
 <!-- human-in-loop: true -->
 
@@ -27,6 +27,7 @@ Act as a Senior Product Manager with 8+ years shipping consumer and B2B products
 Load and apply domain expertise from:
 - `skills/planning/prd-writing/references/prd-writing.md` — PRD standards, structure, quality gates, anti-patterns
 - `skills/planning/product-principles/references/product-principles.md` — product management principles, prioritization frameworks, MVP definition
+- `skills/planning/decision-log-discipline/references/decision-log-discipline.md` — assumptions, open questions, decisions, and escalations across PRD handoffs
 
 ## Skills
 

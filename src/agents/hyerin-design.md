@@ -2,7 +2,7 @@
 <!-- triples-agent: hyerin-design -->
 <!-- role: design-ui-ux -->
 <!-- persona: Senior UI/UX Designer -->
-<!-- knowledge: planning/product-principles.md, design/ux-research.md, design/interaction-design.md, design/visual-design.md, design/design-system.md, design/design-handoff.md, design/cross-platform-design.md, design/mobile-design-system.md, design/content-design.md, design/design-system-audit.md, web/frontend/web-accessibility.md -->
+<!-- knowledge: planning/product-principles.md, design/ux-research.md, design/interaction-design.md, design/visual-design.md, design/design-system.md, design/design-handoff.md, design/cross-platform-design.md, design/mobile-design-system.md, design/content-design.md, design/design-system-audit.md, design/state-coverage.md, web/frontend/web-accessibility.md -->
 <!-- templates: design-spec.md -->
 <!-- human-in-loop: true -->
 
@@ -39,6 +39,7 @@ Load and apply expertise from:
 - `skills/design/mobile-design-system/references/mobile-design-system.md` — mobile token mapping (color roles, Dynamic Type, sp units), touch targets, safe areas, SF Symbols, Material Symbols, motion conventions, platform component selection
 - `skills/design/content-design/references/content-design.md` — UX writing, microcopy, error messages, empty states, confirmation dialogs
 - `skills/design/design-system-audit/references/design-system-audit.md` — coverage gaps, token health, component lifecycle, deprecation
+- `skills/design/state-coverage/references/state-coverage.md` — loading, empty, error, success, permission, offline, edge, and recovery state coverage
 - `skills/web/frontend/web-accessibility/references/web-accessibility.md` — WCAG 2.1 AA, semantic HTML, ARIA, keyboard, contrast
 
 ## Skills

@@ -2,7 +2,7 @@
 <!-- triples-agent: kaede-backend -->
 <!-- role: developer-backend -->
 <!-- persona: Principal Backend Engineer -->
-<!-- knowledge: coding-principles/dry.md, coding-principles/kiss.md, coding-principles/yagni.md, coding-principles/solid.md, coding-principles/slap.md, coding-principles/composition-over-inheritance.md, coding-principles/fail-fast.md, coding-principles/least-surprise.md, coding-principles/boy-scout-rule.md, coding-principles/tdd.md, web/backend/backend-structure.md, web/backend/backend-security.md, web/backend/api-design.md, web/backend/api-security.md -->
+<!-- knowledge: coding-principles/dry.md, coding-principles/kiss.md, coding-principles/yagni.md, coding-principles/solid.md, coding-principles/slap.md, coding-principles/composition-over-inheritance.md, coding-principles/fail-fast.md, coding-principles/least-surprise.md, coding-principles/boy-scout-rule.md, coding-principles/tdd.md, web/backend/backend-structure.md, web/backend/backend-security.md, web/backend/backend-testing-strategy.md, web/backend/api-design.md, web/backend/api-security.md -->
 <!-- human-in-loop: false -->
 
 ## Identity
@@ -35,6 +35,7 @@ Load and apply expertise from:
 - `skills/coding-principles/boy-scout-rule/references/boy-scout-rule.md` — leave code cleaner than you found it
 - `skills/coding-principles/tdd/references/tdd.md` — Test-Driven Development: red-green-refactor cycle, writing tests first
 - `skills/web/backend/backend-structure/references/backend-structure.md` — project structure, API design, database best practices, error handling, logging
+- `skills/web/backend/backend-testing-strategy/references/backend-testing-strategy.md` — backend unit, contract, integration, migration, auth, error-path, and reliability testing
 - `skills/web/backend/api-design/references/api-design.md` — REST/GraphQL conventions, versioning, pagination, security, documentation
 
 ## Skills

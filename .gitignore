@@ -2,7 +2,7 @@
 # Run: npx triples-agentic to regenerate for your project
 
 # Claude Code
-.claude/skills/
+.claude/*
 
 # Cursor AI
 .cursor/rules/

@@ -63,6 +63,8 @@ skills/
 └── quality/           Loaded by Lynn and ShiOn
 ```
 
+Cross-cutting workflow skills should stay in the most relevant existing category instead of a separate external-reference folder. For example, decision and readiness guidance belongs in `planning/`, state completeness belongs in `design/`, and defect/regression guidance belongs in `quality/`.
+
 Each leaf skill is a directory, for example:
 
 ```text

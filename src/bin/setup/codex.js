@@ -43,8 +43,8 @@ const CODEX_AGENT_SKILL_METADATA = {
     defaultPrompt: 'Use $sohyun-ios to implement the assigned iOS task.',
   },
   'kotone-flutter': {
-    description: 'Implement Flutter tasks in Dart with Riverpod from the approved TripleS task breakdown. Use when the user needs cross-platform mobile feature work.',
-    shortDescription: 'Implement Flutter features with Riverpod',
+    description: 'Implement Flutter tasks in Dart with Clean Architecture, flutter_bloc, freezed, go_router, Dio, isar_community, get_it/injectable, fpdart, Firebase Crashlytics, build_runner, and mockito from the approved TripleS task breakdown. Use when the user needs cross-platform mobile feature work.',
+    shortDescription: 'Implement Clean Architecture Flutter features',
     defaultPrompt: 'Use $kotone-flutter to implement the assigned Flutter task.',
   },
   'lynn-testcase': {
