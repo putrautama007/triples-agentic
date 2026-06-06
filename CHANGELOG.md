@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.8.0] — 2026-06-06
+
+### Added
+- implement immediate handoff after human approval across multiple agents (`4a582e5`)
+
+[2.8.0]: https://github.com/putrautama007/triples-agentic/compare/v2.7.2...v2.8.0
+
 ## [2.7.2] — 2026-06-06
 
 ### Fixed
