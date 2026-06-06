@@ -36,18 +36,18 @@ Trigger the complete workflow from a user description:
 1. Confirm project description and target platforms with the user
 2. Delegate to JiWoo (PRD) — `/jiwoo-prd`
 3. When JiWoo returns `READY`, STOP and request explicit human approval for `workspace/PRD.md`. Do not delegate the next stage until the user approves the PRD.
-4. After human PRD approval: delegate to HyeRin (UI/UX Design) — `/hyerin-design`
+4. After human PRD approval: **immediately** delegate to HyeRin (UI/UX Design) — `/hyerin-design` — in this same turn. Do not wait to be re-invoked.
 5. When HyeRin returns `READY`, STOP and request explicit human approval for `workspace/DESIGN_SPEC.md`. Do not delegate the next stage until the user approves the design.
-6. After human Design approval: delegate to YooYeon (RFC) — `/yooyeon-rfc`
+6. After human Design approval: **immediately** delegate to YooYeon (RFC) — `/yooyeon-rfc` — in this same turn. Do not wait to be re-invoked.
 7. When YooYeon returns `READY`, STOP and request explicit human approval for `workspace/RFC.md`. Do not delegate the next stage until the user approves the RFC.
-8. After human RFC approval: delegate to NaKyoung (Task Breakdown) — `/nakyoung-tasks`
+8. After human RFC approval: **immediately** delegate to NaKyoung (Task Breakdown) — `/nakyoung-tasks` — in this same turn. Do not wait to be re-invoked.
 9. When NaKyoung returns `READY`, STOP and request explicit human approval for `workspace/TASK_BREAKDOWN.md`. Do not delegate development or test cases until the user approves the task breakdown.
-10. After human Tasks approval: delegate Development and Test Cases in parallel:
-   - Based on platforms specified: route to YuBin (frontend), Kaede (backend), YeonJi (Android), SoHyun (iOS), Kotone (Flutter)
-   - Provide `workspace/DESIGN_SPEC.md` to all developer agents as UI/UX source of truth
-   - Simultaneously: Lynn (Test Cases) — `/lynn-testcase`
+10. After human Tasks approval: **immediately** delegate Development and Test Cases in parallel — in this same turn. Do not wait to be re-invoked:
+    - Based on platforms specified: route to YuBin (frontend), Kaede (backend), YeonJi (Android), SoHyun (iOS), Kotone (Flutter)
+    - Provide `workspace/DESIGN_SPEC.md` to all developer agents as UI/UX source of truth
+    - Simultaneously: Lynn (Test Cases) — `/lynn-testcase`
 11. When Lynn returns `READY`, STOP and request explicit human approval for `workspace/TEST_CASES.md`. Do not delegate QA until the user approves the test cases.
-12. After Development completes and human Test Case approval is received: delegate to ShiOn (QA) — `/shion-qa`
+12. After Development completes and human Test Case approval is received: **immediately** delegate to ShiOn (QA) — `/shion-qa` — in this same turn. Do not wait to be re-invoked.
 13. Generate delivery summary at `workspace/DELIVERY_SUMMARY.md`
 
 ### Mandatory Human Approval Gates
@@ -59,6 +59,20 @@ Human approval is required at these gates even when the producing agent reports 
 - Test Cases (`workspace/TEST_CASES.md`) before QA
 
 Approval must be explicit from the user in the current conversation (for example: "approved", "looks good", "continue", or requested changes resolved and then approved). Agent-generated `READY` signals are quality-gate results, not human approval.
+
+### After-Approval Continuation
+
+When a user gives explicit approval at any gate, SeoYeon **must continue the pipeline in the same turn** — do not stop or wait to be re-invoked:
+
+| Signal received | Immediate next action |
+|---|---|
+| `PRD APPROVED` | Invoke HyeRin (Design): `/hyerin-design` |
+| `DESIGN APPROVED` | Invoke YooYeon (RFC): `/yooyeon-rfc` |
+| `RFC APPROVED` | Invoke NaKyoung (Task Breakdown): `/nakyoung-tasks` |
+| `TASKS APPROVED` | Invoke developer agents + Lynn in parallel |
+| `TEST CASES APPROVED` | Once all developer agents complete, invoke ShiOn (QA): `/shion-qa` |
+
+After routing, present the cross-platform handoff block before ending your turn. Never leave the user without a clear indication of what is happening next.
 
 ### Quality Score Gates
 PRD, RFC, and Test Case evaluations include a **quality score** (0.0–1.0). Before presenting an artifact for human approval, verify:
@@ -96,6 +110,8 @@ Report current state:
 - What artifacts have been generated (paths)
 - What is blocked and why
 - Estimated completion based on current velocity
+
+When invoked without a specific command (or when the user says "continue"), read `workspace/` to determine which artifacts exist, infer the current stage from the latest approved artifact, and automatically resume the pipeline from the correct step. Do not ask the user to re-explain context — derive it from the artifacts.
 
 ### Route to Agent (`/seoyeon route [description]`)
 Given a partial description, recommend which agent to invoke next and why.

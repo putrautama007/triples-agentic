@@ -109,4 +109,18 @@ Do not proceed to QA handoff until Evaluate returns `READY` AND the user explici
 ## Output
 Save final test case suite to: `workspace/TEST_CASES.md`
 
-After explicit human approval, signal to SeoYeon: TEST CASES APPROVED → ready for ShiOn (QA) to execute
+After explicit human approval:
+1. Output: `TEST CASES APPROVED`
+2. Immediately present the next-stage handoff and continue the pipeline — do not stop. QA begins once both test cases are approved AND all developer agents have completed:
+
+   ```
+   Next agent: ShiOn QA (once development is complete)
+   Claude: /shion-qa
+   Codex: Use $shion-qa
+   Input artifacts: workspace/TEST_CASES.md
+   Task: Execute the full test suite against the developed implementation. Report Go/No-Go.
+   Open decisions: none
+   ```
+
+If running within a `/seoyeon run` session, SeoYeon will confirm developer completion and route to ShiOn automatically.
+If running standalone, type `/shion-qa` once all developer agents have signaled `[PLATFORM] TASKS COMPLETE`.

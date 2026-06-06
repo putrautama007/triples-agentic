@@ -99,4 +99,18 @@ Do not proceed to task breakdown handoff until Evaluate returns `READY` AND the 
 ## Output
 Save final RFC to: `workspace/RFC.md`
 
-After explicit human approval, signal to SeoYeon: RFC APPROVED → ready to hand off to NaKyoung (Task Breakdown)
+After explicit human approval:
+1. Output: `RFC APPROVED`
+2. Immediately present the next-stage handoff and continue the pipeline — do not stop:
+
+   ```
+   Next agent: NaKyoung Task Breakdown
+   Claude: /nakyoung-tasks
+   Codex: Use $nakyoung-tasks
+   Input artifacts: workspace/PRD.md, workspace/RFC.md
+   Task: Create executable task breakdown from the approved PRD and RFC.
+   Open decisions: none
+   ```
+
+If running within a `/seoyeon run` session, SeoYeon will route here automatically.
+If running standalone, type `/nakyoung-tasks` to continue.

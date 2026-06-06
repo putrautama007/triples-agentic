@@ -38,8 +38,8 @@ flowchart TD
         HumanPRD -->|"4. Update PRD"| PRDReview
     end
 
-    PRDEval -->|"✅ READY"| YooYeon
-    PRDEval -->|"✅ READY"| HyeRin
+    PRDEval -->|"✅ READY"| HumanPRDGate["🧑 Human Approval\nApprove PRD?"]
+    HumanPRDGate -->|"Approved"| HyeRin
 
     subgraph DESIGN_LOOP["🎨 Design Phase — HyeRin (Senior UI/UX Designer)"]
         HyeRin["HyeRin\n/hyerin-design"]
@@ -50,7 +50,8 @@ flowchart TD
         HumanDesign -->|"4. Update Design"| DesignReview
     end
 
-    DesignEval -->|"✅ READY"| YooYeon
+    DesignEval -->|"✅ READY"| HumanDesignGate["🧑 Human Approval\nApprove Design?"]
+    HumanDesignGate -->|"Approved"| YooYeon
 
     subgraph RFC_LOOP["⚙️ RFC Phase — YooYeon (Staff Engineer)"]
         YooYeon["YooYeon\n/yooyeon-rfc"]
@@ -61,7 +62,8 @@ flowchart TD
         HumanRFC -->|"4. Update RFC"| RFCReview
     end
 
-    RFCEval -->|"✅ READY"| NaKyoung
+    RFCEval -->|"✅ READY"| HumanRFCGate["🧑 Human Approval\nApprove RFC?"]
+    HumanRFCGate -->|"Approved"| NaKyoung
 
     subgraph TASK_LOOP["📊 Task Breakdown Phase — NaKyoung (TPM)"]
         NaKyoung["NaKyoung\n/nakyoung-tasks"]
@@ -72,8 +74,9 @@ flowchart TD
         HumanTask -->|"4. Update Tasks"| TaskReview
     end
 
-    TaskEval -->|"✅ READY"| DevPhase
-    TaskEval -->|"✅ READY"| TestPhase
+    TaskEval -->|"✅ READY"| HumanTasksGate["🧑 Human Approval\nApprove Tasks?"]
+    HumanTasksGate -->|"Approved"| DevPhase
+    HumanTasksGate -->|"Approved"| TestPhase
 
     subgraph note ["📋 Design Spec → Developer Agents"]
         DesignNote["workspace/DESIGN_SPEC.md\nprovided to all developer agents\nas UI/UX source of truth"]
@@ -96,7 +99,8 @@ flowchart TD
         HumanTC -->|"4. Update Test Cases"| TCReview
     end
 
-    TCEval -->|"✅ READY"| ShiOn
+    TCEval -->|"✅ READY"| HumanTCGate["🧑 Human Approval\nApprove Test Cases?"]
+    HumanTCGate -->|"Approved"| ShiOn
     YuBin --> ShiOn
     Kaede --> ShiOn
     YeonJi --> ShiOn
@@ -140,7 +144,6 @@ flowchart TD
 
 ## Human-in-the-Loop Gates
 
-Human review is required at four stages. Each gate follows the same pattern:
 Human review is required at five stages. Each gate follows the same pattern:
 
 1. Agent **creates** artifact using its template

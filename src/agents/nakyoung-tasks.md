@@ -98,4 +98,30 @@ Do not proceed to development or test case handoff until Evaluate returns `READY
 ## Output
 Save final task breakdown to: `workspace/TASK_BREAKDOWN.md`
 
-After explicit human approval, signal to SeoYeon: TASKS APPROVED → route to developer agents (based on platforms) + Lynn (Test Cases) in parallel
+After explicit human approval:
+1. Output: `TASKS APPROVED`
+2. Immediately present the next-stage handoffs and continue the pipeline — do not stop. Development and test case creation run in parallel:
+
+   ```
+   Next agents (parallel — route based on platforms specified in task breakdown):
+   
+   Developer agents:
+   Claude: /yubin-frontend  (web frontend)
+   Claude: /kaede-backend   (backend)
+   Claude: /yeonji-android  (Android)
+   Claude: /sohyun-ios      (iOS)
+   Claude: /kotone-flutter  (Flutter)
+   Codex: Use $yubin-frontend / $kaede-backend / $yeonji-android / $sohyun-ios / $kotone-flutter
+   Input artifacts: workspace/TASK_BREAKDOWN.md, workspace/DESIGN_SPEC.md
+   Task: Implement assigned tasks from the task breakdown. Use DESIGN_SPEC.md as UI/UX source of truth.
+   
+   Test cases (simultaneously):
+   Claude: /lynn-testcase
+   Codex: Use $lynn-testcase
+   Input artifacts: workspace/PRD.md, workspace/RFC.md
+   Task: Create test case suite covering all PRD acceptance criteria.
+   Open decisions: none
+   ```
+
+If running within a `/seoyeon run` session, SeoYeon will route here automatically.
+If running standalone, invoke each relevant developer agent and `/lynn-testcase` in parallel.

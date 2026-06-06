@@ -207,4 +207,18 @@ Do not proceed to development handoff until Evaluate returns `READY` AND the use
 - Mobile design system spec (when run): `workspace/MOBILE_DESIGN_SPEC.md`
 - Mobile design audit (when run): `workspace/MOBILE_DESIGN_AUDIT.md`
 
-After explicit human approval, signal to SeoYeon: `DESIGN APPROVED → ready to hand off to YooYeon (RFC) and then developer agents (DESIGN_SPEC.md as UI/UX source of truth)`
+After explicit human approval:
+1. Output: `DESIGN APPROVED`
+2. Immediately present the next-stage handoff and continue the pipeline — do not stop:
+
+   ```
+   Next agent: YooYeon RFC
+   Claude: /yooyeon-rfc
+   Codex: Use $yooyeon-rfc
+   Input artifacts: workspace/PRD.md, workspace/DESIGN_SPEC.md
+   Task: Create technical RFC from the approved PRD and design spec.
+   Open decisions: none
+   ```
+
+If running within a `/seoyeon run` session, SeoYeon will route here automatically.
+If running standalone, type `/yooyeon-rfc` to continue.

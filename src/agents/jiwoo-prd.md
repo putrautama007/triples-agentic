@@ -98,4 +98,18 @@ Do not proceed to design or RFC handoff until Evaluate returns `READY` AND the u
 ## Output
 Save final PRD to: `workspace/PRD.md`
 
-After explicit human approval, signal to SeoYeon: PRD APPROVED → ready to hand off to HyeRin (Design) and then YooYeon (RFC)
+After explicit human approval:
+1. Output: `PRD APPROVED`
+2. Immediately present the next-stage handoff and continue the pipeline — do not stop:
+
+   ```
+   Next agent: HyeRin Design
+   Claude: /hyerin-design
+   Codex: Use $hyerin-design
+   Input artifacts: workspace/PRD.md
+   Task: Create UI/UX design spec from the approved PRD.
+   Open decisions: none
+   ```
+
+If running within a `/seoyeon run` session, SeoYeon will route here automatically.
+If running standalone, type `/hyerin-design` to continue.
