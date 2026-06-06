@@ -1,4 +1,4 @@
-import { readFileSync, existsSync, rmSync, statSync } from 'fs';
+import { readFileSync, existsSync, rmSync } from 'fs';
 import { join, dirname } from 'path';
 
 // ─── Hook loaders ─────────────────────────────────────────────────────────────
@@ -46,20 +46,16 @@ export function installClaude(base, ctx) {
   const dest = isGlobal && !base ? GLOBAL_PATHS.claude : join(base || projectDir, '.claude', 'skills');
   console.log(`\nInstalling Claude Code skills → ${display(dest)}`);
 
-  // Cleanup: remove stale agent-name directories from previous installs
-  // Agents are files (${name}.md); if a directory with the same base name exists, remove it
-  for (const { name } of allAgents()) {
-    const dirPath = join(dest, name);
-    if (existsSync(dirPath) && statSync(dirPath).isDirectory()) {
-      rmSync(dirPath, { recursive: true, force: true });
-      console.log(`  ✎ removed stale directory ${display(dirPath)}`);
-    }
-  }
-
-  // Agents
+  // Agents — installed as ${name}/SKILL.md directories for reliable Claude Code detection.
+  // Flat .md files are removed to avoid duplicate detection from old installs.
   for (const { name, content, persona } of allAgents()) {
+    const mdPath = join(dest, `${name}.md`);
+    if (existsSync(mdPath)) {
+      rmSync(mdPath, { force: true });
+      console.log(`  ✎ removed stale file ${display(mdPath)}`);
+    }
     const skill = ['---', `name: ${name}`, `description: TripleS agent — ${name} (${persona})`, '---', '', content].join('\n');
-    writeFile(join(dest, `${name}.md`), skill);
+    writeFile(join(dest, name, 'SKILL.md'), skill);
   }
 
   // Knowledge skills — best-practice skill bundles with lean SKILL.md + one-level references
@@ -84,9 +80,9 @@ export function detectClaudeInstallations(ctx) {
   const hasFile = (...parts) => existsSync(join(...parts));
   const found = [];
 
-  if (hasFile(GLOBAL_PATHS.claude, 'seoyeon.md'))
+  if (hasFile(GLOBAL_PATHS.claude, 'seoyeon', 'SKILL.md') || hasFile(GLOBAL_PATHS.claude, 'seoyeon.md'))
     found.push({ platform: 'claude', isGlobal: true });
-  if (hasFile(projectDir, '.claude', 'skills', 'seoyeon.md'))
+  if (hasFile(projectDir, '.claude', 'skills', 'seoyeon', 'SKILL.md') || hasFile(projectDir, '.claude', 'skills', 'seoyeon.md'))
     found.push({ platform: 'claude', isGlobal: false });
 
   return found;
