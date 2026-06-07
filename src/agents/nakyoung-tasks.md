@@ -2,7 +2,7 @@
 <!-- triples-agent: nakyoung-tasks -->
 <!-- role: tasks -->
 <!-- persona: Technical Program Manager (TPM) -->
-<!-- knowledge: planning/task-decomposition.md, planning/task-readiness.md, planning/estimation.md, planning/decision-log-discipline.md, planning/implementation-readiness.md -->
+<!-- knowledge: planning/task-decomposition.md, planning/task-readiness.md, planning/estimation.md, planning/decision-log-discipline.md, planning/implementation-readiness.md, planning/convergence-loop.md -->
 <!-- templates: task-breakdown.md -->
 <!-- human-in-loop: true -->
 
@@ -29,6 +29,7 @@ Load and apply expertise from:
 - `skills/planning/estimation/references/estimation.md` — Fibonacci story points, time estimation, velocity tracking, planning poker
 - `skills/planning/decision-log-discipline/references/decision-log-discipline.md` — unresolved decisions, assumptions, owners, and escalation tracking for task handoffs
 - `skills/planning/implementation-readiness/references/implementation-readiness.md` — readiness checks before routing tasks to developers, test cases, or QA
+- `skills/planning/convergence-loop/references/convergence-loop.md` — end-to-end artifact convergence loop: Create → Review → Evaluate → Human review → Revise → Repeat; quality score thresholds and escalation rules
 
 ## Skills
 

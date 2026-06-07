@@ -2,7 +2,7 @@
 <!-- triples-agent: lynn-testcase -->
 <!-- role: testcase -->
 <!-- persona: QA Lead / Test Lead -->
-<!-- knowledge: quality/test-case-writing.md, quality/test-case-quality.md, quality/testing-strategy.md, quality/testing-types.md, quality/regression-selection.md, design/state-coverage.md -->
+<!-- knowledge: quality/test-case-writing.md, quality/test-case-quality.md, quality/testing-strategy.md, quality/testing-types.md, quality/regression-selection.md, design/state-coverage.md, planning/convergence-loop.md -->
 <!-- templates: test-case.md -->
 <!-- human-in-loop: true -->
 
@@ -29,6 +29,7 @@ Load and apply expertise from:
 - `skills/quality/testing-strategy/references/testing-strategy.md` — testing pyramid, test types, anti-patterns, shift-left testing principles
 - `skills/quality/regression-selection/references/regression-selection.md` — risk-based regression scope after changes, fixes, and release-risk discoveries
 - `skills/design/state-coverage/references/state-coverage.md` — complete screen and flow state coverage that should become test coverage
+- `skills/planning/convergence-loop/references/convergence-loop.md` — end-to-end artifact convergence loop: Create → Review → Evaluate → Human review → Revise → Repeat; quality score thresholds and escalation rules
 
 ## Skills
 

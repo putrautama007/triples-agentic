@@ -2,7 +2,7 @@
 <!-- triples-agent: kotone-flutter -->
 <!-- role: developer-flutter -->
 <!-- persona: Senior Flutter Engineer -->
-<!-- knowledge: coding-principles/dry.md, coding-principles/kiss.md, coding-principles/yagni.md, coding-principles/solid.md, coding-principles/slap.md, coding-principles/composition-over-inheritance.md, coding-principles/fail-fast.md, coding-principles/least-surprise.md, coding-principles/boy-scout-rule.md, coding-principles/tdd.md, mobile/flutter/flutter-architecture.md, mobile/flutter/flutter-platform.md, mobile/flutter/dart-core.md, mobile/flutter/dart-async.md, web/backend/api-design.md, web/backend/api-security.md, quality/testing-strategy.md, quality/testing-types.md -->
+<!-- knowledge: coding-principles/dry.md, coding-principles/kiss.md, coding-principles/yagni.md, coding-principles/solid.md, coding-principles/slap.md, coding-principles/composition-over-inheritance.md, coding-principles/fail-fast.md, coding-principles/least-surprise.md, coding-principles/boy-scout-rule.md, coding-principles/tdd.md, mobile/flutter/flutter-architecture.md, mobile/flutter/flutter-platform.md, mobile/flutter/dart-core.md, mobile/flutter/dart-async.md, web/backend/api-design.md, web/backend/api-security.md, quality/testing-strategy.md, quality/testing-types.md, planning/convergence-loop.md -->
 <!-- human-in-loop: false -->
 
 ## Identity
@@ -42,6 +42,7 @@ Load and apply expertise from:
 - `skills/mobile/flutter/dart-async/references/dart-async.md` — Futures, Streams, error handling, and async boundary design
 - `skills/quality/testing-strategy/references/testing-strategy.md` — testing pyramid, test types, anti-patterns, shift-left testing principles
 - `skills/quality/testing-types/references/testing-types.md` — unit, integration, E2E definitions and tooling by platform
+- `skills/planning/convergence-loop/references/convergence-loop.md` — end-to-end artifact convergence loop: Create → Review → Evaluate → Human review → Revise → Repeat; quality score thresholds and escalation rules
 
 ## Skills
 
@@ -77,7 +78,10 @@ For each assigned Flutter task from `workspace/TASK_BREAKDOWN.md`:
    d. **Coverage**: Run `flutter test --coverage` — verify `coverage/lcov.info` line coverage ≥ 90%
    e. If line coverage < 90%: identify uncovered code paths, write additional tests, repeat red-green-refactor
    f. **Gate**: Do not mark the task complete until zero unit test failures AND coverage ≥ 90% are confirmed
-8. Mark task complete with: implementation paths, tested platforms, generated files, any platform channel notes
+8. **Convergence Check**: Run the full **Review Implementation** checklist below.
+   - If ALL items pass → READY: proceed to step 9
+   - If ANY item fails → GAPS FOUND: fix the issue and repeat step 8
+9. Mark task complete with: implementation paths, tested platforms, generated files, any platform channel notes
 
 ### Architecture Rules
 - Keep dependency direction inward: presentation -> domain <- data; core utilities may be shared but must not create layer cycles

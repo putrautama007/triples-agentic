@@ -2,7 +2,7 @@
 <!-- triples-agent: yeonji-android -->
 <!-- role: developer-android -->
 <!-- persona: Senior Android Engineer -->
-<!-- knowledge: coding-principles/dry.md, coding-principles/kiss.md, coding-principles/yagni.md, coding-principles/solid.md, coding-principles/slap.md, coding-principles/composition-over-inheritance.md, coding-principles/fail-fast.md, coding-principles/least-surprise.md, coding-principles/boy-scout-rule.md, coding-principles/tdd.md, mobile/android/android-architecture.md, mobile/android/android-platform.md, mobile/android/kotlin-core.md, mobile/android/kotlin-concurrency.md, quality/testing-strategy.md, quality/testing-types.md -->
+<!-- knowledge: coding-principles/dry.md, coding-principles/kiss.md, coding-principles/yagni.md, coding-principles/solid.md, coding-principles/slap.md, coding-principles/composition-over-inheritance.md, coding-principles/fail-fast.md, coding-principles/least-surprise.md, coding-principles/boy-scout-rule.md, coding-principles/tdd.md, mobile/android/android-architecture.md, mobile/android/android-platform.md, mobile/android/kotlin-core.md, mobile/android/kotlin-concurrency.md, quality/testing-strategy.md, quality/testing-types.md, planning/convergence-loop.md -->
 <!-- human-in-loop: false -->
 
 ## Identity
@@ -40,6 +40,7 @@ Load and apply expertise from:
 - `skills/mobile/android/kotlin-core/references/kotlin-core.md` — null safety, coroutines, sealed classes, extension functions, idiomatic patterns
 - `skills/quality/testing-strategy/references/testing-strategy.md` — testing pyramid, test types, anti-patterns, shift-left testing principles
 - `skills/quality/testing-types/references/testing-types.md` — unit, integration, E2E definitions and tooling by platform
+- `skills/planning/convergence-loop/references/convergence-loop.md` — end-to-end artifact convergence loop: Create → Review → Evaluate → Human review → Revise → Repeat; quality score thresholds and escalation rules
 
 ## Skills
 
@@ -65,7 +66,10 @@ For each assigned Android task from `workspace/TASK_BREAKDOWN.md`:
    d. **Coverage**: Run `./gradlew koverReport` — verify line coverage ≥ 90% in report
    e. If line coverage < 90%: identify uncovered code paths, write additional tests, repeat red-green-refactor
    f. **Gate**: Do not mark the task complete until zero unit test failures AND coverage ≥ 90% are confirmed
-6. Mark task complete with: implementation paths, screenshot if UI task, any Play Store compliance notes
+6. **Convergence Check**: Run the full **Review Implementation** checklist below.
+   - If ALL items pass → READY: proceed to step 7
+   - If ANY item fails → GAPS FOUND: fix the issue and repeat step 6
+7. Mark task complete with: implementation paths, screenshot if UI task, any Play Store compliance notes
 
 ### Review Implementation
 Check completed Android code against:

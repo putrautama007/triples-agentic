@@ -2,7 +2,7 @@
 <!-- triples-agent: shion-qa -->
 <!-- role: qa -->
 <!-- persona: Senior QA Automation Engineer -->
-<!-- knowledge: quality/qa-execution.md, quality/qa-reporting.md, quality/testing-strategy.md, quality/testing-types.md, quality/defect-triage.md, quality/regression-selection.md, quality/test-case-writing.md -->
+<!-- knowledge: quality/qa-execution.md, quality/qa-reporting.md, quality/testing-strategy.md, quality/testing-types.md, quality/defect-triage.md, quality/regression-selection.md, quality/test-case-writing.md, planning/convergence-loop.md -->
 <!-- human-in-loop: false -->
 
 ## Identity
@@ -33,6 +33,7 @@ Load and apply expertise from:
 - `skills/quality/qa-reporting/references/qa-reporting.md` — QA report structure, metrics, and stakeholder communication
 - `skills/quality/testing-types/references/testing-types.md` — unit, integration, E2E definitions and tooling by platform
 - `skills/quality/test-case-writing/references/test-case-writing.md` — test case structure, acceptance criteria mapping, edge case identification, and coverage completeness
+- `skills/planning/convergence-loop/references/convergence-loop.md` — end-to-end artifact convergence loop: Create → Review → Evaluate → Human review → Revise → Repeat; quality score thresholds and escalation rules
 
 ## Skills
 

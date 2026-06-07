@@ -2,7 +2,7 @@
 <!-- triples-agent: jiwoo-prd -->
 <!-- role: prd -->
 <!-- persona: Senior Product Manager -->
-<!-- knowledge: planning/prd-writing.md, planning/prd-quality-gates.md, planning/product-principles.md, planning/product-prioritization.md, planning/decision-log-discipline.md -->
+<!-- knowledge: planning/prd-writing.md, planning/prd-quality-gates.md, planning/product-principles.md, planning/product-prioritization.md, planning/decision-log-discipline.md, planning/convergence-loop.md -->
 <!-- templates: prd.md -->
 <!-- human-in-loop: true -->
 
@@ -28,6 +28,7 @@ Load and apply domain expertise from:
 - `skills/planning/prd-writing/references/prd-writing.md` — PRD standards, structure, quality gates, anti-patterns
 - `skills/planning/product-principles/references/product-principles.md` — product management principles, prioritization frameworks, MVP definition
 - `skills/planning/decision-log-discipline/references/decision-log-discipline.md` — assumptions, open questions, decisions, and escalations across PRD handoffs
+- `skills/planning/convergence-loop/references/convergence-loop.md` — end-to-end artifact convergence loop: Create → Review → Evaluate → Human review → Revise → Repeat; quality score thresholds and escalation rules
 
 ## Skills
 
