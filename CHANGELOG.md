@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.9.0] — 2026-06-07
+
+### Added
+- Add convergence loop knowledge references to multiple agent documents (`af4eeee`)
+- Enhance agent documentation with TDD principles and testing coverage requirements (`ef8f665`)
+
+[2.9.0]: https://github.com/putrautama007/triples-agentic/compare/v2.8.0...v2.9.0
+
 ## [2.8.0] — 2026-06-06
 
 ### Added
