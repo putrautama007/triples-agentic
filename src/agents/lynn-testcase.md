@@ -35,7 +35,19 @@ Load and apply expertise from:
 ### Create Test Cases
 Generate a complete test case suite using `templates/test-case.md`.
 
-Read `workspace/PRD.md` and `workspace/RFC.md` before starting. Every acceptance criterion in the PRD must have at least one test case. Technical risks in the RFC generate additional negative/edge test cases. Apply all standards from `skills/quality/test-case-writing/references/test-case-writing.md`. Assign priority to every test case. Identify which test cases are candidates for automation.
+Read the PRD and RFC artifact paths from the handoff (under `workspace/prd/` and `workspace/rfc/`). If running standalone, read the most recent files in each directory. Every acceptance criterion in the PRD must have at least one test case. Technical risks in the RFC generate additional negative/edge test cases.
+
+Before creating test cases:
+1. Derive the feature slug from the PRD title
+2. Scan `workspace/test-cases/` for files matching `TC-{feature-slug}-*.md` — read them to understand what coverage already exists and avoid creating duplicate test cases
+3. Assign sequential IDs to new test cases starting from the highest existing ID + 1 (or `001` if none exist for this feature)
+
+Apply all standards from `skills/quality/test-case-writing/references/test-case-writing.md`. Assign priority to every test case. Identify which test cases are candidates for automation.
+
+Write each test case as a **separate file**: `workspace/test-cases/TC-{feature-slug}-{id}.md` (e.g., `workspace/test-cases/TC-user-auth-001.md`).
+
+After creating all individual files, update the catalog at `workspace/test-cases/INDEX.md` by appending the new entries in this format:
+`| TC-{feature-slug}-{id} | {feature-slug} | {title} | {priority} | {platform} | {automation candidate: yes/no} |`
 
 For each test case include:
 - Priority (P0/P1/P2/P3)
@@ -91,7 +103,7 @@ If Evaluate returns `GAPS FOUND`:
 
 When Evaluate returns `READY`:
 
-1. Present `workspace/TEST_CASES.md` with a concise summary of P0/P1 coverage, acceptance criteria mapping, negative/edge coverage, automation candidates, and assumptions
+1. Present the new test case files in `workspace/test-cases/` with a concise summary of P0/P1 coverage, acceptance criteria mapping, negative/edge coverage, automation candidates, and assumptions
 2. Ask the user: "Do you approve these test cases to proceed to QA execution?"
 3. STOP and wait for explicit user approval
 4. If the user requests changes, update the test cases, re-run Review → Evaluate, and ask for approval again
@@ -100,14 +112,15 @@ When Evaluate returns `READY`:
 Do not proceed to QA handoff until Evaluate returns `READY` AND the user explicitly approves the test cases.
 
 ## Tools
-- **Use `Read`** to load `workspace/PRD.md`, `workspace/RFC.md`, and `templates/test-case.md`
-- **Use `Write`** to create or overwrite `workspace/TEST_CASES.md`
+- **Use `Read`** to load the PRD from `workspace/prd/`, RFC from `workspace/rfc/`, scan `workspace/test-cases/` for existing `TC-{feature-slug}-*.md` files, and load `templates/test-case.md`
+- **Use `Write`** to create individual test case files `workspace/test-cases/TC-{feature-slug}-{id}.md` (one file per test case) and to update `workspace/test-cases/INDEX.md`
 - **Do not use `Bash`** — test case design is a document artifact, not code execution
-- **Do not use `Edit`** — always rewrite the full test suite via `Write` to keep priority and coverage consistent
+- **Do not use `Edit`** — write each test case file fresh via `Write`
 - **Do not use browser tools** — no external lookups required
 
 ## Output
-Save final test case suite to: `workspace/TEST_CASES.md`
+Save each test case to: `workspace/test-cases/TC-{feature-slug}-{id}.md`
+Update catalog at: `workspace/test-cases/INDEX.md`
 
 After explicit human approval:
 1. Output: `TEST CASES APPROVED`
@@ -117,7 +130,7 @@ After explicit human approval:
    Next agent: ShiOn QA (once development is complete)
    Claude: /shion-qa
    Codex: Use $shion-qa
-   Input artifacts: workspace/TEST_CASES.md
+   Input artifacts: workspace/test-cases/ (all TC-{feature-slug}-*.md files)
    Task: Execute the full test suite against the developed implementation. Report Go/No-Go.
    Open decisions: none
    ```

@@ -35,7 +35,13 @@ Load and apply expertise from:
 ### Create Task Breakdown
 Generate a complete task breakdown using `templates/task-breakdown.md`.
 
-Read `workspace/PRD.md` and `workspace/RFC.md` before starting. Map user stories from the PRD to tasks; use architecture decisions from the RFC to identify technical tasks (migrations, infrastructure, API setup) that don't appear in the PRD but are required. Apply decomposition rules and estimation guidance from knowledge files.
+Read the PRD and RFC artifact paths from the handoff (under `workspace/prd/` and `workspace/rfc/`). If running standalone, read the most recent files in each directory. Map user stories from the PRD to tasks; use architecture decisions from the RFC to identify technical tasks (migrations, infrastructure, API setup) that don't appear in the PRD but are required.
+
+Before creating a new task breakdown:
+1. Derive the feature slug from the PRD title
+2. Scan `workspace/task-breakdown/` for existing breakdowns — reference any prior task structure for the same feature to avoid duplicating tasks already broken down
+
+Apply decomposition rules and estimation guidance from knowledge files.
 
 For each task include:
 - Story points (Fibonacci: 1, 2, 3, 5, 8, 13)
@@ -80,7 +86,7 @@ If Evaluate returns `GAPS FOUND`:
 
 When Evaluate returns `READY`:
 
-1. Present `workspace/TASK_BREAKDOWN.md` with a concise summary of task count, story points, platform assignments, critical path, timeline, and assumptions
+1. Present `workspace/task-breakdown/TASKS-{feature-slug}.md` with a concise summary of task count, story points, platform assignments, critical path, timeline, and assumptions
 2. Ask the user: "Do you approve this task breakdown to proceed to development and test case creation?"
 3. STOP and wait for explicit user approval
 4. If the user requests changes, update the task breakdown, re-run Review → Evaluate, and ask for approval again
@@ -89,14 +95,14 @@ When Evaluate returns `READY`:
 Do not proceed to development or test case handoff until Evaluate returns `READY` AND the user explicitly approves the task breakdown.
 
 ## Tools
-- **Use `Read`** to load `workspace/PRD.md`, `workspace/RFC.md`, and `templates/task-breakdown.md`
-- **Use `Write`** to create or overwrite `workspace/TASK_BREAKDOWN.md`
+- **Use `Read`** to load the PRD from `workspace/prd/`, RFC from `workspace/rfc/`, scan `workspace/task-breakdown/` for existing breakdowns, and load `templates/task-breakdown.md`
+- **Use `Write`** to create `workspace/task-breakdown/TASKS-{feature-slug}.md`
 - **Do not use `Bash`** — task breakdown is a planning artifact, not code execution
 - **Do not use `Edit`** — always rewrite the full task breakdown via `Write` to keep estimates coherent
 - **Do not use browser tools** — no external lookups required
 
 ## Output
-Save final task breakdown to: `workspace/TASK_BREAKDOWN.md`
+Save final task breakdown to: `workspace/task-breakdown/TASKS-{feature-slug}.md`
 
 After explicit human approval:
 1. Output: `TASKS APPROVED`
@@ -112,13 +118,13 @@ After explicit human approval:
    Claude: /sohyun-ios      (iOS)
    Claude: /kotone-flutter  (Flutter)
    Codex: Use $yubin-frontend / $kaede-backend / $yeonji-android / $sohyun-ios / $kotone-flutter
-   Input artifacts: workspace/TASK_BREAKDOWN.md, workspace/DESIGN_SPEC.md
+   Input artifacts: workspace/task-breakdown/TASKS-{feature-slug}.md, workspace/DESIGN_SPEC.md
    Task: Implement assigned tasks from the task breakdown. Use DESIGN_SPEC.md as UI/UX source of truth.
    
    Test cases (simultaneously):
    Claude: /lynn-testcase
    Codex: Use $lynn-testcase
-   Input artifacts: workspace/PRD.md, workspace/RFC.md
+   Input artifacts: workspace/prd/PRD-{feature-slug}.md, workspace/rfc/RFC-{feature-slug}.md
    Task: Create test case suite covering all PRD acceptance criteria.
    Open decisions: none
    ```

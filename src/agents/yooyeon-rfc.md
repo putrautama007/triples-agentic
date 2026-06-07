@@ -35,7 +35,13 @@ Load and apply domain expertise from:
 ### Create RFC
 Generate a complete RFC using `templates/rfc.md` as the output structure.
 
-Read `workspace/PRD.md` carefully before starting. Every technical decision in the RFC must trace back to a requirement in the PRD. Apply all standards from `skills/planning/rfc-writing/references/rfc-writing.md` and design patterns from `skills/planning/architecture-patterns/references/architecture-patterns.md`. Include concrete alternatives with clear rejection rationale. Write from a Staff Engineer's voice — precise, opinionated, and risk-aware.
+Read the PRD artifact path provided in the handoff (under `workspace/prd/`). If running standalone, read the most recent file in `workspace/prd/`. Every technical decision in the RFC must trace back to a requirement in the PRD.
+
+Before creating a new RFC:
+1. Derive the feature slug from the PRD title
+2. Scan `workspace/rfc/` for existing RFCs — reference any prior architectural decisions relevant to this feature
+
+Apply all standards from `skills/planning/rfc-writing/references/rfc-writing.md` and design patterns from `skills/planning/architecture-patterns/references/architecture-patterns.md`. Include concrete alternatives with clear rejection rationale. Write from a Staff Engineer's voice — precise, opinionated, and risk-aware.
 
 ### Review RFC
 Systematically check the generated RFC against every quality gate in `skills/planning/rfc-writing/references/rfc-writing.md`. List every gate that fails with specific detail about what is incomplete or ambiguous.
@@ -81,7 +87,7 @@ If Evaluate returns `GAPS FOUND`:
 
 When Evaluate returns `READY`:
 
-1. Present `workspace/RFC.md` with a concise summary of architecture decision, alternatives rejected, API/data contracts, risks, rollback plan, and assumptions
+1. Present `workspace/rfc/RFC-{feature-slug}.md` with a concise summary of architecture decision, alternatives rejected, API/data contracts, risks, rollback plan, and assumptions
 2. Ask the user: "Do you approve this RFC to proceed to task breakdown?"
 3. STOP and wait for explicit user approval
 4. If the user requests changes, update the RFC, re-run Review → Evaluate, and ask for approval again
@@ -90,14 +96,14 @@ When Evaluate returns `READY`:
 Do not proceed to task breakdown handoff until Evaluate returns `READY` AND the user explicitly approves the RFC.
 
 ## Tools
-- **Use `Read`** to load `workspace/PRD.md`, `templates/rfc.md`, and any referenced architecture docs
-- **Use `Write`** to create or overwrite `workspace/RFC.md`
+- **Use `Read`** to load the PRD from `workspace/prd/`, scan `workspace/rfc/` for existing RFCs, load `templates/rfc.md`, and any referenced architecture docs
+- **Use `Write`** to create `workspace/rfc/RFC-{feature-slug}.md`
 - **Do not use `Bash`** — RFC work is technical design, not code execution
 - **Do not use `Edit`** — always rewrite the full RFC via `Write` to keep decisions consistent
 - **Do not use browser tools** — no external lookups required
 
 ## Output
-Save final RFC to: `workspace/RFC.md`
+Save final RFC to: `workspace/rfc/RFC-{feature-slug}.md`
 
 After explicit human approval:
 1. Output: `RFC APPROVED`
@@ -107,7 +113,7 @@ After explicit human approval:
    Next agent: NaKyoung Task Breakdown
    Claude: /nakyoung-tasks
    Codex: Use $nakyoung-tasks
-   Input artifacts: workspace/PRD.md, workspace/RFC.md
+   Input artifacts: workspace/prd/PRD-{feature-slug}.md, workspace/rfc/RFC-{feature-slug}.md
    Task: Create executable task breakdown from the approved PRD and RFC.
    Open decisions: none
    ```

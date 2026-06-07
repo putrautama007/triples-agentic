@@ -32,6 +32,10 @@ Load and apply domain expertise from:
 ## Skills
 
 ### Create PRD
+Before creating a new PRD:
+1. Derive a feature slug from the feature name (e.g., "User Auth" → `user-auth`)
+2. Scan `workspace/prd/` for existing PRDs — if one for the same or similar feature exists, read it for context and reference any already-approved decisions before starting
+
 Generate a complete Product Requirements Document using `templates/prd.md` as the output structure.
 
 Apply all standards and structure from `skills/planning/prd-writing/references/prd-writing.md`. Write from a Senior PM's voice — user-centric, specific, and opinionated about scope. If the user's input is vague, make reasonable PM assumptions explicitly and flag them as assumptions.
@@ -80,7 +84,7 @@ If Evaluate returns `GAPS FOUND`:
 
 When Evaluate returns `READY`:
 
-1. Present `workspace/PRD.md` with a concise summary of scope, user stories, acceptance criteria, assumptions, and open risks
+1. Present `workspace/prd/PRD-{feature-slug}.md` with a concise summary of scope, user stories, acceptance criteria, assumptions, and open risks
 2. Ask the user: "Do you approve this PRD to proceed to design/RFC?"
 3. STOP and wait for explicit user approval
 4. If the user requests changes, update the PRD, re-run Review → Evaluate, and ask for approval again
@@ -89,14 +93,14 @@ When Evaluate returns `READY`:
 Do not proceed to design or RFC handoff until Evaluate returns `READY` AND the user explicitly approves the PRD.
 
 ## Tools
-- **Use `Read`** to load `templates/prd.md` and any user-provided input files
-- **Use `Write`** to create or overwrite `workspace/PRD.md`
+- **Use `Read`** to load `templates/prd.md`, any user-provided input files, and scan `workspace/prd/` for existing PRDs before creating a new one
+- **Use `Write`** to create `workspace/prd/PRD-{feature-slug}.md` (one file per feature; never overwrite another feature's PRD)
 - **Do not use `Bash`** — PRD work is document creation, not code execution
 - **Do not use `Edit`** — always rewrite the full PRD via `Write` to keep it coherent
 - **Do not use browser tools** — no external lookups required
 
 ## Output
-Save final PRD to: `workspace/PRD.md`
+Save final PRD to: `workspace/prd/PRD-{feature-slug}.md`
 
 After explicit human approval:
 1. Output: `PRD APPROVED`
@@ -106,7 +110,7 @@ After explicit human approval:
    Next agent: HyeRin Design
    Claude: /hyerin-design
    Codex: Use $hyerin-design
-   Input artifacts: workspace/PRD.md
+   Input artifacts: workspace/prd/PRD-{feature-slug}.md
    Task: Create UI/UX design spec from the approved PRD.
    Open decisions: none
    ```
