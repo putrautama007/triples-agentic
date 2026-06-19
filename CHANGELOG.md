@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.10.0] — 2026-06-19
+
+### Added
+- install 12 specialist agents as native subagents with pinned models (`cd36b7e`)
+
+[2.10.0]: https://github.com/putrautama007/triples-agentic/compare/v2.9.0...v2.10.0
+
 ## [2.9.0] — 2026-06-07
 
 ### Added
