@@ -1,4 +1,4 @@
-import { readFileSync, existsSync, readdirSync } from 'fs';
+import { readFileSync, existsSync, readdirSync, rmSync } from 'fs';
 import { join } from 'path';
 
 const CODEX_AGENT_SKILL_METADATA = {
@@ -147,6 +147,28 @@ function writeCodexSkillBundle(skillsRoot, agent, ctx) {
   }
 }
 
+/** TOML literal multi-line string (no escaping); falls back to an escaped basic string if content contains the closing ''' sequence. */
+function tomlMultilineLiteral(str) {
+  if (str.includes("'''")) {
+    const escaped = str.replace(/\\/g, '\\\\').replace(/"""/g, '\\"\\"\\"');
+    return `"""\n${escaped}\n"""`;
+  }
+  return `'''\n${str}\n'''`;
+}
+
+/** Builds a Codex custom subagent TOML file — https://developers.openai.com/codex/subagents */
+function codexAgentTomlContent(agent, helpers) {
+  const { tomlEscape, stripAgentMetadataComments } = helpers;
+  const meta = codexSkillMetadata(agent);
+  const lines = [
+    `name = "${tomlEscape(agent.slug)}"`,
+    `description = "${tomlEscape(meta.description)}"`,
+  ];
+  if (agent.codexModel) lines.push(`model = "${tomlEscape(agent.codexModel)}"`);
+  lines.push(`developer_instructions = ${tomlMultilineLiteral(stripAgentMetadataComments(agent.content))}`);
+  return lines.join('\n') + '\n';
+}
+
 function resolveBundledTemplatePath(skillsRoot, relPath) {
   const templateSources = {
     'prd.md': join(skillsRoot, 'planning', 'prd-writing', 'references', 'prd-template.md'),
@@ -259,15 +281,32 @@ function installCodexSettings(base, ctx) {
 }
 
 export function installCodex(base, ctx) {
-  const { GLOBAL_PATHS, isGlobal, projectDir, allAgents, display } = ctx;
+  const { GLOBAL_PATHS, isGlobal, projectDir, allAgents, display, writeFile } = ctx;
   const codexRoot = isGlobal && !base
     ? GLOBAL_PATHS.codex
     : join(base || projectDir, '.codex');
   const skillsRoot = join(codexRoot, 'skills');
+  const agentsRoot = join(codexRoot, 'agents');
   console.log(`\nInstalling OpenAI Codex skills → ${display(skillsRoot)}`);
+  console.log(`Installing OpenAI Codex subagents → ${display(agentsRoot)}`);
 
+  // SeoYeon stays a Skill — she is the $seoyeon orchestrator entry point.
+  // Every other agent installs as a native Codex subagent (.codex/agents/{slug}.toml)
+  // so it can be spawned explicitly with its own pinned model.
   for (const agent of allAgents()) {
-    writeCodexSkillBundle(skillsRoot, agent, ctx);
+    if (agent.slug === 'seoyeon') {
+      writeCodexSkillBundle(skillsRoot, agent, ctx);
+      continue;
+    }
+
+    // Remove a stale skill install from before this agent became a subagent.
+    const staleSkillDir = join(skillsRoot, agent.slug);
+    if (existsSync(staleSkillDir)) {
+      rmSync(staleSkillDir, { recursive: true, force: true });
+      console.log(`  ✎ removed stale skill ${display(staleSkillDir)}`);
+    }
+
+    writeFile(join(agentsRoot, `${agent.slug}.toml`), codexAgentTomlContent(agent, ctx));
   }
 
   writeCodexKnowledgeSkillBundles(skillsRoot, ctx);

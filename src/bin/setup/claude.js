@@ -42,20 +42,39 @@ function installClaudeSettings(claudeDir, ctx) {
 // ─── Installer ────────────────────────────────────────────────────────────────
 
 export function installClaude(base, ctx) {
-  const { GLOBAL_PATHS, isGlobal, projectDir, allAgents, allKnowledgeSkills, knowledgeSkillContent, writeFile, installManagedProjectDoc, display } = ctx;
+  const { GLOBAL_PATHS, isGlobal, projectDir, allAgents, allKnowledgeSkills, knowledgeSkillContent, stripAgentMetadataComments, writeFile, installManagedProjectDoc, display } = ctx;
   const dest = isGlobal && !base ? GLOBAL_PATHS.claude : join(base || projectDir, '.claude', 'skills');
+  const agentsDest = join(dirname(dest), 'agents');
   console.log(`\nInstalling Claude Code skills → ${display(dest)}`);
+  console.log(`Installing Claude Code subagents → ${display(agentsDest)}`);
 
-  // Agents — installed as ${name}/SKILL.md directories for reliable Claude Code detection.
-  // Flat .md files are removed to avoid duplicate detection from old installs.
-  for (const { name, content, persona } of allAgents()) {
+  // SeoYeon stays a Skill — she is the slash-command entry point (/seoyeon, /seoyeon run).
+  // Every other agent installs as a native Claude Code subagent (.claude/agents/{name}.md)
+  // so it can be delegated to via the Agent tool with its own pinned model.
+  for (const { name, content, persona, model } of allAgents()) {
     const mdPath = join(dest, `${name}.md`);
     if (existsSync(mdPath)) {
       rmSync(mdPath, { force: true });
       console.log(`  ✎ removed stale file ${display(mdPath)}`);
     }
-    const skill = ['---', `name: ${name}`, `description: TripleS agent — ${name} (${persona})`, '---', '', content].join('\n');
-    writeFile(join(dest, name, 'SKILL.md'), skill);
+
+    if (name === 'seoyeon') {
+      const skill = ['---', `name: ${name}`, `description: TripleS agent — ${name} (${persona})`, '---', '', content].join('\n');
+      writeFile(join(dest, name, 'SKILL.md'), skill);
+      continue;
+    }
+
+    // Remove a stale skill install from before this agent became a subagent.
+    const staleSkillDir = join(dest, name);
+    if (existsSync(staleSkillDir)) {
+      rmSync(staleSkillDir, { recursive: true, force: true });
+      console.log(`  ✎ removed stale skill ${display(staleSkillDir)}`);
+    }
+
+    const frontmatter = ['---', `name: ${name}`, `description: TripleS agent — ${name} (${persona})`];
+    if (model) frontmatter.push(`model: ${model}`);
+    frontmatter.push('---', '', stripAgentMetadataComments(content));
+    writeFile(join(agentsDest, `${name}.md`), frontmatter.join('\n'));
   }
 
   // Knowledge skills — best-practice skill bundles with lean SKILL.md + one-level references

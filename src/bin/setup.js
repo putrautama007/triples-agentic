@@ -173,6 +173,8 @@ function allAgents() {
         displayName: shortHeading(heading, name),
         knowledgePaths: parseCommentList(content, 'knowledge'),
         templatePaths: parseCommentList(content, 'templates'),
+        model: parseComment(content, 'model'),
+        codexModel: parseComment(content, 'codex-model'),
       };
     })
     .sort((a, b) => a.name.localeCompare(b.name));
@@ -439,20 +441,23 @@ const PLATFORM_LABELS = {
 
 // ─── Success banner ───────────────────────────────────────────────────────────
 
+const ORCHESTRATOR_COMMAND = ['seoyeon', 'Engineering Manager — orchestrates all agents'];
+
+// Specialist agents — installed as Claude Code subagents (model-pinned, Agent tool) for Claude;
+// skill/rule files for other platforms. [name, description, model]
 const AGENT_COMMANDS = [
-  ['chaewon-init-setup', 'Project Setup — initialize and audit local install'],
-  ['seoyeon',        'Engineering Manager — orchestrates all agents'],
-  ['jiwoo-prd',      'Senior PM — create & review PRD'],
-  ['hyerin-design',  'Senior UI/UX — create & review design spec'],
-  ['yooyeon-rfc',    'Staff Engineer — create & review RFC'],
-  ['nakyoung-tasks', 'TPM — task breakdown with estimates'],
-  ['yubin-frontend', 'Principal Frontend — implement web UI'],
-  ['kaede-backend',  'Principal Backend — implement APIs'],
-  ['yeonji-android', 'Senior Android — implement Kotlin features'],
-  ['sohyun-ios',     'Senior iOS — implement Swift features'],
-  ['kotone-flutter', 'Senior Flutter — cross-platform Dart'],
-  ['lynn-testcase',  'QA Lead — create & review test cases'],
-  ['shion-qa',       'Senior QA — execute tests & Go/No-Go'],
+  ['chaewon-init-setup', 'Project Setup — initialize and audit local install', 'sonnet'],
+  ['jiwoo-prd',      'Senior PM — create & review PRD', 'opus'],
+  ['hyerin-design',  'Senior UI/UX — create & review design spec', 'opus'],
+  ['yooyeon-rfc',    'Staff Engineer — create & review RFC', 'opus'],
+  ['nakyoung-tasks', 'TPM — task breakdown with estimates', 'opus'],
+  ['yubin-frontend', 'Principal Frontend — implement web UI', 'sonnet'],
+  ['kaede-backend',  'Principal Backend — implement APIs', 'sonnet'],
+  ['yeonji-android', 'Senior Android — implement Kotlin features', 'sonnet'],
+  ['sohyun-ios',     'Senior iOS — implement Swift features', 'sonnet'],
+  ['kotone-flutter', 'Senior Flutter — cross-platform Dart', 'sonnet'],
+  ['lynn-testcase',  'QA Lead — create & review test cases', 'opus'],
+  ['shion-qa',       'Senior QA — execute tests & Go/No-Go', 'sonnet'],
 ];
 
 const KNOWLEDGE_SUMMARY = {
@@ -549,7 +554,7 @@ async function runUpdate() {
   isGlobal = savedIsGlobal;
 
   const totalKnowledge = Object.values(KNOWLEDGE_SUMMARY).reduce((n, g) => n + g.length, 0);
-  console.log(`\n✅  Updated ${installations.length} installation(s) — ${AGENT_COMMANDS.length} agents, ${totalKnowledge} knowledge references\n`);
+  console.log(`\n✅  Updated ${installations.length} installation(s) — ${AGENT_COMMANDS.length + 1} agents, ${totalKnowledge} knowledge references\n`);
 }
 
 // ─── Success banner ───────────────────────────────────────────────────────────
@@ -559,9 +564,12 @@ function printSuccessBanner() {
   const knowledgeGroups = Object.keys(KNOWLEDGE_SUMMARY).length;
   console.log('\n✅  TripleS Agentic installed successfully!\n');
 
-  console.log('── Agents / Skills ───────────────────────────────────────────');
-  for (const [cmd, desc] of AGENT_COMMANDS) {
-    console.log(`  ${cmd.padEnd(18)} ${desc}`);
+  console.log('── Orchestrator (slash command) ───────────────────────────────');
+  console.log(`  /${ORCHESTRATOR_COMMAND[0].padEnd(17)} ${ORCHESTRATOR_COMMAND[1]}`);
+
+  console.log('\n── Specialist Agents (model-pinned subagents on Claude Code) ──');
+  for (const [cmd, desc, model] of AGENT_COMMANDS) {
+    console.log(`  ${cmd.padEnd(18)} [${model.padEnd(6)}] ${desc}`);
   }
 
   console.log(`\n── Knowledge Library (${totalKnowledge} bundled references across ${knowledgeGroups} groups) ───────`);

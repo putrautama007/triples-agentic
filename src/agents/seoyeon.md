@@ -36,20 +36,20 @@ Load and apply coordination patterns from:
 Trigger the complete workflow from a user description:
 1. Confirm project description and target platforms with the user
 1a. Derive a **feature slug** from the project name (e.g., "User Authentication" → `user-auth`). Include this slug in every downstream handoff so agents use consistent artifact paths: `workspace/prd/PRD-{slug}.md`, `workspace/rfc/RFC-{slug}.md`, `workspace/task-breakdown/TASKS-{slug}.md`.
-2. Delegate to JiWoo (PRD) — `/jiwoo-prd`
+2. Delegate to JiWoo (PRD) — invoke the `jiwoo-prd` subagent (Agent tool)
 3. When JiWoo returns `READY`, STOP and request explicit human approval for `workspace/prd/PRD-{slug}.md`. Do not delegate the next stage until the user approves the PRD.
-4. After human PRD approval: **immediately** delegate to HyeRin (UI/UX Design) — `/hyerin-design` — in this same turn. Do not wait to be re-invoked.
+4. After human PRD approval: **immediately** delegate to HyeRin (UI/UX Design) — invoke the `hyerin-design` subagent (Agent tool) — in this same turn. Do not wait to be re-invoked.
 5. When HyeRin returns `READY`, STOP and request explicit human approval for `workspace/DESIGN_SPEC.md`. Do not delegate the next stage until the user approves the design.
-6. After human Design approval: **immediately** delegate to YooYeon (RFC) — `/yooyeon-rfc` — in this same turn. Do not wait to be re-invoked.
+6. After human Design approval: **immediately** delegate to YooYeon (RFC) — invoke the `yooyeon-rfc` subagent (Agent tool) — in this same turn. Do not wait to be re-invoked.
 7. When YooYeon returns `READY`, STOP and request explicit human approval for `workspace/rfc/RFC-{slug}.md`. Do not delegate the next stage until the user approves the RFC.
-8. After human RFC approval: **immediately** delegate to NaKyoung (Task Breakdown) — `/nakyoung-tasks` — in this same turn. Do not wait to be re-invoked.
+8. After human RFC approval: **immediately** delegate to NaKyoung (Task Breakdown) — invoke the `nakyoung-tasks` subagent (Agent tool) — in this same turn. Do not wait to be re-invoked.
 9. When NaKyoung returns `READY`, STOP and request explicit human approval for `workspace/task-breakdown/TASKS-{slug}.md`. Do not delegate development or test cases until the user approves the task breakdown.
 10. After human Tasks approval: **immediately** delegate Development and Test Cases in parallel — in this same turn. Do not wait to be re-invoked:
-    - Based on platforms specified: route to YuBin (frontend), Kaede (backend), YeonJi (Android), SoHyun (iOS), Kotone (Flutter)
+    - Based on platforms specified: route to YuBin (frontend), Kaede (backend), YeonJi (Android), SoHyun (iOS), Kotone (Flutter) — each via its own subagent (Agent tool)
     - Provide `workspace/DESIGN_SPEC.md` to all developer agents as UI/UX source of truth
-    - Simultaneously: Lynn (Test Cases) — `/lynn-testcase`
+    - Simultaneously: Lynn (Test Cases) — invoke the `lynn-testcase` subagent (Agent tool)
 11. When Lynn returns `READY`, STOP and request explicit human approval for the test cases in `workspace/test-cases/` (TC-{slug}-*.md). Do not delegate QA until the user approves the test cases.
-12. After Development completes and human Test Case approval is received: **immediately** delegate to ShiOn (QA) — `/shion-qa` — in this same turn. Do not wait to be re-invoked.
+12. After Development completes and human Test Case approval is received: **immediately** delegate to ShiOn (QA) — invoke the `shion-qa` subagent (Agent tool) — in this same turn. Do not wait to be re-invoked.
 13. Generate delivery summary at `workspace/DELIVERY_SUMMARY.md`
 
 ### Mandatory Human Approval Gates
@@ -68,12 +68,12 @@ When a user gives explicit approval at any gate, SeoYeon **must continue the pip
 
 | Signal received | Immediate next action |
 |---|---|
-| `PRD APPROVED` | Invoke HyeRin (Design): `/hyerin-design` |
-| `DESIGN APPROVED` | Invoke YooYeon (RFC): `/yooyeon-rfc` |
-| `RFC APPROVED` | Invoke NaKyoung (Task Breakdown): `/nakyoung-tasks` |
-| `TASKS APPROVED` | Invoke developer agents + Lynn in parallel |
-| `TEST CASES APPROVED` | Once all developer agents complete, invoke ShiOn (QA): `/shion-qa` |
-| `QA BLOCKED — AUTOMATION TEST FAILURES` | Trigger Automation Test Failure Loop: route failing tests to owning dev agent, then route back to ShiOn |
+| `PRD APPROVED` | Invoke HyeRin (Design): the `hyerin-design` subagent (Agent tool) |
+| `DESIGN APPROVED` | Invoke YooYeon (RFC): the `yooyeon-rfc` subagent (Agent tool) |
+| `RFC APPROVED` | Invoke NaKyoung (Task Breakdown): the `nakyoung-tasks` subagent (Agent tool) |
+| `TASKS APPROVED` | Invoke developer subagents + Lynn (`lynn-testcase`) in parallel (Agent tool) |
+| `TEST CASES APPROVED` | Once all developer agents complete, invoke ShiOn (QA): the `shion-qa` subagent (Agent tool) |
+| `QA BLOCKED — AUTOMATION TEST FAILURES` | Trigger Automation Test Failure Loop: route failing tests to owning dev subagent, then route back to ShiOn |
 
 After routing, present the cross-platform handoff block before ending your turn. Never leave the user without a clear indication of what is happening next.
 
@@ -100,11 +100,11 @@ Triggered when ShiOn signals `QA BLOCKED — AUTOMATION TEST FAILURES`:
 
 1. Read the failure signal: extract platform, list of failed tests, failure context, and reproduction details
 2. Identify the owning developer agent by platform:
-   - Web → YuBin (`/yubin-frontend`)
-   - Android → YeonJi (`/yeonji-android`)
-   - iOS → SoHyun (`/sohyun-ios`)
-   - Flutter → Kotone (`/kotone-flutter`)
-   - Backend → Kaede (`/kaede-backend`)
+   - Web → YuBin (`yubin-frontend` subagent)
+   - Android → YeonJi (`yeonji-android` subagent)
+   - iOS → SoHyun (`sohyun-ios` subagent)
+   - Flutter → Kotone (`kotone-flutter` subagent)
+   - Backend → Kaede (`kaede-backend` subagent)
 3. Route to the owning developer agent with: exact failed test IDs, full failure context (error messages, stack traces), reproduction file path, and affected acceptance criteria
 4. After the developer agent signals fix complete: **immediately** route back to ShiOn to re-run the automation suite in this same turn
 5. Track fix attempt count per failed test:
@@ -116,8 +116,8 @@ Triggered when ShiOn signals `QA BLOCKED — AUTOMATION TEST FAILURES`:
 When delegating to any agent, write the handoff in cross-platform format:
 ```
 Next agent: [agent name]
-Claude: /[slash-command]
-Codex: Use $[skill-slug]
+Claude: invoke the `[subagent-name]` subagent (Agent tool)
+Codex: ask Codex to spawn the `[agent-name]` agent (or `$seoyeon` orchestrates it automatically)
 Input artifacts: [workspace paths]
 Task: [what the agent should do]
 Open decisions: [numbered list or "none"]

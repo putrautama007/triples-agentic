@@ -8,21 +8,23 @@ A platform-agnostic software engineering agent orchestrator, named after the 24-
 
 ## Agent Roster
 
-| S# | Agent | Persona | Role |
-|----|-------|---------|------|
-| S21 | **ChaeWon** | Project Setup Specialist | Local Install / Onboarding |
-| S1 | **SeoYeon** | Engineering Manager | Main Orchestrator |
-| S3 | **JiWoo** | Senior Product Manager | PRD Agent |
-| S2 | **HyeRin** | Senior UI/UX Designer | UI/UX Design |
-| S5 | **YooYeon** | Staff Engineer / Tech Lead | RFC Agent |
-| S7 | **NaKyoung** | Technical Program Manager | Task Breakdown |
-| S8 | **YuBin** | Principal Frontend Engineer | Frontend Web |
-| S9 | **Kaede** | Principal Backend Engineer | Backend |
-| S12 | **YeonJi** | Senior Android Engineer | Android Native (Kotlin) |
-| S14 | **SoHyun** | Senior iOS Engineer | iOS Native (Swift) |
-| S11 | **Kotone** | Senior Flutter Engineer | Flutter (Dart) |
-| S17 | **Lynn** | QA Lead / Test Lead | Test Cases |
-| S20 | **ShiOn** | Senior QA Automation Engineer | QA Execution |
+| S# | Agent | Persona | Role | Tier | Claude model | Codex model |
+|----|-------|---------|------|------|---------------|-------------|
+| S21 | **ChaeWon** | Project Setup Specialist | Local Install / Onboarding | Implementation | sonnet | gpt-5.3-codex |
+| S1 | **SeoYeon** | Engineering Manager | Main Orchestrator | Orchestrator | — (Skill, not a subagent) | — (Skill, not a subagent) |
+| S3 | **JiWoo** | Senior Product Manager | PRD Agent | Planning | opus | gpt-5.5 |
+| S2 | **HyeRin** | Senior UI/UX Designer | UI/UX Design | Planning | opus | gpt-5.5 |
+| S5 | **YooYeon** | Staff Engineer / Tech Lead | RFC Agent | Planning | opus | gpt-5.5 |
+| S7 | **NaKyoung** | Technical Program Manager | Task Breakdown | Planning | opus | gpt-5.5 |
+| S8 | **YuBin** | Principal Frontend Engineer | Frontend Web | Implementation | sonnet | gpt-5.3-codex |
+| S9 | **Kaede** | Principal Backend Engineer | Backend | Implementation | sonnet | gpt-5.3-codex |
+| S12 | **YeonJi** | Senior Android Engineer | Android Native (Kotlin) | Implementation | sonnet | gpt-5.3-codex |
+| S14 | **SoHyun** | Senior iOS Engineer | iOS Native (Swift) | Implementation | sonnet | gpt-5.3-codex |
+| S11 | **Kotone** | Senior Flutter Engineer | Flutter (Dart) | Implementation | sonnet | gpt-5.3-codex |
+| S17 | **Lynn** | QA Lead / Test Lead | Test Cases | Planning | opus | gpt-5.5 |
+| S20 | **ShiOn** | Senior QA Automation Engineer | QA Execution | Implementation | sonnet | gpt-5.3-codex |
+
+SeoYeon is the only agent that stays a Skill (`/seoyeon` on Claude Code, `$seoyeon` on Codex) — she's the pipeline entry point. The other 12 install as native, model-pinned **subagents**: `.claude/agents/*.md` on Claude Code, `.codex/agents/*.toml` on Codex (see [Files installed per platform](#files-installed-per-platform)).
 
 ---
 
@@ -139,22 +141,24 @@ triples-agentic claude       # direct install for Claude Code
 
 ### Files installed per platform
 
-| Platform | Agent skills | Hook config |
-|---|---|---|
-| **Claude Code** | `.claude/skills/*.md` + project `CLAUDE.md` | `.claude/settings.json` (PreToolUse hook) |
-| **Cursor AI** | `.cursor/rules/*.mdc` | `.cursor/rules/triples-safety.mdc` (always-applied rule) |
-| **GitHub Copilot** | `.github/instructions/*.instructions.md` | `.github/instructions/triples-safety.instructions.md` |
-| **OpenAI Codex** | `.codex/skills/<skill>/SKILL.md` + project `AGENTS.md` / `~/.codex/skills/<skill>/SKILL.md` (global) | `.codex/config.toml` / `~/.codex/config.toml` (PreToolUse hook) |
-| **Windsurf** | `.windsurfrules` | `.windsurf/hooks.json` (pre_run_command hook) |
+| Platform | Specialist agents | Orchestrator + knowledge | Hook config |
+|---|---|---|---|
+| **Claude Code** | `.claude/agents/*.md` (12 model-pinned subagents) | `.claude/skills/seoyeon/` + `.claude/skills/*` + project `CLAUDE.md` | `.claude/settings.json` (PreToolUse hook) |
+| **Cursor AI** | — (all agents are rules) | `.cursor/rules/*.mdc` | `.cursor/rules/triples-safety.mdc` (always-applied rule) |
+| **GitHub Copilot** | — (all agents are instructions) | `.github/instructions/*.instructions.md` | `.github/instructions/triples-safety.instructions.md` |
+| **OpenAI Codex** | `.codex/agents/*.toml` (12 model-pinned subagents) | `.codex/skills/seoyeon/` + `.codex/skills/*` + project `AGENTS.md` | `.codex/config.toml` (PreToolUse hook) |
+| **Windsurf** | — (all agents are rules) | `.windsurfrules` | `.windsurf/hooks.json` (pre_run_command hook) |
+
+Subagents are explicit-invocation only (Agent tool on Claude Code, "spawn the `<name>` agent" on Codex) — SeoYeon delegates to them automatically during `/seoyeon run` / `$seoyeon`, or you can invoke one directly. See the [Agent Roster](#agent-roster) for the model pinned to each.
 
 Global install paths:
 
-| Platform | Skills | Hook config |
-|---|---|---|
-| Claude Code | `~/.claude/skills/` | `~/.claude/settings.json` |
-| Cursor AI | `~/.cursor/rules/` | `~/.cursor/rules/triples-safety.mdc` |
-| OpenAI Codex | `~/.codex/skills/` | `~/.codex/config.toml` |
-| Windsurf | `~/.codeium/windsurf/rules/` | `~/.codeium/windsurf/hooks.json` |
+| Platform | Agents | Skills | Hook config |
+|---|---|---|---|
+| Claude Code | `~/.claude/agents/` | `~/.claude/skills/` | `~/.claude/settings.json` |
+| Cursor AI | — | `~/.cursor/rules/` | `~/.cursor/rules/triples-safety.mdc` |
+| OpenAI Codex | `~/.codex/agents/` | `~/.codex/skills/` | `~/.codex/config.toml` |
+| Windsurf | — | `~/.codeium/windsurf/rules/` | `~/.codeium/windsurf/hooks.json` |
 
 ---
 
@@ -199,34 +203,36 @@ Edit these files and reinstall to update the rules across all platforms.
 ### Full pipeline (Claude Code)
 ```
 /seoyeon run
+/seoyeon status  Check current run state
 ```
 SeoYeon walks you through the complete workflow and delegates to each agent.
 
-### Individual agents
+### Specialist subagents (Claude Code Agent tool)
+SeoYeon delegates to these automatically during `/seoyeon run`, or invoke one directly:
+
 ```
-/chaewon-init-setup  Explain or audit local TripleS setup
-/jiwoo-prd       Create, review, and finalize a PRD
-/hyerin-design   Create, review, and finalize a design spec
-/yooyeon-rfc     Create, review, and finalize an RFC
-/nakyoung-tasks  Create task breakdown with story points and estimates
-/yubin-frontend  Implement frontend web features
-/kaede-backend   Implement backend API and services
-/yeonji-android  Implement Android (Kotlin + Compose) features
-/sohyun-ios      Implement iOS (Swift + SwiftUI) features
-/kotone-flutter  Implement Flutter (Dart) cross-platform features
-/lynn-testcase   Create, review, and finalize test cases
-/shion-qa        Execute tests and produce Go/No-Go report
-/seoyeon status  Check current run state
+chaewon-init-setup [sonnet]  Explain or audit local TripleS setup
+jiwoo-prd          [opus]    Create, review, and finalize a PRD
+hyerin-design      [opus]    Create, review, and finalize a design spec
+yooyeon-rfc        [opus]    Create, review, and finalize an RFC
+nakyoung-tasks     [opus]    Create task breakdown with story points and estimates
+yubin-frontend     [sonnet]  Implement frontend web features
+kaede-backend      [sonnet]  Implement backend API and services
+yeonji-android     [sonnet]  Implement Android (Kotlin + Compose) features
+sohyun-ios         [sonnet]  Implement iOS (Swift + SwiftUI) features
+kotone-flutter     [sonnet]  Implement Flutter (Dart) cross-platform features
+lynn-testcase      [opus]    Create, review, and finalize test cases
+shion-qa           [sonnet]  Execute tests and produce Go/No-Go report
 ```
 
 ### In Codex
-Use `/skills` to browse installed TripleS skills, or mention them directly in your prompt:
+Use `$seoyeon` to orchestrate the full pipeline, or `/skills` to browse the orchestrator skill and bundled knowledge references. Specialist agents are Codex custom subagents — they're explicit-invocation only, so name the agent in your request:
 
 ```text
-Use $chaewon-init-setup to explain or audit the local TripleS setup.
-Use $seoyeon to orchestrate this feature from PRD through QA with human review gates and a QA rework loop.
-Use $jiwoo-prd to draft the PRD for this feature.
-Use $kaede-backend to implement the backend task from the breakdown.
+$seoyeon to orchestrate this feature from PRD through QA with human review gates and a QA rework loop.
+Ask Codex to spawn the jiwoo-prd agent to draft the PRD for this feature.
+Ask Codex to spawn the kaede-backend agent to implement the backend task from the breakdown.
+Ask Codex to spawn the chaewon-init-setup agent to explain or audit the local TripleS setup.
 ```
 
 ### Claude + Codex continuity
@@ -235,8 +241,8 @@ SeoYeon handoffs include both platform forms so you can continue the same run in
 
 ```text
 Next agent: JiWoo PRD
-Claude: /jiwoo-prd
-Codex: Use $jiwoo-prd
+Claude: invoke the `jiwoo-prd` subagent (Agent tool)
+Codex: ask Codex to spawn the `jiwoo-prd` agent
 Input artifacts: workspace/PRD.md
 Task: Review and revise until READY.
 Open decisions: none
@@ -326,12 +332,17 @@ your-project/
 ├── CLAUDE.md                  # Claude Code project guidance (project install)
 ├── AGENTS.md                  # Codex / agentic coding guidance (project install)
 ├── .claude/
-│   ├── skills/                # Claude Code agent + knowledge skills
+│   ├── agents/                # 12 model-pinned Claude Code subagents (*.md)
+│   ├── skills/seoyeon/        # SeoYeon orchestrator skill
+│   ├── skills/                # knowledge skills (coding principles, planning, design, …)
 │   └── settings.json          # Claude Code PreToolUse safety hook
 ├── .cursor/rules/             # Cursor AI agent rules + safety rule
 ├── .github/instructions/      # Copilot agent instructions + safety instruction
-├── .codex/skills/             # Codex skill bundles (project install)
-├── .codex/config.toml         # Codex PreToolUse safety hook
+├── .codex/
+│   ├── agents/                # 12 model-pinned Codex subagents (*.toml)
+│   ├── skills/seoyeon/        # SeoYeon orchestrator skill
+│   ├── skills/                # knowledge skills (project install)
+│   └── config.toml            # Codex PreToolUse safety hook
 ├── .windsurf/hooks.json       # Windsurf pre_run_command safety hook
 └── .windsurfrules             # Windsurf agent rules
 ```
@@ -343,6 +354,8 @@ your-project/
 Each agent file defines: identity, persona, knowledge references, tool guardrails, skills (workflows), and handoff signals. Domain content lives in `skills/` — agents only reference it.
 
 Each agent includes a `## Tools` section that specifies which tools to use and which to avoid (e.g., planning agents never use `Bash`; QA agent never edits source files).
+
+Two metadata comments control per-agent model pinning at install time: `<!-- model: opus|sonnet -->` (read by the Claude Code installer) and `<!-- codex-model: gpt-5.5|gpt-5.3-codex -->` (read by the Codex installer). `seoyeon.md` has neither — she installs as a Skill, not a subagent, on both platforms.
 
 ### `hooks/` — Safety guardrails (source of truth)
 
