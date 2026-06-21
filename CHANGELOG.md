@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.11.0] — 2026-06-21
+
+### Added
+- resumable runs, finish slug migration, harden Check gate and hooks (`597b399`)
+
+[2.11.0]: https://github.com/putrautama007/triples-agentic/compare/v2.10.1...v2.11.0
+
 ## [2.10.1] — 2026-06-21
 
 ### Changed
