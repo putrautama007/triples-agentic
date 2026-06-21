@@ -458,6 +458,7 @@ const AGENT_COMMANDS = [
   ['kotone-flutter', 'Senior Flutter — cross-platform Dart', 'sonnet'],
   ['lynn-testcase',  'QA Lead — create & review test cases', 'opus'],
   ['shion-qa',       'Senior QA — execute tests & Go/No-Go', 'sonnet'],
+  ['dahyun-checker', 'DevOps — run tests, types & lint checks', 'sonnet'],
 ];
 
 const KNOWLEDGE_SUMMARY = {

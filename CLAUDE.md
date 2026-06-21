@@ -15,7 +15,7 @@ This project has local TripleS Agentic support for Claude Code.
 
 ### Start here
 
-- Use `/seoyeon run` for the full PRD → Design → RFC → Tasks → Development → Test Cases → QA pipeline — SeoYeon delegates to each specialist subagent automatically.
+- Use `/seoyeon run` for the full PRD → Design → RFC → Tasks → Development → Check → Test Cases → QA pipeline — SeoYeon delegates to each specialist subagent automatically.
 - Use `/seoyeon status` to check pipeline state, or `/seoyeon` for other orchestrator commands.
 - Or invoke a specialist subagent directly via the Agent tool when you need a single stage:
   - `jiwoo-prd` — Product Requirements Document (opus)
