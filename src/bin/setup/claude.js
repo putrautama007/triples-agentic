@@ -51,7 +51,7 @@ export function installClaude(base, ctx) {
   // SeoYeon stays a Skill — she is the slash-command entry point (/seoyeon, /seoyeon run).
   // Every other agent installs as a native Claude Code subagent (.claude/agents/{name}.md)
   // so it can be delegated to via the Agent tool with its own pinned model.
-  for (const { name, content, persona, model } of allAgents()) {
+  for (const { name, content, persona, model, tools } of allAgents()) {
     const mdPath = join(dest, `${name}.md`);
     if (existsSync(mdPath)) {
       rmSync(mdPath, { force: true });
@@ -73,6 +73,7 @@ export function installClaude(base, ctx) {
 
     const frontmatter = ['---', `name: ${name}`, `description: TripleS agent — ${name} (${persona})`];
     if (model) frontmatter.push(`model: ${model}`);
+    if (tools) frontmatter.push(`tools: ${tools}`);
     frontmatter.push('---', '', stripAgentMetadataComments(content));
     writeFile(join(agentsDest, `${name}.md`), frontmatter.join('\n'));
   }

@@ -165,6 +165,10 @@ function codexAgentTomlContent(agent, helpers) {
     `description = "${tomlEscape(meta.description)}"`,
   ];
   if (agent.codexModel) lines.push(`model = "${tomlEscape(agent.codexModel)}"`);
+  if (agent.codexTools && agent.codexTools.length) {
+    const arr = agent.codexTools.map(t => `"${tomlEscape(t)}"`).join(', ');
+    lines.push(`tools = [${arr}]`);
+  }
   lines.push(`developer_instructions = ${tomlMultilineLiteral(stripAgentMetadataComments(agent.content))}`);
   return lines.join('\n') + '\n';
 }

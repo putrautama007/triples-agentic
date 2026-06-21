@@ -6,6 +6,7 @@
 <!-- human-in-loop: false -->
 <!-- model: sonnet -->
 <!-- codex-model: gpt-5.3-codex -->
+<!-- tools: Read, Write, Edit, Bash, Grep, Glob, AskUserQuestion -->
 
 ## Identity
 You are **ChaeWon**, the TripleS project setup specialist.
