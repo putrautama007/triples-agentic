@@ -2,7 +2,7 @@
 
 A platform-agnostic software engineering agent orchestrator, named after the 24-member K-pop group **TripleS**.
 
-13 specialized agents covering project setup plus the full product-to-delivery lifecycle — from PRD to UI/UX design, RFC, task breakdown, implementation across 5 platforms, test cases, and QA.
+14 specialized agents covering project setup plus the full product-to-delivery lifecycle — from PRD to UI/UX design, RFC, task breakdown, implementation across 5 platforms, automated code quality checks, test cases, and QA.
 
 ---
 
@@ -22,9 +22,10 @@ A platform-agnostic software engineering agent orchestrator, named after the 24-
 | S14 | **SoHyun** | Senior iOS Engineer | iOS Native (Swift) | Implementation | sonnet | gpt-5.3-codex |
 | S11 | **Kotone** | Senior Flutter Engineer | Flutter (Dart) | Implementation | sonnet | gpt-5.3-codex |
 | S17 | **Lynn** | QA Lead / Test Lead | Test Cases | Planning | opus | gpt-5.5 |
+| S24 | **DaHyun** | Senior DevOps / CI Engineer | Code Quality Check | Implementation | sonnet | gpt-5.3-codex |
 | S20 | **ShiOn** | Senior QA Automation Engineer | QA Execution | Implementation | sonnet | gpt-5.3-codex |
 
-SeoYeon is the only agent that stays a Skill (`/seoyeon` on Claude Code, `$seoyeon` on Codex) — she's the pipeline entry point. The other 12 install as native, model-pinned **subagents**: `.claude/agents/*.md` on Claude Code, `.codex/agents/*.toml` on Codex (see [Files installed per platform](#files-installed-per-platform)).
+SeoYeon is the only agent that stays a Skill (`/seoyeon` on Claude Code, `$seoyeon` on Codex) — she's the pipeline entry point. The other 13 install as native, model-pinned **subagents**: `.claude/agents/*.md` on Claude Code, `.codex/agents/*.toml` on Codex (see [Files installed per platform](#files-installed-per-platform)).
 
 ---
 
@@ -38,6 +39,7 @@ User → SeoYeon (EM)
          → NaKyoung (Tasks) [human review loop]
          → YuBin + Kaede + YeonJi + SoHyun + Kotone [parallel dev]
            + Lynn (Test Cases) [human review loop]
+         → DaHyun (Check: tests/types/lint) [auto-loop on failure]
          → ShiOn (QA) → Go/No-Go
 ```
 
@@ -143,10 +145,10 @@ triples-agentic claude       # direct install for Claude Code
 
 | Platform | Specialist agents | Orchestrator + knowledge | Hook config |
 |---|---|---|---|
-| **Claude Code** | `.claude/agents/*.md` (12 model-pinned subagents) | `.claude/skills/seoyeon/` + `.claude/skills/*` + project `CLAUDE.md` | `.claude/settings.json` (PreToolUse hook) |
+| **Claude Code** | `.claude/agents/*.md` (13 model-pinned subagents) | `.claude/skills/seoyeon/` + `.claude/skills/*` + project `CLAUDE.md` | `.claude/settings.json` (PreToolUse hook) |
 | **Cursor AI** | — (all agents are rules) | `.cursor/rules/*.mdc` | `.cursor/rules/triples-safety.mdc` (always-applied rule) |
 | **GitHub Copilot** | — (all agents are instructions) | `.github/instructions/*.instructions.md` | `.github/instructions/triples-safety.instructions.md` |
-| **OpenAI Codex** | `.codex/agents/*.toml` (12 model-pinned subagents) | `.codex/skills/seoyeon/` + `.codex/skills/*` + project `AGENTS.md` | `.codex/config.toml` (PreToolUse hook) |
+| **OpenAI Codex** | `.codex/agents/*.toml` (13 model-pinned subagents) | `.codex/skills/seoyeon/` + `.codex/skills/*` + project `AGENTS.md` | `.codex/config.toml` (PreToolUse hook) |
 | **Windsurf** | — (all agents are rules) | `.windsurfrules` | `.windsurf/hooks.json` (pre_run_command hook) |
 
 Subagents are explicit-invocation only (Agent tool on Claude Code, "spawn the `<name>` agent" on Codex) — SeoYeon delegates to them automatically during `/seoyeon run` / `$seoyeon`, or you can invoke one directly. See the [Agent Roster](#agent-roster) for the model pinned to each.
@@ -225,6 +227,7 @@ yeonji-android     [sonnet]  Implement Android (Kotlin + Compose) features
 sohyun-ios         [sonnet]  Implement iOS (Swift + SwiftUI) features
 kotone-flutter     [sonnet]  Implement Flutter (Dart) cross-platform features
 lynn-testcase      [opus]    Create, review, and finalize test cases
+dahyun-checker     [sonnet]  Run tests, type checks, and lint; report failures by platform
 shion-qa           [sonnet]  Execute tests and produce Go/No-Go report
 ```
 
@@ -271,6 +274,12 @@ JiWoo, HyeRin, YooYeon, NaKyoung, and Lynn all have built-in review loops:
 
 This ensures PRD, design spec, RFC, task breakdown, and test cases are implementation-ready before moving forward.
 
+## Code Quality Check Loop
+
+After all developer agents finish and test cases are approved, SeoYeon delegates to DaHyun (`dahyun-checker`), who runs tests, type checks, and lint per platform and writes `workspace/CHECK_REPORT.md`. On `CHECK FAILED`, SeoYeon routes the failures (grouped by platform ownership) back to the owning developer agent, then re-invokes DaHyun. ShiOn (QA) only starts once DaHyun signals `CHECK PASSED`.
+
+Escalation happens if the loop runs more than 5 times without a clean check.
+
 ## QA Rework Loop
 
 If ShiOn returns `QA COMPLETE — NO-GO`, SeoYeon routes defects back to the owning developer agents, then asks ShiOn to re-test fixes and regression-risk areas. The loop repeats until `QA COMPLETE — GO` or the human explicitly accepts documented release risk.
@@ -285,7 +294,7 @@ Escalation happens when the same QA defect survives 2 fix attempts, the same pla
 triples-agentic/
 ├── install.sh                 # curl installer
 ├── src/
-│   ├── agents/                # 13 agent definitions (identity, persona, knowledge, tools, workflow)
+│   ├── agents/                # 14 agent definitions (identity, persona, knowledge, tools, workflow)
 │   │   ├── chaewon-init-setup.md
 │   │   ├── seoyeon.md
 │   │   ├── jiwoo-prd.md
@@ -297,6 +306,7 @@ triples-agentic/
 │   │   ├── sohyun-ios.md
 │   │   ├── kotone-flutter.md
 │   │   ├── lynn-testcase.md
+│   │   ├── dahyun-checker.md
 │   │   └── shion-qa.md
 │   ├── hooks/                 # Safety guardrail definitions (source of truth)
 │   │   ├── dangerous-commands.json   # per-platform hook configs
@@ -335,14 +345,14 @@ your-project/
 ├── CLAUDE.md                  # Claude Code project guidance (project install)
 ├── AGENTS.md                  # Codex / agentic coding guidance (project install)
 ├── .claude/
-│   ├── agents/                # 12 model-pinned Claude Code subagents (*.md)
+│   ├── agents/                # 13 model-pinned Claude Code subagents (*.md)
 │   ├── skills/seoyeon/        # SeoYeon orchestrator skill
 │   ├── skills/                # knowledge skills (coding principles, planning, design, …)
 │   └── settings.json          # Claude Code PreToolUse safety hook
 ├── .cursor/rules/             # Cursor AI agent rules + safety rule
 ├── .github/instructions/      # Copilot agent instructions + safety instruction
 ├── .codex/
-│   ├── agents/                # 12 model-pinned Codex subagents (*.toml)
+│   ├── agents/                # 13 model-pinned Codex subagents (*.toml)
 │   ├── skills/seoyeon/        # SeoYeon orchestrator skill
 │   ├── skills/                # knowledge skills (project install)
 │   └── config.toml            # Codex PreToolUse safety hook

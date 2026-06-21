@@ -2,20 +2,23 @@
 
 ## Agent Roster
 
-| S# | Agent | Persona | Role | Slash Command |
+| S# | Agent | Persona | Role | Claude invocation |
 |----|-------|---------|------|---------------|
-| S1 | **SeoYeon** | Engineering Manager | Main Orchestrator | `/seoyeon` |
-| S3 | **JiWoo** | Senior Product Manager | PRD Agent | `/jiwoo-prd` |
-| S2 | **HyeRin** | Senior UI/UX Designer | UI/UX Design | `/hyerin-design` |
-| S5 | **YooYeon** | Staff Engineer / Tech Lead | RFC Agent | `/yooyeon-rfc` |
-| S7 | **NaKyoung** | Technical Program Manager | Task Breakdown | `/nakyoung-tasks` |
-| S8 | **YuBin** | Principal Frontend Engineer | Frontend Web Dev | `/yubin-frontend` |
-| S9 | **Kaede** | Principal Backend Engineer | Backend Dev | `/kaede-backend` |
-| S12 | **YeonJi** | Senior Android Engineer | Android Native | `/yeonji-android` |
-| S14 | **SoHyun** | Senior iOS Engineer | iOS Native | `/sohyun-ios` |
-| S11 | **Kotone** | Senior Flutter Engineer | Flutter Dev | `/kotone-flutter` |
-| S17 | **Lynn** | QA Lead / Test Lead | Test Case Agent | `/lynn-testcase` |
-| S20 | **ShiOn** | Senior QA Automation Engineer | QA Execution | `/shion-qa` |
+| S1 | **SeoYeon** | Engineering Manager | Main Orchestrator | `/seoyeon` (Skill) |
+| S3 | **JiWoo** | Senior Product Manager | PRD Agent | `jiwoo-prd` (Agent tool) |
+| S2 | **HyeRin** | Senior UI/UX Designer | UI/UX Design | `hyerin-design` (Agent tool) |
+| S5 | **YooYeon** | Staff Engineer / Tech Lead | RFC Agent | `yooyeon-rfc` (Agent tool) |
+| S7 | **NaKyoung** | Technical Program Manager | Task Breakdown | `nakyoung-tasks` (Agent tool) |
+| S8 | **YuBin** | Principal Frontend Engineer | Frontend Web Dev | `yubin-frontend` (Agent tool) |
+| S9 | **Kaede** | Principal Backend Engineer | Backend Dev | `kaede-backend` (Agent tool) |
+| S12 | **YeonJi** | Senior Android Engineer | Android Native | `yeonji-android` (Agent tool) |
+| S14 | **SoHyun** | Senior iOS Engineer | iOS Native | `sohyun-ios` (Agent tool) |
+| S11 | **Kotone** | Senior Flutter Engineer | Flutter Dev | `kotone-flutter` (Agent tool) |
+| S17 | **Lynn** | QA Lead / Test Lead | Test Case Agent | `lynn-testcase` (Agent tool) |
+| S24 | **DaHyun** | Senior DevOps / CI Engineer | Code Quality Check | `dahyun-checker` (Agent tool) |
+| S20 | **ShiOn** | Senior QA Automation Engineer | QA Execution | `shion-qa` (Agent tool) |
+
+SeoYeon is the only slash command — the rest are subagents invoked via the Agent tool (Claude Code) or by name (Codex). See [README.md](../README.md#agent-roster) for the full per-platform breakdown.
 
 ---
 
@@ -30,7 +33,7 @@ flowchart TD
     SeoYeon -->|"Delegate: Create PRD"| JiWoo
 
     subgraph PRD_LOOP["📋 PRD Phase — JiWoo (Senior PM)"]
-        JiWoo["JiWoo\n/jiwoo-prd"]
+        JiWoo["JiWoo\n(jiwoo-prd)"]
         JiWoo --> PRDCreate["1. Create PRD\n(from prd_template.md)"]
         PRDCreate --> PRDReview["2. Review PRD\n(quality checklist)"]
         PRDReview --> PRDEval{3. Evaluate:\nAll quality gates\npassed?}
@@ -42,7 +45,7 @@ flowchart TD
     HumanPRDGate -->|"Approved"| HyeRin
 
     subgraph DESIGN_LOOP["🎨 Design Phase — HyeRin (Senior UI/UX Designer)"]
-        HyeRin["HyeRin\n/hyerin-design"]
+        HyeRin["HyeRin\n(hyerin-design)"]
         HyeRin --> DesignCreate["1. Create Design Spec\n(from design_spec_template.md)"]
         DesignCreate --> DesignReview["2. Review Design Spec\n(quality checklist)"]
         DesignReview --> DesignEval{3. Evaluate:\nAll UI/UX quality\ngates passed?}
@@ -54,7 +57,7 @@ flowchart TD
     HumanDesignGate -->|"Approved"| YooYeon
 
     subgraph RFC_LOOP["⚙️ RFC Phase — YooYeon (Staff Engineer)"]
-        YooYeon["YooYeon\n/yooyeon-rfc"]
+        YooYeon["YooYeon\n(yooyeon-rfc)"]
         YooYeon --> RFCCreate["1. Create RFC\n(from rfc_template.md)"]
         RFCCreate --> RFCReview["2. Review RFC\n(quality checklist)"]
         RFCReview --> RFCEval{3. Evaluate:\nAll quality gates\npassed?}
@@ -66,7 +69,7 @@ flowchart TD
     HumanRFCGate -->|"Approved"| NaKyoung
 
     subgraph TASK_LOOP["📊 Task Breakdown Phase — NaKyoung (TPM)"]
-        NaKyoung["NaKyoung\n/nakyoung-tasks"]
+        NaKyoung["NaKyoung\n(nakyoung-tasks)"]
         NaKyoung --> TaskCreate["1. Create Tasks\n(story points + estimates)"]
         TaskCreate --> TaskReview["2. Review Tasks\n(readiness checklist)"]
         TaskReview --> TaskEval{3. Evaluate:\nAll tasks clear\n& estimable?}
@@ -83,15 +86,15 @@ flowchart TD
     end
 
     subgraph DevPhase["⚡ Development Phase — Parallel"]
-        YuBin["🌐 YuBin\nPrincipal Frontend\n/yubin-frontend\n\nReact/Vue/Angular\nTailwind, TypeScript"]
-        Kaede["🖥️ Kaede\nPrincipal Backend\n/kaede-backend\n\nNode/Python/Go\nPostgreSQL, REST"]
-        YeonJi["🤖 YeonJi\nSenior Android\n/yeonji-android\n\nKotlin + Jetpack Compose\nMaterial Design 3"]
-        SoHyun["🍎 SoHyun\nSenior iOS\n/sohyun-ios\n\nSwift + SwiftUI\nApple HIG"]
-        Kotone["🦋 Kotone\nSenior Flutter\n/kotone-flutter\n\nDart + Flutter\nAndroid + iOS + Web"]
+        YuBin["🌐 YuBin\nPrincipal Frontend\n(yubin-frontend)\n\nReact/Vue/Angular\nTailwind, TypeScript"]
+        Kaede["🖥️ Kaede\nPrincipal Backend\n(kaede-backend)\n\nNode/Python/Go\nPostgreSQL, REST"]
+        YeonJi["🤖 YeonJi\nSenior Android\n(yeonji-android)\n\nKotlin + Jetpack Compose\nMaterial Design 3"]
+        SoHyun["🍎 SoHyun\nSenior iOS\n(sohyun-ios)\n\nSwift + SwiftUI\nApple HIG"]
+        Kotone["🦋 Kotone\nSenior Flutter\n(kotone-flutter)\n\nDart + Flutter\nAndroid + iOS + Web"]
     end
 
     subgraph TestPhase["📝 Test Case Phase — Lynn (QA Lead)"]
-        Lynn["Lynn\n/lynn-testcase"]
+        Lynn["Lynn\n(lynn-testcase)"]
         Lynn --> TCCreate["1. Create Test Cases\n(from test_case_template.md)"]
         TCCreate --> TCReview["2. Review Test Cases\n(quality checklist)"]
         TCReview --> TCEval{3. Evaluate:\nAll PRD criteria\ncovered?}
@@ -100,15 +103,26 @@ flowchart TD
     end
 
     TCEval -->|"✅ READY"| HumanTCGate["🧑 Human Approval\nApprove Test Cases?"]
-    HumanTCGate -->|"Approved"| ShiOn
-    YuBin --> ShiOn
-    Kaede --> ShiOn
-    YeonJi --> ShiOn
-    SoHyun --> ShiOn
-    Kotone --> ShiOn
+    HumanTCGate -->|"Approved"| DaHyun
+    YuBin --> DaHyun
+    Kaede --> DaHyun
+    YeonJi --> DaHyun
+    SoHyun --> DaHyun
+    Kotone --> DaHyun
+
+    subgraph CHECK["🛠️ Code Quality Check — DaHyun (Senior DevOps / CI Engineer)"]
+        DaHyun["DaHyun\n(dahyun-checker)"]
+        DaHyun --> RunChecks["Run tests + types + lint\nper detected platform"]
+        RunChecks --> CheckEval{All three\ncategories pass?}
+        CheckEval -->|"❌ CHECK FAILED"| RouteFix["Route failures by platform\nto owning dev agent\n(loop ≤ 5)"]
+        RouteFix -->|"Fix complete"| DaHyun
+        CheckEval -->|"❌ Loop > 5"| HumanCheckEscalation["🧑 Human Escalation\nManual intervention required"]
+    end
+
+    CheckEval -->|"✅ CHECK PASSED"| ShiOn
 
     subgraph QA["🔍 QA Phase — ShiOn (Senior QA Automation)"]
-        ShiOn["ShiOn\n/shion-qa"]
+        ShiOn["ShiOn\n(shion-qa)"]
         ShiOn --> Smoke["Smoke Tests\n(P0 only)"]
         Smoke --> SmokeGate{P0 pass?}
         SmokeGate -->|"❌ Fail"| BlockRelease["🛑 Block Release\nReport P0 failures\nto SeoYeon"]
@@ -156,11 +170,11 @@ Human review is required at five stages. Each gate follows the same pattern:
 
 | Gate | Agent | Artifact |
 |------|-------|---------|
-| PRD Review | JiWoo (Senior PM) | `workspace/PRD.md` |
+| PRD Review | JiWoo (Senior PM) | `workspace/prd/PRD-{slug}.md` |
 | Design Review | HyeRin (Senior UI/UX Designer) | `workspace/DESIGN_SPEC.md` |
-| RFC Review | YooYeon (Staff Engineer) | `workspace/RFC.md` |
-| Task Breakdown Review | NaKyoung (TPM) | `workspace/TASK_BREAKDOWN.md` |
-| Test Case Review | Lynn (QA Lead) | `workspace/TEST_CASES.md` |
+| RFC Review | YooYeon (Staff Engineer) | `workspace/rfc/RFC-{slug}.md` |
+| Task Breakdown Review | NaKyoung (TPM) | `workspace/task-breakdown/TASKS-{slug}.md` |
+| Test Case Review | Lynn (QA Lead) | `workspace/test-cases/TC-{slug}-*.md` |
 
 ---
 
@@ -168,15 +182,17 @@ Human review is required at five stages. Each gate follows the same pattern:
 
 ```
 workspace/
-├── PRD.md                    ← JiWoo
-├── DESIGN_SPEC.md            ← HyeRin
-├── RFC.md                    ← YooYeon
-├── TASK_BREAKDOWN.md         ← NaKyoung
-├── TEST_CASES.md             ← Lynn
+├── RUN_STATE.md               ← SeoYeon (resumable run ledger, kept current at every stage transition)
+├── prd/PRD-{slug}.md          ← JiWoo
+├── DESIGN_SPEC.md             ← HyeRin
+├── rfc/RFC-{slug}.md          ← YooYeon
+├── task-breakdown/TASKS-{slug}.md ← NaKyoung
+├── test-cases/TC-{slug}-*.md  ← Lynn
+├── CHECK_REPORT.md            ← DaHyun (tests/types/lint, overwritten on recheck)
 ├── BUGS/
-│   └── BUG-[ID].md          ← ShiOn (one per defect)
-├── QA_REPORT.md              ← ShiOn
-└── DELIVERY_SUMMARY.md       ← SeoYeon
+│   └── BUG-[ID].md           ← ShiOn (one per defect)
+├── QA_REPORT.md               ← ShiOn
+└── DELIVERY_SUMMARY.md        ← SeoYeon
 ```
 
 ---
@@ -187,9 +203,9 @@ TripleS can run in Claude Code or OpenAI Codex. SeoYeon should hand off work usi
 
 ```text
 Next agent: JiWoo PRD
-Claude: /jiwoo-prd
-Codex: Use $jiwoo-prd
-Input artifacts: workspace/PRD.md
+Claude: invoke the `jiwoo-prd` subagent (Agent tool)
+Codex: ask Codex to spawn the `jiwoo-prd` agent
+Input artifacts: workspace/prd/PRD-{slug}.md
 Task: Review and revise until READY.
 Open decisions: none
 ```
@@ -203,6 +219,7 @@ Use artifact paths as the source of truth. Do not rely on hidden conversation me
 - Planning stages loop through **Create → Review → Evaluate → Human Review → Revise** until `READY`.
 - Development starts only after PRD, Design, RFC, and Task Breakdown are approved.
 - Test cases can run in parallel with development after task approval.
+- DaHyun's Code Quality Check runs once all developer agents finish and test cases are approved; `CHECK FAILED` routes back to the owning developer agent and re-runs, escalating to human after 5 loops.
 - QA `NO-GO` routes defects back to owning developer agents, then returns to ShiOn for re-test.
 - Human escalation happens after the same planning gate fails 3 times or the same QA defect survives 2 fix attempts.
 - Approved artifact changes that affect scope, architecture, design behavior, or release risk require human sign-off.
@@ -214,31 +231,30 @@ Use artifact paths as the source of truth. Do not rely on hidden conversation me
 ### Full pipeline — Claude Code
 ```
 /seoyeon run
+/seoyeon status   → Check current run state
+/seoyeon resume   → Continue after a token-limit reset or closed session
 ```
-SeoYeon walks you through the entire workflow, delegating to each agent in sequence.
+SeoYeon walks you through the entire workflow, delegating to each agent in sequence. The run ledger at `workspace/RUN_STATE.md` makes long runs resumable.
 
 ### Full pipeline — OpenAI Codex
 ```text
 Use $seoyeon to orchestrate this feature from PRD through QA with human review gates and a QA rework loop.
 ```
 
-### Individual agents
+### Individual agents (Claude Code Agent tool)
+SeoYeon delegates to these automatically during `/seoyeon run`, or invoke one directly:
 ```
-/jiwoo-prd       → Start or resume PRD creation
-/hyerin-design   → Start or resume UI/UX design spec
-/hyerin-audit    → Audit feature/system design coverage and gaps
-/hyerin-content  → Produce UX writing and microcopy spec
-/hyerin-mobile   → Define mobile design-system mapping and platform conventions
-/hyerin-mobile-audit → Audit mobile design-system compliance and gaps
-/hyerin-platforms → Define cross-platform adaptation guidance
-/yooyeon-rfc     → Start or resume RFC from PRD
-/nakyoung-tasks  → Start or resume task breakdown
-/yubin-frontend  → Implement frontend web tasks
-/kaede-backend   → Implement backend tasks
-/yeonji-android  → Implement Android tasks
-/sohyun-ios      → Implement iOS tasks
-/kotone-flutter  → Implement Flutter tasks
-/lynn-testcase   → Start or resume test case creation
-/shion-qa        → Execute QA against test cases + dev output
-/seoyeon status  → Check current run state
+jiwoo-prd          [opus]    Start or resume PRD creation
+hyerin-design      [opus]    Start or resume UI/UX design spec
+yooyeon-rfc        [opus]    Start or resume RFC from PRD
+nakyoung-tasks     [opus]    Start or resume task breakdown
+yubin-frontend     [sonnet]  Implement frontend web tasks
+kaede-backend      [sonnet]  Implement backend tasks
+yeonji-android     [sonnet]  Implement Android tasks
+sohyun-ios         [sonnet]  Implement iOS tasks
+kotone-flutter     [sonnet]  Implement Flutter tasks
+lynn-testcase      [opus]    Start or resume test case creation
+dahyun-checker     [sonnet]  Run tests, type checks, and lint; report failures by platform
+shion-qa           [sonnet]  Execute QA against test cases + dev output
+chaewon-init-setup [sonnet]  Explain or audit the local TripleS setup
 ```
