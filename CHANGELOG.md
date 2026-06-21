@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.12.0] — 2026-06-21
+
+### Added
+- add explicit tool allowlists to TripleS subagents (`72697ad`)
+
+[2.12.0]: https://github.com/putrautama007/triples-agentic/compare/v2.11.1...v2.12.0
+
 ## [2.11.1] — 2026-06-21
 
 ### Changed
