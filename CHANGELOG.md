@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.11.1] — 2026-06-21
+
+### Changed
+- sync README, workflow diagram, and templates with DaHyun checker agent (`eb1dc40`)
+
+[2.11.1]: https://github.com/putrautama007/triples-agentic/compare/v2.11.0...v2.11.1
+
 ## [2.11.0] — 2026-06-21
 
 ### Added
