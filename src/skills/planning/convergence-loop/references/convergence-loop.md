@@ -35,13 +35,75 @@ For every planning artifact:
 
 | Stage | Owner | Artifact | Ready Signal |
 |---|---|---|---|
-| PRD | JiWoo | `workspace/PRD.md` | `PRD APPROVED` |
+| PRD | JiWoo | `workspace/prd/PRD-{slug}.md` | `PRD APPROVED` |
 | Design | HyeRin | `workspace/DESIGN_SPEC.md` | `DESIGN APPROVED` |
-| RFC | YooYeon | `workspace/RFC.md` | `RFC APPROVED` |
-| Tasks | NaKyoung | `workspace/TASK_BREAKDOWN.md` | `TASKS APPROVED` |
-| Test Cases | Lynn | `workspace/TEST_CASES.md` | `TEST CASES APPROVED` |
+| RFC | YooYeon | `workspace/rfc/RFC-{slug}.md` | `RFC APPROVED` |
+| Tasks | NaKyoung | `workspace/task-breakdown/TASKS-{slug}.md` | `TASKS APPROVED` |
 | Implementation | Developer agents | source files + test output | `[PLATFORM] TASKS COMPLETE` |
+| Check | DaHyun | check output (tests, types, lint) | `CHECK PASSED` or `CHECK FAILED` |
+| Test Cases | Lynn | `workspace/test-cases/TC-{slug}-*.md` | `TEST CASES APPROVED` |
 | QA | ShiOn | `workspace/QA_REPORT.md` + `workspace/BUGS/*.md` | `QA COMPLETE — GO` or `QA COMPLETE — NO-GO` |
+
+## Run-State Ledger & Resume (token-limit resilience)
+
+Long runs get cut off mid-stage — a usage-limit reset, a context compaction, or a closed terminal. Sub-agents do **not** keep memory between invocations: when a sub-agent is interrupted, everything it has not written to disk is lost. The run-state ledger makes every run resumable from the last completed unit of work, with no dependence on conversation memory. It works the same in Claude Code and Codex.
+
+### The ledger file
+
+One file per run: `workspace/RUN_STATE.md`. Plain Markdown — both tools read and edit it, and a human can eyeball it. Status markers:
+
+`[ ]` pending · `[~]` in-progress · `[x]` done / approved · `[!]` blocked
+
+```markdown
+# Run State — {slug}
+<!-- triples-run-state: v1 -->
+Updated: {ISO-8601 timestamp} — {agent}
+Active stage: {stage}
+Next action: {one line — the exact unit to resume}
+
+## Stages
+- [x] PRD — JiWoo — approved — workspace/prd/PRD-{slug}.md
+- [x] Design — HyeRin — approved — workspace/DESIGN_SPEC.md
+- [x] RFC — YooYeon — approved — workspace/rfc/RFC-{slug}.md
+- [x] Tasks — NaKyoung — approved — workspace/task-breakdown/TASKS-{slug}.md
+- [~] Development — in-progress
+- [ ] Check — DaHyun — pending
+- [ ] Test Cases — Lynn — pending
+- [ ] QA — ShiOn — pending
+
+## Development tasks
+- [x] TASK-001 — Kaede — done
+- [~] TASK-007 — Kaede — in-progress
+- [ ] TASK-008 — YuBin — pending
+
+## Test cases
+- (one line per TC during the Test Cases stage)
+
+## QA tests
+- (one line per test / bug during QA)
+
+## Open decisions / approvals pending
+- none
+```
+
+### Write rule (every agent)
+
+Flush after each completed unit — never batch:
+1. **Before** starting a unit (a task, a test case, a QA test, a bug fix), mark it `[~]` and set `Next action` to that unit.
+2. **After** the unit passes its gate, mark it `[x]`, refresh `Updated`, and point `Next action` at the next unit.
+3. An interruption therefore loses at most one in-flight unit.
+
+The orchestrator creates the ledger at run start and owns the `## Stages` rows (one update per stage transition or approval). Producing agents own their own task/test rows.
+
+### Resume rule
+
+On `/seoyeon resume` (or "continue"):
+1. Read `workspace/RUN_STATE.md`.
+2. The resume point is the first `[~]` unit; if none, the first `[ ]` unit under the active stage.
+3. Re-invoke the owning agent with: "These units are `[x]` — do not redo them. Resume at {unit}." The agent re-reads its artifacts and continues.
+4. If no ledger exists, fall back to artifact inference (existing behavior).
+
+Never trust conversation memory to know where a run stopped — trust the ledger.
 
 ## Cross-Platform Invocation Contract
 
@@ -53,7 +115,7 @@ Use this format:
 Next agent: JiWoo PRD
 Claude: /jiwoo-prd
 Codex: Use $jiwoo-prd
-Input artifacts: workspace/PRD.md
+Input artifacts: workspace/prd/PRD-{slug}.md
 Task: Review and revise until READY.
 Open decisions: [numbered list or "none"]
 ```

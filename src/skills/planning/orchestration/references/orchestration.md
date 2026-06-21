@@ -63,11 +63,14 @@ Never silently skip a gate or merge conflicting requirements without human sign-
 All artifacts land in `workspace/` at the project root:
 ```
 workspace/
-├── PRD.md
+├── RUN_STATE.md                       # resumable run ledger (see below)
+├── prd/PRD-{slug}.md
 ├── DESIGN_SPEC.md
-├── RFC.md
-├── TASK_BREAKDOWN.md
-├── TEST_CASES.md
+├── rfc/RFC-{slug}.md
+├── task-breakdown/TASKS-{slug}.md
+├── test-cases/TC-{slug}-*.md
+├── QA_REPORT.md
+├── BUGS/*.md
 └── DELIVERY_SUMMARY.md
 ```
 
@@ -75,7 +78,9 @@ Reference artifacts by path, not by memory, to avoid drift between agent context
 
 ## Run State
 
-Maintain a mental model of which stage the current run is in:
+Do **not** keep run state only in your head — persist it to `workspace/RUN_STATE.md` so the run survives a usage-limit reset, context compaction, or a closed session. The orchestrator creates the ledger at run start, updates the stage rows at every transition and approval, and reads it on resume. Producing agents own their own task/test rows. Format and rules: see `planning/convergence-loop.md` → "Run-State Ledger & Resume".
+
+The stages tracked in the ledger:
 
 | Stage | Agent | Status |
 |---|---|---|
@@ -84,8 +89,18 @@ Maintain a mental model of which stage the current run is in:
 | RFC | YooYeon | pending / in-progress / review / approved |
 | Task Breakdown | NaKyoung | pending / in-progress / review / approved |
 | Development | YuBin, Kaede, YeonJi, SoHyun, Kotone | pending / in-progress / done |
+| Check | DaHyun | pending / in-progress / passed / failed |
 | Test Cases | Lynn | pending / in-progress / review / approved |
 | QA | ShiOn | pending / in-progress / done |
+
+### Resume protocol (`/seoyeon resume`)
+
+When the user resumes after a limit reset (or says "continue"):
+1. Read `workspace/RUN_STATE.md`. If it is missing, fall back to inferring the stage from which artifacts exist.
+2. Find the resume point: the first `[~]` (in-progress) unit, else the first `[ ]` (pending) unit under the active stage.
+3. If the resume point is behind a pending **human approval gate**, stop and re-request that approval — do not auto-advance.
+4. Otherwise re-invoke the owning agent with the completed units listed as "done — do not redo" and the resume point named explicitly.
+5. Present the cross-platform handoff block so the run can also continue in Codex.
 
 ## Communication Style for Engineering Managers
 

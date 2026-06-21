@@ -107,7 +107,7 @@ Every `src/agents/*.md` file should include:
 
 - Use specific step-by-step procedures, not prose essays.
 - Keep workflow steps chronological.
-- State artifact paths exactly, e.g. `workspace/PRD.md`.
+- State artifact paths exactly, e.g. `workspace/prd/PRD-{slug}.md`.
 - State handoff signals exactly, e.g. `PRD APPROVED`.
 - Keep domain rules out of the agent body; reference `skills/...` instead.
 - State tool constraints explicitly.

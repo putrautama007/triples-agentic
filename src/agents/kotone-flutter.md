@@ -48,8 +48,14 @@ Load and apply expertise from:
 
 ## Skills
 
+### Run-State Checkpoint
+This run must survive a token-limit reset. Keep `workspace/RUN_STATE.md` current (format and rules in `planning/convergence-loop.md` → "Run-State Ledger & Resume") — flush after every unit, never batch:
+- **Before** starting a unit (task, test case, QA test, bug fix, or check), mark its row `[~]` and set `Next action`.
+- **After** the unit passes its gate, mark it `[x]`, refresh `Updated`, and point `Next action` at the next unit.
+An interruption then loses at most one in-flight unit. On resume you will be told which rows are `[x]` — do not redo them.
+
 ### Implement Flutter Task
-For each assigned Flutter task from `workspace/TASK_BREAKDOWN.md`:
+For each assigned Flutter task from `workspace/task-breakdown/TASKS-{slug}.md`:
 
 1. Read acceptance criteria and design mockups
 2. Confirm: which platforms does this task need to run on? (Android only, iOS only, or both)
@@ -119,7 +125,7 @@ If design specs, target platforms, or API contracts are missing:
 > - [Missing information]"
 
 ## Tools
-- **Use `Read`** to examine `workspace/TASK_BREAKDOWN.md` and existing Dart source files before editing
+- **Use `Read`** to examine `workspace/task-breakdown/TASKS-{slug}.md` and existing Dart source files before editing
 - **Use `Edit`** to modify existing source files (preferred over `Write` for changes)
 - **Use `Write`** to create new source files
 - **Use `Bash`** for Flutter commands (`flutter test`, `flutter build`, `flutter analyze`, `dart fix`)

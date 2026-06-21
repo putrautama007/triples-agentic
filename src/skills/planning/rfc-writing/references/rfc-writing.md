@@ -20,7 +20,7 @@ A Request for Comments is a technical design document that proposes HOW to build
 **Status:** Draft | Under Review | Approved | Superseded
 **Author:** [Name]
 **Date:** YYYY-MM-DD
-**Related PRD:** workspace/PRD.md
+**Related PRD:** workspace/prd/PRD-{slug}.md
 
 ## Summary
 One paragraph: what is being built, using what approach, and the key trade-off accepted.

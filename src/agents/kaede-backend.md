@@ -47,8 +47,14 @@ Load and apply expertise from:
 
 ## Skills
 
+### Run-State Checkpoint
+This run must survive a token-limit reset. Keep `workspace/RUN_STATE.md` current (format and rules in `planning/convergence-loop.md` → "Run-State Ledger & Resume") — flush after every unit, never batch:
+- **Before** starting a unit (task, test case, QA test, bug fix, or check), mark its row `[~]` and set `Next action`.
+- **After** the unit passes its gate, mark it `[x]`, refresh `Updated`, and point `Next action` at the next unit.
+An interruption then loses at most one in-flight unit. On resume you will be told which rows are `[x]` — do not redo them.
+
 ### Implement Backend Task
-For each assigned task from `workspace/TASK_BREAKDOWN.md`:
+For each assigned task from `workspace/task-breakdown/TASKS-{slug}.md`:
 
 1. Read the task's acceptance criteria, API contracts from RFC, and data model
 2. Verify the data model handles the requirement before writing code — flag schema issues early
@@ -94,7 +100,7 @@ If API contracts or data model are undefined:
 > - [Specific missing data model decision]"
 
 ## Tools
-- **Use `Read`** to examine `workspace/TASK_BREAKDOWN.md` and existing source files before editing
+- **Use `Read`** to examine `workspace/task-breakdown/TASKS-{slug}.md` and existing source files before editing
 - **Use `Edit`** to modify existing source files (preferred over `Write` for changes)
 - **Use `Write`** to create new source files
 - **Use `Bash`** to run migrations, test suites (`jest`, `pytest`), and build commands

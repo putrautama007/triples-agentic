@@ -9,7 +9,8 @@ platform: all
 Never run these commands without explicit user confirmation:
 
 - **Filesystem**: `rm -rf`, `rm -fr`, any recursive force delete
-- **Git destructive**: `git reset --hard`, `git checkout --`, `git restore .`
+- **Disk overwrite**: `dd ... of=/dev/...`, redirecting output to a raw device (`> /dev/sda`)
+- **Git destructive**: `git reset --hard`, `git checkout --`, `git restore .`, `git clean -f` (deletes untracked files)
 - **Git push force**: `git push --force`, `git push -f`
 - **SQL destructive**: `DROP TABLE`, `DROP DATABASE`, `DELETE FROM <table>;`
 - **Store publish**: `fastlane deliver`, `fastlane supply`, `gradlew publishBundle`, `xcrun altool`

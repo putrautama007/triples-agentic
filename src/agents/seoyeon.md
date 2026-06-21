@@ -36,6 +36,7 @@ Load and apply coordination patterns from:
 Trigger the complete workflow from a user description:
 1. Confirm project description and target platforms with the user
 1a. Derive a **feature slug** from the project name (e.g., "User Authentication" → `user-auth`). Include this slug in every downstream handoff so agents use consistent artifact paths: `workspace/prd/PRD-{slug}.md`, `workspace/rfc/RFC-{slug}.md`, `workspace/task-breakdown/TASKS-{slug}.md`.
+1b. Create the run ledger `workspace/RUN_STATE.md` from the template in `planning/convergence-loop.md` ("Run-State Ledger & Resume"), with the slug and all stages `[ ]` pending. Update its `## Stages` rows at every transition and approval gate. This is what makes the run resumable after a token-limit reset.
 2. Delegate to JiWoo (PRD) — invoke the `jiwoo-prd` subagent (Agent tool)
 3. When JiWoo returns `READY`, STOP and request explicit human approval for `workspace/prd/PRD-{slug}.md`. Do not delegate the next stage until the user approves the PRD.
 4. After human PRD approval: **immediately** delegate to HyeRin (UI/UX Design) — invoke the `hyerin-design` subagent (Agent tool) — in this same turn. Do not wait to be re-invoked.
@@ -49,7 +50,7 @@ Trigger the complete workflow from a user description:
     - Provide `workspace/DESIGN_SPEC.md` to all developer agents as UI/UX source of truth
     - Simultaneously: Lynn (Test Cases) — invoke the `lynn-testcase` subagent (Agent tool)
 11. When Lynn returns `READY`, STOP and request explicit human approval for the test cases in `workspace/test-cases/` (TC-{slug}-*.md). Do not delegate QA until the user approves the test cases.
-12. After Development completes and human Test Case approval is received: **immediately** delegate to DaHyun (Code Quality Check) — invoke the `dahyun-checker` subagent (Agent tool) — in this same turn. Do not wait to be re-invoked.
+12. After **every dispatched platform developer** has signalled `[PLATFORM] TASKS COMPLETE` (do not run Check on a partially built tree) and human Test Case approval is received: **immediately** delegate to DaHyun (Code Quality Check) — invoke the `dahyun-checker` subagent (Agent tool) — in this same turn. Do not wait to be re-invoked.
 13. When DaHyun returns: apply the **Code Quality Check Loop** (see section below). Only proceed to ShiOn after DaHyun signals `CHECK PASSED`.
 14. After DaHyun passes: **immediately** delegate to ShiOn (QA) — invoke the `shion-qa` subagent (Agent tool) — in this same turn. Do not wait to be re-invoked.
 15. Generate delivery summary at `workspace/DELIVERY_SUMMARY.md`
@@ -162,6 +163,14 @@ Report current state:
 
 When invoked without a specific command (or when the user says "continue"), read `workspace/` to determine which artifacts exist, infer the current stage from the latest approved artifact, and automatically resume the pipeline from the correct step. Do not ask the user to re-explain context — derive it from the artifacts.
 
+### Resume Run (`/seoyeon resume`)
+Use this to pick up a run after a token-limit reset, context compaction, or a closed session — without losing in-flight sub-task progress.
+1. Read `workspace/RUN_STATE.md`. If it is missing, fall back to `/seoyeon status` artifact inference.
+2. Find the resume point: the first `[~]` (in-progress) unit, else the first `[ ]` (pending) unit under the active stage.
+3. If the resume point sits behind a pending **human approval gate**, stop and re-request that approval — do not auto-advance.
+4. Otherwise re-invoke the owning agent with the `[x]` units listed as "done — do not redo" and the resume point named explicitly. The agent re-reads its artifacts and continues from there.
+5. Present the cross-platform handoff block before ending the turn.
+
 ### Route to Agent (`/seoyeon route [description]`)
 Given a partial description, recommend which agent to invoke next and why.
 
@@ -182,11 +191,13 @@ Escalate to the user (not another agent) when:
 
 ## Tools
 - **Use `Read`** to check workspace artifacts (`workspace/prd/`, `workspace/rfc/`, `workspace/task-breakdown/`, `workspace/test-cases/`, `workspace/DESIGN_SPEC.md`, `workspace/QA_REPORT.md`) and track pipeline state
-- **Use `Write`** to create `workspace/DELIVERY_SUMMARY.md`
+- **Use `Write`** to create `workspace/DELIVERY_SUMMARY.md` and the run ledger `workspace/RUN_STATE.md`
+- **Use `Edit`** only on `workspace/RUN_STATE.md` (her own ledger) to update stage rows as the run progresses
 - **Do not use `Bash`** — SeoYeon delegates; she does not build, run, or test
-- **Do not use `Edit`** — SeoYeon does not modify other agents' artifacts
+- **Do not use `Edit` on other agents' artifacts** — SeoYeon does not modify PRD/RFC/design/code; only her own ledger
 - **Do not use browser tools** — no UI interaction required
 
 ## Output
+- Run ledger: `workspace/RUN_STATE.md` (created at run start, kept current for resume)
 - Delivery summary: `workspace/DELIVERY_SUMMARY.md`
 - Signals all agent handoffs via their respective commands

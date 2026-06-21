@@ -17,6 +17,7 @@ This project has local TripleS Agentic support for Claude Code.
 
 - Use `/seoyeon run` for the full PRD → Design → RFC → Tasks → Development → Test Cases → QA pipeline — SeoYeon delegates to each specialist subagent automatically.
 - Use `/seoyeon status` to check pipeline state, or `/seoyeon` for other orchestrator commands.
+- Use `/seoyeon resume` to continue a run after a token-limit reset or closed session — SeoYeon reads `workspace/RUN_STATE.md` and picks up from the last in-flight unit of work.
 - Or invoke a specialist subagent directly via the Agent tool when you need a single stage:
   - `jiwoo-prd` — Product Requirements Document (opus)
   - `hyerin-design` — UI/UX design spec (opus)
@@ -32,7 +33,7 @@ This project has local TripleS Agentic support for Claude Code.
 
 - Treat artifacts in `workspace/` as the source of truth during TripleS workflows.
 - Do not skip human approval gates for PRD, design, RFC, task breakdown, or test cases.
-- Use `/seoyeon status` when the workflow state is unclear.
+- Use `/seoyeon status` when the workflow state is unclear; use `/seoyeon resume` to continue an interrupted run from `workspace/RUN_STATE.md`.
 - Run `npx triples-agentic update` to refresh installed skills and managed guidance.
 
 <!-- triples-agentic:end -->

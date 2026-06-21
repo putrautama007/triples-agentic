@@ -29,11 +29,11 @@ This skill applies before:
 
 Implementation is ready only when the relevant approved artifacts exist:
 
-- `workspace/PRD.md` — scope, personas, acceptance criteria, success metrics.
+- `workspace/prd/PRD-{slug}.md` — scope, personas, acceptance criteria, success metrics.
 - `workspace/DESIGN_SPEC.md` — flows, states, platform adaptation, component guidance when UI is in scope.
-- `workspace/RFC.md` — architecture, API/data contracts, risks, rollback plan when technical design is needed.
-- `workspace/TASK_BREAKDOWN.md` — task owner, dependencies, estimates, binary acceptance criteria.
-- `workspace/TEST_CASES.md` — approved before QA execution.
+- `workspace/rfc/RFC-{slug}.md` — architecture, API/data contracts, risks, rollback plan when technical design is needed.
+- `workspace/task-breakdown/TASKS-{slug}.md` — task owner, dependencies, estimates, binary acceptance criteria.
+- `workspace/test-cases/TC-{slug}-*.md` — approved before QA execution.
 
 ## Handoff Readiness Checklist
 

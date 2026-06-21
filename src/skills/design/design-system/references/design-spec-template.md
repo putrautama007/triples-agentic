@@ -4,8 +4,8 @@
 **Status:** Draft | Under Review | Approved
 **Date:** YYYY-MM-DD
 **Version:** 1.0
-**PRD Reference:** `workspace/PRD.md`
-**RFC Reference:** `workspace/RFC.md` (if available)
+**PRD Reference:** `workspace/prd/PRD-{slug}.md`
+**RFC Reference:** `workspace/rfc/RFC-{slug}.md` (if available)
 
 ---
 

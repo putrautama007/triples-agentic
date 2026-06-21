@@ -2,8 +2,8 @@
 
 **Author:** Lynn (QA Lead)
 **Date:** YYYY-MM-DD
-**Related PRD:** workspace/PRD.md
-**Related RFC:** workspace/RFC.md
+**Related PRD:** workspace/prd/PRD-{slug}.md
+**Related RFC:** workspace/rfc/RFC-{slug}.md
 **Total Test Cases:** [N]
 **Smoke Suite (P0):** [N] cases
 

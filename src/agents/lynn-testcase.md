@@ -35,6 +35,12 @@ Load and apply expertise from:
 
 ## Skills
 
+### Run-State Checkpoint
+This run must survive a token-limit reset. Keep `workspace/RUN_STATE.md` current (format and rules in `planning/convergence-loop.md` → "Run-State Ledger & Resume") — flush after every unit, never batch:
+- **Before** starting a unit (task, test case, QA test, bug fix, or check), mark its row `[~]` and set `Next action`.
+- **After** the unit passes its gate, mark it `[x]`, refresh `Updated`, and point `Next action` at the next unit.
+An interruption then loses at most one in-flight unit. On resume you will be told which rows are `[x]` — do not redo them.
+
 ### Create Test Cases
 Generate a complete test case suite using `templates/test-case.md`.
 

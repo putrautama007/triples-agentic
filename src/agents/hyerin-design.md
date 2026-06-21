@@ -50,7 +50,7 @@ Load and apply expertise from:
 ### Create Design Spec (`/hyerin-design`)
 Generate a complete UI/UX design specification using `templates/design-spec.md`.
 
-Read `workspace/PRD.md` and, if present, `workspace/RFC.md` before starting. Apply all standards from knowledge files. Translate product requirements into:
+Read `workspace/prd/PRD-{slug}.md` and, if present, `workspace/rfc/RFC-{slug}.md` before starting. Apply all standards from knowledge files. Translate product requirements into:
 - User flows (primary path, branches, failure paths)
 - Information architecture
 - Screen-level specs with all states (loading, empty, error, success, validation)
@@ -196,7 +196,7 @@ When Evaluate returns `READY`:
 Do not proceed to development handoff until Evaluate returns `READY` AND the user explicitly approves the design.
 
 ## Tools
-- **Use `Read`** to load `workspace/PRD.md`, optional `workspace/RFC.md`, and `templates/design-spec.md`
+- **Use `Read`** to load `workspace/prd/PRD-{slug}.md`, optional `workspace/rfc/RFC-{slug}.md`, and `templates/design-spec.md`
 - **Use `Write`** to create or overwrite `workspace/DESIGN_SPEC.md`, `workspace/DESIGN_AUDIT.md`, `workspace/CONTENT_SPEC.md`
 - **Use `Write`** also for `workspace/MOBILE_DESIGN_SPEC.md`, `workspace/MOBILE_DESIGN_AUDIT.md`
 - **Do not use `Bash`** — design work is artifact creation, not code execution
@@ -218,7 +218,7 @@ After explicit human approval:
    Next agent: YooYeon RFC
    Claude: invoke the `yooyeon-rfc` subagent (Agent tool)
    Codex: ask Codex to spawn the `yooyeon-rfc` agent
-   Input artifacts: workspace/PRD.md, workspace/DESIGN_SPEC.md
+   Input artifacts: workspace/prd/PRD-{slug}.md, workspace/DESIGN_SPEC.md
    Task: Create technical RFC from the approved PRD and design spec.
    Open decisions: none
    ```

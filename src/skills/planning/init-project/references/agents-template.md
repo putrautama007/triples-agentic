@@ -16,6 +16,7 @@ This project has local TripleS Agentic support for Codex and other coding agents
 ### Start here in Codex
 
 - Use `$seoyeon` for the full PRD → Design → RFC → Tasks → Development → Test Cases → QA pipeline — SeoYeon delegates to each specialist agent automatically.
+- Ask SeoYeon to `resume` to continue a run after a token-limit reset or closed session — she reads `workspace/RUN_STATE.md` and picks up from the last in-flight unit of work.
 - Use `/skills` to browse the orchestrator skill and bundled knowledge references.
 - Or ask Codex to spawn a specialist agent directly when you need a single stage (Codex agents are explicit-invocation only — name the agent in your request):
   - `jiwoo-prd` — Product Requirements Document (gpt-5.5)
@@ -29,7 +30,7 @@ This project has local TripleS Agentic support for Codex and other coding agents
 
 ### Working rules
 
-- Treat artifacts in `workspace/` as the source of truth during TripleS workflows.
+- Treat artifacts in `workspace/` as the source of truth during TripleS workflows; `workspace/RUN_STATE.md` is the resumable run ledger.
 - Keep `.codex/agents/` and `.codex/skills/` as the canonical Codex instruction source; this file is supplemental guidance.
 - Do not skip human approval gates for PRD, design, RFC, task breakdown, or test cases.
 - Run `npx triples-agentic update` to refresh installed agents, skills, and managed guidance.

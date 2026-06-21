@@ -4,7 +4,7 @@
 **Status:** Draft | Under Review | Approved | Superseded
 **Date:** YYYY-MM-DD
 **Version:** 1.0
-**Related PRD:** workspace/PRD.md
+**Related PRD:** workspace/prd/PRD-{slug}.md
 
 ---
 
@@ -144,7 +144,7 @@ Response 400:
 
 ## References
 
-- [Link to PRD: workspace/PRD.md]
+- [Link to PRD: workspace/prd/PRD-{slug}.md]
 - [External documentation, standards, or prior RFCs]
 
 ---

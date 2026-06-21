@@ -204,8 +204,11 @@ Edit these files and reinstall to update the rules across all platforms.
 ```
 /seoyeon run
 /seoyeon status  Check current run state
+/seoyeon resume  Continue after a token-limit reset or closed session
 ```
 SeoYeon walks you through the complete workflow and delegates to each agent.
+
+Long runs are resumable. SeoYeon keeps a ledger at `workspace/RUN_STATE.md` and every agent flushes it after each completed unit of work, so if you hit a usage limit mid-pipeline, `/seoyeon resume` picks up from the last in-flight task — not the start of the stage.
 
 ### Specialist subagents (Claude Code Agent tool)
 SeoYeon delegates to these automatically during `/seoyeon run`, or invoke one directly:

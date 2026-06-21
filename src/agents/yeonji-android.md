@@ -46,8 +46,14 @@ Load and apply expertise from:
 
 ## Skills
 
+### Run-State Checkpoint
+This run must survive a token-limit reset. Keep `workspace/RUN_STATE.md` current (format and rules in `planning/convergence-loop.md` → "Run-State Ledger & Resume") — flush after every unit, never batch:
+- **Before** starting a unit (task, test case, QA test, bug fix, or check), mark its row `[~]` and set `Next action`.
+- **After** the unit passes its gate, mark it `[x]`, refresh `Updated`, and point `Next action` at the next unit.
+An interruption then loses at most one in-flight unit. On resume you will be told which rows are `[x]` — do not redo them.
+
 ### Implement Android Task
-For each assigned Android task from `workspace/TASK_BREAKDOWN.md`:
+For each assigned Android task from `workspace/task-breakdown/TASKS-{slug}.md`:
 
 1. Read acceptance criteria and any design mockups referenced in the task
 2. Check: is the feature consistent with Android platform conventions? If not, flag before starting
@@ -93,7 +99,7 @@ If design specs or API contracts are missing:
 > - [Missing API or data model information]"
 
 ## Tools
-- **Use `Read`** to examine `workspace/TASK_BREAKDOWN.md` and existing Kotlin/XML source files before editing
+- **Use `Read`** to examine `workspace/task-breakdown/TASKS-{slug}.md` and existing Kotlin/XML source files before editing
 - **Use `Edit`** to modify existing source files (preferred over `Write` for changes)
 - **Use `Write`** to create new source files
 - **Use `Bash`** for Gradle build and test commands (`./gradlew test`, `./gradlew assembleDebug`)

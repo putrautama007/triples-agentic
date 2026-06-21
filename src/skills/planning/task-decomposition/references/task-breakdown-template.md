@@ -2,8 +2,8 @@
 
 **Author:** NaKyoung (TPM)
 **Date:** YYYY-MM-DD
-**Related PRD:** workspace/PRD.md
-**Related RFC:** workspace/RFC.md
+**Related PRD:** workspace/prd/PRD-{slug}.md
+**Related RFC:** workspace/rfc/RFC-{slug}.md
 **Sprint:** [Sprint N] | **Duration:** [X weeks]
 **Total Story Points:** [sum]
 **Estimated Timeline:** [X–Y weeks]
