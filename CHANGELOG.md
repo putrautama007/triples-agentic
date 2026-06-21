@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.10.1] — 2026-06-21
+
+### Changed
+- add DaHyun checker agent and Code Quality Check Loop to workflow (`c6f6a1b`)
+
+[2.10.1]: https://github.com/putrautama007/triples-agentic/compare/v2.10.0...v2.10.1
+
 ## [2.10.0] — 2026-06-19
 
 ### Added
