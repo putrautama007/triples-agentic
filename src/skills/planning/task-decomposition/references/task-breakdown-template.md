@@ -43,6 +43,7 @@
 **Assignee:** [YuBin / Kaede / YeonJi / SoHyun / Kotone]
 **Platform:** [Web / Android / iOS / Flutter / Backend]
 **Dependencies:** none / TASK-XXX
+**Parallel Group:** PG-1
 
 **Description:**
 One paragraph of what needs to be done and why.
@@ -70,6 +71,7 @@ One paragraph of what needs to be done and why.
 **Assignee:** [Agent]
 **Platform:** [Platform]
 **Dependencies:** TASK-001
+**Parallel Group:** PG-2
 
 **Description:**
 [Description]
@@ -99,6 +101,7 @@ One paragraph of what needs to be done and why.
 **Assignee:** [Agent]
 **Platform:** Backend
 **Dependencies:** none
+**Parallel Group:** PG-1
 
 **Description:**
 [Description]
@@ -127,6 +130,7 @@ One paragraph of what needs to be done and why.
 **Assignee:** Kaede (Backend)
 **Platform:** Backend / DevOps
 **Dependencies:** none
+**Parallel Group:** PG-1
 
 **Description:**
 [e.g., Configure PostgreSQL schema and run initial migration]
@@ -145,6 +149,20 @@ TASK-I01 (DB setup)
             └── TASK-002 (Frontend integration)
                     └── TASK-003 (UI polish)
 ```
+
+---
+
+## Execution Plan — Parallel Groups (Waves)
+
+Tasks are grouped into waves derived from the dependency map. Tasks in the same wave have no dependency on each other and can be built in parallel; the next wave starts once its dependencies (earlier waves) are done.
+
+| Wave | Tasks | Assignees | Runs after |
+|------|-------|-----------|------------|
+| PG-1 | TASK-I01, TASK-003 | Kaede, [Agent] | — (no dependencies) |
+| PG-2 | TASK-001 | Kaede | PG-1 |
+| PG-3 | TASK-002 | YuBin | PG-2 |
+
+> Within a wave, a developer agent may implement its same-group tasks concurrently (e.g. via the `Task` tool). Keep tasks across waves in order.
 
 ---
 

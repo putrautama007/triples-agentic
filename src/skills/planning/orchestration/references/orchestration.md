@@ -12,11 +12,12 @@ The orchestrator's job is to route work, not do it. Delegate early, track progre
 ## Standard Workflow Sequence
 
 ```
-User Input → PRD → Design → RFC → Task Breakdown → (Dev ∥ Test Cases) → QA → Delivery
+User Input → PRD → Design → RFC → Task Breakdown → Dev → QA → Delivery
+                  └─────────── Test Cases (PRD-driven, parallel) ──────────┘
 ```
 
 Human review gates are mandatory at: PRD, Design, RFC, Task Breakdown, Test Cases.
-Development and Test Case creation run in parallel once Task Breakdown is approved.
+Test Case creation is PRD-driven: it starts at PRD approval and runs in parallel with Design, RFC, Task Breakdown, and Development (enriched by the RFC once approved). Development starts once Task Breakdown is approved. QA requires Development complete **and** Test Cases approved.
 
 ### Human Approval Gate Enforcement
 

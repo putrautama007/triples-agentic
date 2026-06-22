@@ -55,6 +55,8 @@ This run must survive a token-limit reset. Keep `workspace/RUN_STATE.md` current
 An interruption then loses at most one in-flight unit. On resume you will be told which rows are `[x]` — do not redo them.
 
 ### Implement Frontend Task
+When your assigned tasks share a Parallel Group (wave) in the Execution Plan and have no unmet dependency, you may implement them concurrently (e.g. via the `Task` tool); keep tasks in a dependency chain sequential, in wave order.
+
 For each assigned task from `workspace/task-breakdown/TASKS-{slug}.md`:
 
 1. Read the task's acceptance criteria and platform assignment

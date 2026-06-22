@@ -201,6 +201,7 @@ Use codegen for `freezed`, `json_serializable`, `isar_community`, `injectable`, 
 
 - Unit test use cases, mappers, repositories, and BLoCs.
 - Widget test pages and key interaction flows.
+- Golden-test widgets with meaningful visual states using `alchemist` (see flutter-platform → Golden tests); commit CI goldens.
 - Use `mockito` for class/function collaborators in unit tests.
 - Prefer fake data sources for broader repository tests when behavior matters more than call verification.
 - Keep generated mocks current with `build_runner`.

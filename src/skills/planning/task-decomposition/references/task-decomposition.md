@@ -27,6 +27,14 @@ Initiative (months)
 4. **Every task must have testable acceptance criteria.** "Done" is not a criterion.
 5. **Estimate at the task level, not story level.** Roll up estimates bottom-up.
 
+## Parallel Grouping
+
+Once dependencies are set, group tasks into **waves** so independent work runs concurrently:
+
+- Treat tasks and their dependencies as a DAG. Assign each task a parallel group by topological level: `PG-1` = tasks with no dependencies; `PG-N` = tasks whose dependencies all sit in earlier waves.
+- **Invariant:** no task depends on another task in its own group — same-group tasks are independent (Rule 2) and safe to build in parallel.
+- Tasks in a dependency chain land in different waves and run in order. Record the wave on each task and summarise waves in an Execution Plan so builders know what to fan out.
+
 ## Story Mapping
 
 Story mapping organises user stories by user journey (x-axis) and priority/release (y-axis):

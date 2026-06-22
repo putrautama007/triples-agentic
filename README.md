@@ -34,13 +34,12 @@ SeoYeon is the only agent that stays a Skill (`/seoyeon` on Claude Code, `$seoye
 ```
 User → SeoYeon (EM)
          → JiWoo (PRD) [human review loop]
-         → HyeRin (UI/UX Design) [human review loop]
-         → YooYeon (RFC) [human review loop]
-         → NaKyoung (Tasks) [human review loop]
+         → HyeRin (UI/UX Design) [human review loop]   ┐ Lynn (Test Cases) runs
+         → YooYeon (RFC) [human review loop]            │ as a PRD-driven parallel
+         → NaKyoung (Tasks) [human review loop]         ┘ track from PRD approval
          → YuBin + Kaede + YeonJi + SoHyun + Kotone [parallel dev]
-           + Lynn (Test Cases) [human review loop]
          → DaHyun (Check: tests/types/lint) [auto-loop on failure]
-         → ShiOn (QA) → Go/No-Go
+         → ShiOn (QA) → Go/No-Go   (needs dev complete + Test Cases approved)
 ```
 
 Full Mermaid diagram: [docs/workflow.md](docs/workflow.md)
@@ -204,11 +203,15 @@ Edit these files and reinstall to update the rules across all platforms.
 
 ### Full pipeline (Claude Code)
 ```
-/seoyeon run
-/seoyeon status  Check current run state
-/seoyeon resume  Continue after a token-limit reset or closed session
+/seoyeon run                Full pipeline from PRD
+/seoyeon run --from rfc      Start at RFC (attach/place PRD + Design first)
+/seoyeon run --from dev      Start at Development (attach/place Tasks + Design first)
+/seoyeon status             Check current run state
+/seoyeon resume             Continue after a token-limit reset or closed session
 ```
 SeoYeon walks you through the complete workflow and delegates to each agent.
+
+Already have an upstream artifact? Start mid-pipeline with `/seoyeon run --from design|rfc|tasks|dev` and attach (or pre-place in `workspace/`) the documents that stage depends on — skipped stages are recorded as provided, and every downstream human-approval gate still fires. If a stage agent finds the supplied context unclear, it asks you numbered open questions and, when an answer invalidates an upstream doc, spawns that doc's owning agent to revise it.
 
 Long runs are resumable. SeoYeon keeps a ledger at `workspace/RUN_STATE.md` and every agent flushes it after each completed unit of work, so if you hit a usage limit mid-pipeline, `/seoyeon resume` picks up from the last in-flight task — not the start of the stage.
 

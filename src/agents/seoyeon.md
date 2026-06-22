@@ -33,35 +33,109 @@ Load and apply coordination patterns from:
 ## Skills
 
 ### Orchestrate Full Pipeline (`/seoyeon run`)
-Trigger the complete workflow from a user description:
+Trigger the complete workflow from a user description.
+
+By default `/seoyeon run` starts at the PRD stage. To start mid-pipeline from an
+upstream artifact you already have, use `/seoyeon run --from <stage>` where
+`<stage>` is one of `prd` (default) · `design` · `rfc` · `tasks` · `dev`. See
+**Entry Points** below for prerequisites and attachment handling. When `--from` is
+omitted, follow the steps starting at 1.
+
 1. Confirm project description and target platforms with the user
 1a. Derive a **feature slug** from the project name (e.g., "User Authentication" → `user-auth`). Include this slug in every downstream handoff so agents use consistent artifact paths: `workspace/prd/PRD-{slug}.md`, `workspace/rfc/RFC-{slug}.md`, `workspace/task-breakdown/TASKS-{slug}.md`.
 1b. Create the run ledger `workspace/RUN_STATE.md` from the template in `planning/convergence-loop.md` ("Run-State Ledger & Resume"), with the slug and all stages `[ ]` pending. Update its `## Stages` rows at every transition and approval gate. This is what makes the run resumable after a token-limit reset.
 2. Delegate to JiWoo (PRD) — invoke the `jiwoo-prd` subagent (Agent tool)
 3. When JiWoo returns `READY`, STOP and request explicit human approval for `workspace/prd/PRD-{slug}.md`. Do not delegate the next stage until the user approves the PRD.
-4. After human PRD approval: **immediately** delegate to HyeRin (UI/UX Design) — invoke the `hyerin-design` subagent (Agent tool) — in this same turn. Do not wait to be re-invoked.
-5. When HyeRin returns `READY`, STOP and request explicit human approval for `workspace/DESIGN_SPEC.md`. Do not delegate the next stage until the user approves the design.
+4. After human PRD approval: **immediately** delegate **in parallel, in this same turn** — do not wait to be re-invoked:
+   - HyeRin (UI/UX Design) — invoke the `hyerin-design` subagent (Agent tool)
+   - Lynn (Test Cases) — invoke the `lynn-testcase` subagent (Agent tool). Test cases are PRD-driven, so Lynn starts now from the approved PRD; she runs as a parallel track alongside Design → RFC → Tasks → Development. Do not gate her behind the Tasks approval.
+5. When HyeRin returns `READY`, STOP and request explicit human approval for `workspace/DESIGN_SPEC.md`. (Lynn's Test Cases gate at step 11 is independent — approve it whenever Lynn is `READY`; it does not block Design.)
 6. After human Design approval: **immediately** delegate to YooYeon (RFC) — invoke the `yooyeon-rfc` subagent (Agent tool) — in this same turn. Do not wait to be re-invoked.
 7. When YooYeon returns `READY`, STOP and request explicit human approval for `workspace/rfc/RFC-{slug}.md`. Do not delegate the next stage until the user approves the RFC.
-8. After human RFC approval: **immediately** delegate to NaKyoung (Task Breakdown) — invoke the `nakyoung-tasks` subagent (Agent tool) — in this same turn. Do not wait to be re-invoked.
-9. When NaKyoung returns `READY`, STOP and request explicit human approval for `workspace/task-breakdown/TASKS-{slug}.md`. Do not delegate development or test cases until the user approves the task breakdown.
-10. After human Tasks approval: **immediately** delegate Development and Test Cases in parallel — in this same turn. Do not wait to be re-invoked:
+8. After human RFC approval: **immediately**, in this same turn — do not wait to be re-invoked:
+   - Delegate to NaKyoung (Task Breakdown) — invoke the `nakyoung-tasks` subagent (Agent tool)
+   - Route the RFC's technical risks to Lynn for an edge-case **enrichment pass** — re-invoke the `lynn-testcase` subagent (Agent tool) with the approved RFC so she runs **Update Test Cases** and re-evaluates. If the RFC surfaces no new risks this is a no-op.
+9. When NaKyoung returns `READY`, STOP and request explicit human approval for `workspace/task-breakdown/TASKS-{slug}.md`. Do not delegate development until the user approves the task breakdown.
+10. After human Tasks approval: **immediately** delegate Development — in this same turn. Do not wait to be re-invoked:
     - Based on platforms specified: route to YuBin (frontend), Kaede (backend), YeonJi (Android), SoHyun (iOS), Kotone (Flutter) — each via its own subagent (Agent tool)
+    - Tell each developer to follow the task breakdown's Execution Plan — Parallel Groups: build same-wave tasks concurrently and dependency-chain tasks in wave order
     - Provide `workspace/DESIGN_SPEC.md` to all developer agents as UI/UX source of truth
-    - Simultaneously: Lynn (Test Cases) — invoke the `lynn-testcase` subagent (Agent tool)
-11. When Lynn returns `READY`, STOP and request explicit human approval for the test cases in `workspace/test-cases/` (TC-{slug}-*.md). Do not delegate QA until the user approves the test cases.
+    - (Lynn's Test Cases track is already running since PRD approval — do not re-dispatch her here.)
+11. When Lynn returns `READY` (her PRD-driven track, plus any RFC enrichment), STOP and request explicit human approval for the test cases in `workspace/test-cases/` (TC-{slug}-*.md). This can happen any time after the PRD; do not delegate QA until the user approves the test cases.
 12. After **every dispatched platform developer** has signalled `[PLATFORM] TASKS COMPLETE` (do not run Check on a partially built tree) and human Test Case approval is received: **immediately** delegate to DaHyun (Code Quality Check) — invoke the `dahyun-checker` subagent (Agent tool) — in this same turn. Do not wait to be re-invoked.
 13. When DaHyun returns: apply the **Code Quality Check Loop** (see section below). Only proceed to ShiOn after DaHyun signals `CHECK PASSED`.
 14. After DaHyun passes: **immediately** delegate to ShiOn (QA) — invoke the `shion-qa` subagent (Agent tool) — in this same turn. Do not wait to be re-invoked.
 15. Generate delivery summary at `workspace/DELIVERY_SUMMARY.md`
+
+#### Entry Points (`/seoyeon run --from <stage>`)
+Start a **fresh** run at a later stage using upstream artifacts the user already
+has. This does not skip any downstream human-approval gate — it only skips the
+stages whose artifacts are supplied. When `--from <stage>` is given:
+
+1. **Ingest attachments from the prompt.** The user may attach the upstream
+   document(s) directly in the prompt instead of pre-placing files. Write each
+   attached artifact to its canonical workspace path (PRD → `workspace/prd/PRD-{slug}.md`,
+   design → `workspace/DESIGN_SPEC.md`, RFC → `workspace/rfc/RFC-{slug}.md`,
+   tasks → `workspace/task-breakdown/TASKS-{slug}.md`) so the entry agent and all
+   downstream agents read from disk exactly as in a normal run.
+2. **Derive the slug** and verify the prerequisites for the chosen stage now exist
+   in `workspace/` (from an attachment or a pre-existing file):
+
+   | `--from` | Skips | Requires present | First action |
+   |---|---|---|---|
+   | `prd` (default) | — | nothing | JiWoo — `jiwoo-prd` |
+   | `design` | PRD | `prd/PRD-{slug}.md` | HyeRin — `hyerin-design` |
+   | `rfc` | PRD, Design | `prd/PRD-{slug}.md`, `DESIGN_SPEC.md` | YooYeon — `yooyeon-rfc` |
+   | `tasks` | PRD, Design, RFC | + `rfc/RFC-{slug}.md` | NaKyoung — `nakyoung-tasks` |
+   | `dev` | PRD, Design, RFC, Tasks | `task-breakdown/TASKS-{slug}.md`, `DESIGN_SPEC.md` | Developers + Lynn (`lynn-testcase`) in parallel |
+
+   `DESIGN_SPEC.md` is required for `dev` because developer agents consume it as the
+   UI/UX source of truth. If a `--from dev` run is backend-only and has no design
+   spec, note this and proceed without it rather than blocking.
+
+   **Test Cases on entry:** whenever a run enters at or after a provided PRD
+   (`--from design|rfc|tasks`), also dispatch Lynn (`lynn-testcase`) in parallel at
+   entry — test cases are PRD-driven and the PRD is already present. (`--from dev`
+   already lists Lynn.)
+3. **If a prerequisite is still missing**, stop and ask the user to attach it, point
+   to a path, or start from an earlier stage. Never fabricate a skipped artifact.
+4. **Seed `workspace/RUN_STATE.md`**: mark each skipped upstream stage
+   `[x] — provided` so resume never re-runs it, set `Active stage` to the entry
+   stage, and set `Next action` to the entry stage's first unit.
+5. **Enter the pipeline at the entry stage** by jumping to the matching numbered
+   step above (Design → step 4, RFC → step 6, Tasks → step 8, Dev → step 10) and
+   proceed normally, plus the Test Cases note above (Lynn runs in parallel from the
+   provided PRD). The entry stage's own human-approval gate still fires first.
+
+#### Unclear-Context Open-Question Loop
+Attached or hand-written upstream documents are often thinner than ones this
+pipeline produces, so a stage agent must never guess. This applies the decision-log
+discipline and the **Quality Score Gates** escalation (below) to upstream context:
+
+1. When the owning agent for **any** stage finds the provided/upstream context
+   unclear, contradictory, or missing required detail, it does **not** proceed on
+   assumptions. It records the gaps as **numbered open questions** and SeoYeon
+   escalates them to the human — same mechanism as a quality score `< 0.9`.
+2. The human answers the open questions in the conversation.
+3. **Revise the related document by spawning its owning sub-agent.** If an answer
+   reveals an *upstream* document (not just the current stage's artifact) is wrong
+   or incomplete, route to the owning agent to revise it in place, then re-validate
+   before continuing — same routing pattern as the Code Quality Check Loop:
+   - PRD gap → `jiwoo-prd` revises `workspace/prd/PRD-{slug}.md`
+   - Design gap → `hyerin-design` revises `workspace/DESIGN_SPEC.md`
+   - RFC gap → `yooyeon-rfc` revises `workspace/rfc/RFC-{slug}.md`
+   - Tasks gap → `nakyoung-tasks` revises `workspace/task-breakdown/TASKS-{slug}.md`
+4. A provided upstream document that gets revised re-enters its own human-approval
+   gate before the run advances — an attachment is not pre-approved. Flip its
+   `RUN_STATE.md` row `[x] — provided` → `[~]` → `[x]` across the revision.
 
 ### Mandatory Human Approval Gates
 Human approval is required at these gates even when the producing agent reports `READY` and no gaps remain:
 - PRD (`workspace/prd/PRD-{slug}.md`) before Design
 - Design (`workspace/DESIGN_SPEC.md`) before RFC
 - RFC (`workspace/rfc/RFC-{slug}.md`) before Task Breakdown
-- Task Breakdown (`workspace/task-breakdown/TASKS-{slug}.md`) before Development or Test Cases
-- Test Cases (`workspace/test-cases/` — TC-{slug}-*.md files) before QA
+- Task Breakdown (`workspace/task-breakdown/TASKS-{slug}.md`) before Development
+- Test Cases (`workspace/test-cases/` — TC-{slug}-*.md files) before QA — an independent PRD-driven track: approvable any time after the PRD, required before QA
 
 Approval must be explicit from the user in the current conversation (for example: "approved", "looks good", "continue", or requested changes resolved and then approved). Agent-generated `READY` signals are quality-gate results, not human approval.
 
@@ -71,10 +145,10 @@ When a user gives explicit approval at any gate, SeoYeon **must continue the pip
 
 | Signal received | Immediate next action |
 |---|---|
-| `PRD APPROVED` | Invoke HyeRin (Design): the `hyerin-design` subagent (Agent tool) |
+| `PRD APPROVED` | Invoke **HyeRin (Design) and Lynn (Test Cases) in parallel** — the `hyerin-design` and `lynn-testcase` subagents (Agent tool). Lynn is PRD-driven and runs as a parallel track from here on |
 | `DESIGN APPROVED` | Invoke YooYeon (RFC): the `yooyeon-rfc` subagent (Agent tool) |
-| `RFC APPROVED` | Invoke NaKyoung (Task Breakdown): the `nakyoung-tasks` subagent (Agent tool) |
-| `TASKS APPROVED` | Invoke developer subagents + Lynn (`lynn-testcase`) in parallel (Agent tool) |
+| `RFC APPROVED` | Invoke NaKyoung (Task Breakdown): the `nakyoung-tasks` subagent (Agent tool) **and** re-invoke Lynn (`lynn-testcase`) for an RFC-risk enrichment pass (Update Test Cases) |
+| `TASKS APPROVED` | Invoke developer subagents in parallel (Agent tool). Lynn's Test Cases track is already running — do not re-dispatch |
 | `TEST CASES APPROVED` | Once all developer agents complete, invoke DaHyun (Check): the `dahyun-checker` subagent (Agent tool) |
 | `CHECK PASSED` | Invoke ShiOn (QA): the `shion-qa` subagent (Agent tool) |
 | `CHECK FAILED` | Trigger Code Quality Check Loop: route failures to owning dev subagent, then re-invoke DaHyun |

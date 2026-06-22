@@ -44,6 +44,8 @@ For every planning artifact:
 | Test Cases | Lynn | `workspace/test-cases/TC-{slug}-*.md` | `TEST CASES APPROVED` |
 | QA | ShiOn | `workspace/QA_REPORT.md` + `workspace/BUGS/*.md` | `QA COMPLETE — GO` or `QA COMPLETE — NO-GO` |
 
+**Test Cases is a PRD-driven parallel track.** Lynn starts at PRD approval — not at the Tasks gate — and runs alongside Design → RFC → Tasks → Development. The RFC contributes technical-risk edge cases via an enrichment pass (Update Test Cases) once it is approved. The Test Cases gate sits before QA, not after Tasks; QA still requires both all developers `[PLATFORM] TASKS COMPLETE` **and** Test Cases approved.
+
 ## Run-State Ledger & Resume (token-limit resilience)
 
 Long runs get cut off mid-stage — a usage-limit reset, a context compaction, or a closed terminal. Sub-agents do **not** keep memory between invocations: when a sub-agent is interrupted, everything it has not written to disk is lost. The run-state ledger makes every run resumable from the last completed unit of work, with no dependence on conversation memory. It works the same in Claude Code and Codex.
@@ -94,6 +96,8 @@ Flush after each completed unit — never batch:
 3. An interruption therefore loses at most one in-flight unit.
 
 The orchestrator creates the ledger at run start and owns the `## Stages` rows (one update per stage transition or approval). Producing agents own their own task/test rows.
+
+A run may start at a later stage (`/seoyeon run --from rfc|dev|…`) using upstream artifacts the user supplies — pre-placed in `workspace/` or attached in the prompt. Skipped upstream stages are seeded `[x] — provided` so resume treats them as done and never re-runs them. A provided upstream document may still be revised mid-run (the orchestrator spawns its owning agent) and then re-enters its human-approval gate — its ledger row flips `[x] — provided` → `[~]` → `[x]` across the revision.
 
 ### Resume rule
 

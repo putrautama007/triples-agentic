@@ -43,6 +43,7 @@ flowchart TD
 
     PRDEval -->|"✅ READY"| HumanPRDGate["🧑 Human Approval\nApprove PRD?"]
     HumanPRDGate -->|"Approved"| HyeRin
+    HumanPRDGate -->|"Approved (PRD-driven, parallel)"| TestPhase
 
     subgraph DESIGN_LOOP["🎨 Design Phase — HyeRin (Senior UI/UX Designer)"]
         HyeRin["HyeRin\n(hyerin-design)"]
@@ -79,7 +80,6 @@ flowchart TD
 
     TaskEval -->|"✅ READY"| HumanTasksGate["🧑 Human Approval\nApprove Tasks?"]
     HumanTasksGate -->|"Approved"| DevPhase
-    HumanTasksGate -->|"Approved"| TestPhase
 
     subgraph note ["📋 Design Spec → Developer Agents"]
         DesignNote["workspace/DESIGN_SPEC.md\nprovided to all developer agents\nas UI/UX source of truth"]
@@ -217,8 +217,11 @@ Use artifact paths as the source of truth. Do not rely on hidden conversation me
 ## Convergence Rules
 
 - Planning stages loop through **Create → Review → Evaluate → Human Review → Revise** until `READY`.
+- A run can start mid-pipeline with `/seoyeon run --from design|rfc|tasks|dev` when the upstream artifacts already exist (pre-placed in `workspace/` or attached in the prompt); skipped stages are seeded `[x] — provided` and **all downstream human-approval gates still fire**.
+- If a stage agent finds upstream context unclear, it raises numbered open questions for the human instead of guessing; an answer that invalidates an upstream document routes back to that document's owning agent for revision (and re-approval).
 - Development starts only after PRD, Design, RFC, and Task Breakdown are approved.
-- Test cases can run in parallel with development after task approval.
+- Each task carries a Parallel Group (wave); developer agents build same-wave, independent tasks concurrently and dependency-chain tasks in wave order.
+- Test cases are a PRD-driven parallel track: Lynn starts at PRD approval and runs alongside Design → RFC → Tasks → Development; the RFC adds technical-risk edge cases via an enrichment pass once approved. The Test Cases gate is required before QA, not after Tasks.
 - DaHyun's Code Quality Check runs once all developer agents finish and test cases are approved; `CHECK FAILED` routes back to the owning developer agent and re-runs, escalating to human after 5 loops.
 - QA `NO-GO` routes defects back to owning developer agents, then returns to ShiOn for re-test.
 - Human escalation happens after the same planning gate fails 3 times or the same QA defect survives 2 fix attempts.
@@ -230,11 +233,13 @@ Use artifact paths as the source of truth. Do not rely on hidden conversation me
 
 ### Full pipeline — Claude Code
 ```
-/seoyeon run
-/seoyeon status   → Check current run state
-/seoyeon resume   → Continue after a token-limit reset or closed session
+/seoyeon run                  → Full pipeline from PRD
+/seoyeon run --from rfc        → Start at RFC (attach/place PRD + Design first)
+/seoyeon run --from dev        → Start at Development (attach/place Tasks + Design first)
+/seoyeon status               → Check current run state
+/seoyeon resume               → Continue after a token-limit reset or closed session
 ```
-SeoYeon walks you through the entire workflow, delegating to each agent in sequence. The run ledger at `workspace/RUN_STATE.md` makes long runs resumable.
+SeoYeon walks you through the entire workflow, delegating to each agent in sequence. The run ledger at `workspace/RUN_STATE.md` makes long runs resumable. `--from <stage>` accepts `design|rfc|tasks|dev`; downstream human-approval gates are unchanged.
 
 ### Full pipeline — OpenAI Codex
 ```text

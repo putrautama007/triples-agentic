@@ -52,7 +52,19 @@ For each task include:
 - Time estimate (hours or days range)
 - Platform assignment (which developer agent handles it)
 - Dependencies on other tasks
+- Parallel Group (the wave it can execute in — assigned by the next skill)
 - Acceptance criteria (binary pass/fail)
+
+### Group Parallel Tasks
+After dependencies are assigned, derive **Parallel Groups (waves)** from the dependency graph so builder agents can execute independent tasks concurrently:
+
+1. Treat tasks + their `Dependencies` as a DAG and assign each task a parallel group by topological level:
+   - `PG-1` = every task with no dependencies
+   - `PG-N` = every task whose dependencies all sit in `PG-1 … PG-N-1`
+2. **Invariant:** no task may depend on another task in its own group. If two tasks must be ordered, they belong to different waves.
+3. Write the group onto each task as a `**Parallel Group:** PG-N` field, and emit an **Execution Plan — Parallel Groups** section listing each wave → its tasks grouped by assignee.
+
+Tasks in the same wave (especially same assignee) carry no ordering between them, so a developer agent may build them in parallel. Tasks in a dependency chain stay in separate waves and run in order.
 
 ### Review Task Breakdown
 Check each task against the readiness checklist in `skills/planning/task-decomposition/references/task-decomposition.md`. Flag tasks that are too large (> 2 days), lack testable criteria, or have unresolved dependencies.
@@ -64,6 +76,7 @@ Run the quality gate checklist from `skills/planning/task-decomposition/referenc
 - [ ] No task exceeds 2 days (16h) without a decomposition note
 - [ ] Every task has binary acceptance criteria
 - [ ] Dependencies between tasks are explicit and unblocked (or sequenced)
+- [ ] Every task is assigned a Parallel Group, and no task depends on another task in its own group
 - [ ] Total story points are realistic given team size and sprint length
 - [ ] Platform assignments are clear for all tasks
 - [ ] Timeline estimate (week-level) is documented
@@ -91,12 +104,12 @@ If Evaluate returns `GAPS FOUND`:
 When Evaluate returns `READY`:
 
 1. Present `workspace/task-breakdown/TASKS-{feature-slug}.md` with a concise summary of task count, story points, platform assignments, critical path, timeline, and assumptions
-2. Ask the user: "Do you approve this task breakdown to proceed to development and test case creation?"
+2. Ask the user: "Do you approve this task breakdown to proceed to development?"
 3. STOP and wait for explicit user approval
 4. If the user requests changes, update the task breakdown, re-run Review → Evaluate, and ask for approval again
 5. Only after explicit user approval, signal `TASKS APPROVED`
 
-Do not proceed to development or test case handoff until Evaluate returns `READY` AND the user explicitly approves the task breakdown.
+Do not proceed to development handoff until Evaluate returns `READY` AND the user explicitly approves the task breakdown.
 
 ## Tools
 - **Use `Read`** to load the PRD from `workspace/prd/`, RFC from `workspace/rfc/`, scan `workspace/task-breakdown/` for existing breakdowns, and load `templates/task-breakdown.md`
@@ -110,7 +123,7 @@ Save final task breakdown to: `workspace/task-breakdown/TASKS-{feature-slug}.md`
 
 After explicit human approval:
 1. Output: `TASKS APPROVED`
-2. Immediately present the next-stage handoffs and continue the pipeline — do not stop. Development and test case creation run in parallel:
+2. Immediately present the next-stage handoff and continue the pipeline — do not stop. Development is dispatched now; Lynn's Test Cases track is already running in parallel since PRD approval, so it is **not** dispatched here:
 
    ```
    Next agents (parallel — route based on platforms specified in task breakdown):
@@ -123,13 +136,9 @@ After explicit human approval:
    Claude: invoke the `kotone-flutter` subagent  (Flutter)
    Codex: ask Codex to spawn the `yubin-frontend` / `kaede-backend` / `yeonji-android` / `sohyun-ios` / `kotone-flutter` agents
    Input artifacts: workspace/task-breakdown/TASKS-{feature-slug}.md, workspace/DESIGN_SPEC.md
-   Task: Implement assigned tasks from the task breakdown. Use DESIGN_SPEC.md as UI/UX source of truth.
+   Task: Implement assigned tasks from the task breakdown. Use DESIGN_SPEC.md as UI/UX source of truth. Follow the Execution Plan — Parallel Groups: build tasks in the same wave (same Parallel Group) concurrently, and tasks in a dependency chain in wave order.
    
-   Test cases (simultaneously):
-   Claude: invoke the `lynn-testcase` subagent (Agent tool)
-   Codex: ask Codex to spawn the `lynn-testcase` agent
-   Input artifacts: workspace/prd/PRD-{feature-slug}.md, workspace/rfc/RFC-{feature-slug}.md
-   Task: Create test case suite covering all PRD acceptance criteria.
+   Test cases: already in progress (Lynn started at PRD approval). No action needed here.
    Open decisions: none
    ```
 

@@ -56,6 +56,8 @@ This run must survive a token-limit reset. Keep `workspace/RUN_STATE.md` current
 An interruption then loses at most one in-flight unit. On resume you will be told which rows are `[x]` — do not redo them.
 
 ### Implement Flutter Task
+When your assigned tasks share a Parallel Group (wave) in the Execution Plan and have no unmet dependency, you may implement them concurrently (e.g. via the `Task` tool); keep tasks in a dependency chain sequential, in wave order.
+
 For each assigned Flutter task from `workspace/task-breakdown/TASKS-{slug}.md`:
 
 1. Read acceptance criteria and design mockups
@@ -116,6 +118,7 @@ Check completed Flutter code against:
 - [ ] Null safety: no `!` without certainty, no unnecessary `?` types
 - [ ] Platform-adaptive: tested on both Android and iOS (or documented if single-platform)
 - [ ] Tests: widget tests + unit tests for business logic with `mockito` mocks
+- [ ] Golden tests via `alchemist` for widgets with meaningful visual states (loading/empty/error/filled); CI goldens committed
 - [ ] TDD applied: failing test written before production code (red → green → refactor)
 - [ ] All unit tests pass with zero failures
 - [ ] Unit test coverage ≥ 90% verified with coverage report
@@ -148,7 +151,7 @@ If design specs, target platforms, or API contracts are missing:
 - **fpdart** for functional error handling and explicit success/failure flows
 - **build_runner** for code generation
 - **Material 3** theming
-- **flutter_test** for widget tests, **mockito** for mocks
+- **flutter_test** for widget tests, **mockito** for mocks, **alchemist** for widget golden tests
 
 ## Output
 Implementation files at paths specified in the task breakdown.

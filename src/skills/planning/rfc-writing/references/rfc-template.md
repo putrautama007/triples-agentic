@@ -5,6 +5,7 @@
 **Date:** YYYY-MM-DD
 **Version:** 1.0
 **Related PRD:** workspace/prd/PRD-{slug}.md
+**Related Design Spec:** workspace/DESIGN_SPEC.md
 
 ---
 
