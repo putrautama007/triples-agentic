@@ -464,7 +464,7 @@ const AGENT_COMMANDS = [
 ];
 
 const KNOWLEDGE_SUMMARY = {
-  'coding-principles': ['dry', 'kiss', 'yagni', 'solid', 'slap', 'composition-over-inheritance',
+  'coding-principles': ['digest', 'dry', 'kiss', 'yagni', 'solid', 'slap', 'composition-over-inheritance',
                    'fail-fast', 'least-surprise', 'boy-scout-rule', 'tdd'],
   design:          ['ux-research', 'interaction-design', 'visual-design', 'design-system',
                    'design-handoff', 'cross-platform-design', 'mobile-design-system',
@@ -473,7 +473,8 @@ const KNOWLEDGE_SUMMARY = {
                    'product-prioritization', 'rfc-writing', 'rfc-quality-gates',
                    'architecture-patterns', 'architecture-database', 'architecture-security',
                    'task-decomposition', 'task-readiness', 'estimation',
-                   'decision-log-discipline', 'implementation-readiness', 'init-project'],
+                   'decision-log-discipline', 'implementation-readiness', 'init-project',
+                   'convergence-contract'],
   'web/frontend':  ['frontend-components', 'frontend-state', 'frontend-performance',
                    'frontend-data-fetching', 'web-accessibility', 'web-performance', 'web-security',
                    ],
@@ -482,8 +483,9 @@ const KNOWLEDGE_SUMMARY = {
   'mobile/android': ['android-architecture', 'android-platform', 'kotlin-core', 'kotlin-concurrency'],
   'mobile/ios':     ['ios-architecture', 'ios-platform', 'swift-core', 'swift-concurrency'],
   'mobile/flutter': ['flutter-architecture', 'flutter-platform', 'dart-core', 'dart-async'],
-  quality:         ['testing-strategy', 'testing-types', 'test-case-writing', 'test-case-quality',
-                   'qa-execution', 'qa-reporting', 'defect-triage', 'regression-selection'],
+  quality:         ['testing-strategy', 'testing-types', 'testing-digest', 'test-case-writing',
+                   'test-case-quality', 'qa-execution', 'qa-reporting', 'defect-triage',
+                   'regression-selection'],
 };
 
 // ─── Update helpers ───────────────────────────────────────────────────────────
