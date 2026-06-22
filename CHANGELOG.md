@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.13.1] — 2026-06-22
+
+### Changed
+- cut orchestration token burn with knowledge digests (`dc4e1b6`)
+
+[2.13.1]: https://github.com/putrautama007/triples-agentic/compare/v2.13.0...v2.13.1
+
 ## [2.13.0] — 2026-06-22
 
 ### Added
