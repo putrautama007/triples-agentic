@@ -11,8 +11,9 @@ below. Full detail: `planning/convergence-loop.md` (orchestrator-owned).
 
 ## Run-State Ledger (token-limit resilience)
 
-Sub-agents keep no memory between invocations — anything not written to disk is lost.
-`workspace/RUN_STATE.md` makes every run resumable from the last completed unit.
+Child context may be lost after interruption or compaction, so anything not written
+to disk can be lost. `workspace/RUN_STATE.md` makes every run resumable from the
+last completed unit.
 
 Status markers: `[ ]` pending · `[~]` in-progress · `[x]` done/approved · `[!]` blocked
 
@@ -31,7 +32,21 @@ Next action: {one line — the exact unit to resume}
 ## Development tasks
 - [x] TASK-001 — Kaede — done
 - [~] TASK-007 — Kaede — in-progress
+
+## Planning input queue
+- [!] 001 — {request-id} — clarification — pending
+  - Protocol: request v1|v2; response v2; attempts 1/2
+  - Target: {exact spawned planning-child target}
+  - Owner / stage: {owner} / {stage}
+  - Artifacts: {workspace paths}
+  - Questions: {q1: pending; q2: answered — summary}
 ```
+
+The orchestrator owns the planning-input queue. It stores pending and resolved
+entries in arrival order, processes concurrent requests FIFO, and records a
+second malformed response as `protocol_error` rather than guessing. Planning
+children are followed up on the same target after answers; respawn occurs only
+when that target is unavailable or its context is lost.
 
 **Write rule (flush after each unit, never batch):**
 1. **Before** starting a unit (task, test case, QA test, bug fix, check), mark its row `[~]` and set `Next action`.
@@ -47,6 +62,12 @@ Emit exactly one when your stage ends:
 - `GAPS FOUND` — list specific gaps + one clarification question each.
 - `BLOCKED` — cannot proceed; state why.
 - Implementation agents end with `[PLATFORM] TASKS COMPLETE`; checker with `CHECK PASSED`/`CHECK FAILED`; QA with `QA COMPLETE — GO`/`QA COMPLETE — NO-GO`.
+
+For Codex planning specialists only (JiWoo, HyeRin, YooYeon, NaKyoung, Lynn), a
+blocking clarification is returned to the parent as
+`TRIPLES_USER_INPUT_REQUIRED` v2. `READY` also returns to the parent, which owns
+the human **Approve / Request changes** gate. This does not alter implementation,
+checker, setup, or QA blocker handling.
 
 ## Handoff format
 

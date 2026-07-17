@@ -173,6 +173,7 @@ function allAgents() {
         displayName: shortHeading(heading, name),
         knowledgePaths: parseCommentList(content, 'knowledge'),
         templatePaths: parseCommentList(content, 'templates'),
+        humanInLoop: parseComment(content, 'human-in-loop') === 'true',
         model: parseComment(content, 'model'),
         codexModel: parseComment(content, 'codex-model'),
         tools: parseComment(content, 'tools'),

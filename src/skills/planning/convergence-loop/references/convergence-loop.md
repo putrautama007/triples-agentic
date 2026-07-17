@@ -22,7 +22,7 @@ For every planning artifact:
    - Minimum score threshold: **0.9**. If score < 0.9, the agent must escalate to the human with specific clarification questions before revising.
    - Only output `READY` when score ≥ 0.9.
 4. **Human review** — ALWAYS required before moving to the next stage, regardless of evaluation result:
-   - If `GAPS FOUND`: on Claude Code, use the available `AskUserQuestion` flow; on Codex, return specific questions to the parent, which asks the user and re-invokes the owner with the answers.
+   - If `GAPS FOUND`: on Claude Code, use the available `AskUserQuestion` flow; on Codex, return a v2 planning-gate request to the parent, which asks the user and follows up the same child target with correlated answers.
    - If `READY`: on Codex, return the artifact summary so the parent can own the explicit approval request. Preserve the direct human gate on platforms that expose it to the specialist. Do NOT proceed until the user approves.
 5. **Revise** — incorporate decisions, preserve approved sections, and record meaningful changes.
 6. **Repeat** — continue Review → Evaluate → Human review until the user explicitly approves the artifact.
@@ -48,7 +48,7 @@ For every planning artifact:
 
 ## Run-State Ledger & Resume (token-limit resilience)
 
-Long runs get cut off mid-stage — a usage-limit reset, a context compaction, or a closed terminal. Sub-agents do **not** keep memory between invocations: when a sub-agent is interrupted, everything it has not written to disk is lost. The run-state ledger makes every run resumable from the last completed unit of work, with no dependence on conversation memory. It works the same in Claude Code and Codex.
+Long runs get cut off mid-stage — a usage-limit reset, a context compaction, or a closed terminal. Child context can also become unavailable, so anything not written to disk may be lost. The run-state ledger makes every run resumable from the last completed unit of work, with no dependence on conversation memory. It works the same in Claude Code and Codex.
 
 ### The ledger file
 
@@ -84,16 +84,28 @@ Next action: {one line — the exact unit to resume}
 ## QA tests
 - (one line per test / bug during QA)
 
-## Open decisions / approvals pending
-- [!] {request-id} — {kind} — {owner} — {stage} — pending
+## Planning input queue
+- [!] 001 — {request-id} — {clarification | escalation | approval} — pending
+  - Protocol: request v1|v2; response v2; attempts 1/2
+  - Target: {exact spawned child target | parent-owned approval}
+  - Owner / stage: {owner} / {stage}
   - Artifacts: {workspace paths}
-  - Resume: {revise_and_evaluate | advance_pipeline | retry_current_task}
-  - Answers: {none | q1: summary; q2: summary}
+  - Questions: {q1: pending; q2: answered — concise summary}
+- [x] 000 — {request-id} — {kind} — resolved
+  - Protocol: request v2; response v2; attempts 1/2
+  - Target: {exact spawned child target}
+  - Owner / stage: {owner} / {stage}
+  - Artifacts: {workspace paths}
+  - Answers: {q1: concise summary; q2: concise summary}
 ```
 
-When every required answer is present, change `[!]` to `[x] — resolved` and
-retain the concise answer summary for the rest of the run. This remains compatible
-with `triples-run-state: v1`; no separate migration is required.
+Queue numbers are assigned in arrival order. Concurrent planning requests and
+parent-owned approvals are processed FIFO: only the oldest pending entry is
+presented. When every required answer is present, change `[!]` to `[x] — resolved`
+and retain the target, correlation IDs, and concise answer summary. A second
+malformed child response is instead retained as `[!] — protocol_error` with both
+validation attempts; no decision is guessed. This remains compatible with
+`triples-run-state: v1`; no separate ledger migration is required.
 
 ### Write rule (every agent)
 
@@ -110,9 +122,9 @@ A run may start at a later stage (`/seoyeon run --from rfc|dev|…`) using upstr
 
 On `/seoyeon resume` (or "continue"):
 1. Read `workspace/RUN_STATE.md`.
-2. If `## Open decisions / approvals pending` contains `[!]`, re-present only the unanswered questions and do not advance.
+2. If `## Planning input queue` contains `[!]`, process the oldest entry only. Re-present just its unanswered questions and do not advance the affected gate.
 3. Otherwise the resume point is the first `[~]` unit; if none, the first `[ ]` unit under the active stage.
-4. Re-invoke the owning agent with: "These units are `[x]` — do not redo them. Resume at {unit}." The agent re-reads its artifacts and continues.
+4. For a resolved planning request, follow up its recorded child target. Respawn only when that target is unavailable or its context is lost; seed the replacement from the artifacts, ledger, and correlated v2 response. For ordinary stage resume, tell the owner: "These units are `[x]` — do not redo them. Resume at {unit}."
 5. If no ledger exists, fall back to artifact inference (existing behavior).
 
 Never trust conversation memory to know where a run stopped — trust the ledger.
@@ -135,6 +147,26 @@ Open decisions: [numbered list or "none"]
 ```
 
 Do not depend on hidden conversation memory. Every handoff must include artifact paths and locked decisions.
+
+## Codex Planning-Gate Relay
+
+The relay is limited to JiWoo, HyeRin, YooYeon, NaKyoung, and Lynn. Codex-generated
+planning children emit `TRIPLES_USER_INPUT_REQUIRED` v2 with a stable request ID,
+owner, stage, artifacts, and one to three typed questions. Choice questions have
+two or three options and exactly one recommendation; `free_text` is used only
+when meaningful options do not exist.
+
+The parent accepts v1 and v2 requests during migration, persists them in the FIFO
+queue above, and sends only a v2 `TRIPLES_USER_INPUT_RESPONSE` correlated by
+request and question IDs. It uses native `request_user_input` without timeout
+when every question is choice-compatible, otherwise the same prompts are rendered
+in plain text. One malformed response receives a corrective same-target follow-up;
+a second becomes `protocol_error` without guessing.
+
+After all answers arrive, the parent follows up the same idle child target and
+continues in the same turn. `READY` returns to the parent, which owns **Approve /
+Request changes**. Approval advances immediately; changes return to the same
+producer. Developer, checker, setup, and QA blocker behavior is unchanged.
 
 ## Development and QA Convergence
 

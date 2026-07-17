@@ -47,7 +47,7 @@ What the agent produces and what signal it sends when done.
 | `persona` | Short label shown in the install banner |
 | `knowledge` | Comma-separated list of `skills/` paths to load |
 | `templates` | Runtime template name(s) copied from owning skill `references/*-template.md` files |
-| `human-in-loop` | Whether this workflow requires human review before handing off |
+| `human-in-loop` | Whether this planning workflow requires human review; Codex uses `true` to inject the planning-gate child v2 contract |
 | `tools` | Claude Code subagent tool allowlist; Codex agents inherit the parent tool surface |
 | `codex-model` | Model pinned in the generated Codex custom-agent TOML |
 
@@ -60,6 +60,10 @@ Specifies which tools the agent should and should not use. Claude Code also
 receives the source `tools` metadata as an enforced subagent allowlist. Codex
 does not receive a custom-agent tool array; its subagents inherit the parent
 task's available tools and use these instructions as behavioral guardrails.
+
+For Codex, `human-in-loop: true` is intentionally limited to JiWoo, HyeRin,
+YooYeon, NaKyoung, and Lynn (SeoYeon is installed as the parent skill). Only
+those five custom agents receive the planning-gate child relay contract.
 
 - **Planning/document agents** (SeoYeon, JiWoo, YooYeon, NaKyoung, Lynn): `Read` + `Write` only — no `Bash`, no code editing.
 - **Design agent** (HyeRin): `Read` + `Write` only — no `Bash`, no code editing.

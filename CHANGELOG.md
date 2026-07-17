@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.13.3] — 2026-07-17
+
+### Changed
+- replace the Codex planning-gate relay with a metadata-gated v2 child contract for JiWoo, HyeRin, YooYeon, NaKyoung, and Lynn only
+- keep planning clarification and approval on the same Codex child target, with FIFO run-state persistence and parent-owned Approve / Request changes gates
+
+### Fixed
+- accept legacy v1 planning requests while returning correlated v2 responses, and record repeated malformed payloads without guessing
+- preserve Claude `AskUserQuestion` allowlists while omitting unsupported Codex custom-agent `tools` arrays
+
+[2.13.3]: https://github.com/putrautama007/triples-agentic/compare/v2.13.2...v2.13.3
+
 ## [2.13.2] — 2026-07-17
 
 ### Fixed
