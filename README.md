@@ -118,7 +118,7 @@ npx triples-agentic all         # all platforms
 # Global install
 npx triples-agentic claude --global     # → ~/.claude/skills/
 npx triples-agentic cursor --global     # → ~/.cursor/rules/
-npx triples-agentic codex --global      # → ~/.codex/skills/
+npx triples-agentic codex --global      # → ~/.codex/agents/ + ~/.codex/skills/
 npx triples-agentic windsurf --global   # → ~/.codeium/windsurf/rules/
 
 # Install into a specific directory
@@ -244,6 +244,12 @@ Ask Codex to spawn the kaede-backend agent to implement the backend task from th
 Ask Codex to spawn the chaewon-init-setup agent to explain or audit the local TripleS setup.
 ```
 
+Codex specialists inherit the parent task's available tools. TripleS does not
+emit a custom-agent tool array because that is not part of the supported Codex
+agent schema. Human decisions are returned to SeoYeon or the invoking parent as
+`TRIPLES_USER_INPUT_REQUIRED`; the parent presents the question and re-invokes
+the specialist with the correlated answer.
+
 ### Claude + Codex continuity
 
 SeoYeon handoffs include both platform forms so you can continue the same run in either assistant:
@@ -271,11 +277,32 @@ JiWoo, HyeRin, YooYeon, NaKyoung, and Lynn all have built-in review loops:
 1. Agent creates artifact
 2. Agent reviews against quality gate checklist
 3. Agent evaluates: `READY` or `GAPS: [list]`
-4. On gaps: agent presents numbered list to user with specific questions
-5. User provides clarifications
-6. Agent updates and loops → repeat until `READY`
+4. On gaps: the agent produces up to three specific questions
+5. Claude may present them directly with `AskUserQuestion`; on Codex the specialist returns them to SeoYeon/the parent
+6. On Codex, the parent persists the request, presents it, and re-invokes the specialist with the correlated answers
+7. Agent updates and loops → repeat until `READY`
 
 This ensures PRD, design spec, RFC, task breakdown, and test cases are implementation-ready before moving forward.
+
+On Codex, `request_user_input` is used only when that native tool is callable
+and the supplied options are compatible. Otherwise the parent asks the same
+questions in plain text. A pending or partially answered request never advances
+the pipeline.
+
+### Codex troubleshooting
+
+After upgrading an existing Codex installation, refresh the generated files and
+start a new task so Codex reloads its custom-agent definitions:
+
+```bash
+npx triples-agentic update
+codex doctor --json
+```
+
+The doctor's `config.load` check should not contain a startup warning naming a
+TripleS agent as malformed. If it does, confirm the affected `.codex/agents/*.toml`
+file does not contain a top-level `tools = [...]` array, rerun the update, and
+restart Codex.
 
 ## Code Quality Check Loop
 

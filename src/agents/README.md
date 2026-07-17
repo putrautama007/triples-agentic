@@ -47,14 +47,19 @@ What the agent produces and what signal it sends when done.
 | `persona` | Short label shown in the install banner |
 | `knowledge` | Comma-separated list of `skills/` paths to load |
 | `templates` | Runtime template name(s) copied from owning skill `references/*-template.md` files |
-| `human-in-loop` | Whether this agent pauses for user review before handing off |
+| `human-in-loop` | Whether this workflow requires human review before handing off |
+| `tools` | Claude Code subagent tool allowlist; Codex agents inherit the parent tool surface |
+| `codex-model` | Model pinned in the generated Codex custom-agent TOML |
 
 ---
 
 ## Sections
 
 ### `## Tools`
-Specifies which tools the agent should and should not use. This is a behavioral guardrail — not enforced by the platform, but followed by the AI.
+Specifies which tools the agent should and should not use. Claude Code also
+receives the source `tools` metadata as an enforced subagent allowlist. Codex
+does not receive a custom-agent tool array; its subagents inherit the parent
+task's available tools and use these instructions as behavioral guardrails.
 
 - **Planning/document agents** (SeoYeon, JiWoo, YooYeon, NaKyoung, Lynn): `Read` + `Write` only — no `Bash`, no code editing.
 - **Design agent** (HyeRin): `Read` + `Write` only — no `Bash`, no code editing.
@@ -75,7 +80,7 @@ The installer (`src/bin/setup.js`) wraps each agent file in platform-specific fr
 | Claude Code | `.claude/skills/<slug>.md` | YAML `name` + `description` |
 | Cursor AI | `.cursor/rules/<slug>.mdc` | `description` + `alwaysApply: false` |
 | GitHub Copilot | `.github/instructions/<slug>.instructions.md` | `applyTo: "**"` |
-| OpenAI Codex | `.codex/skills/<slug>/SKILL.md` + supplemental project `AGENTS.md` | Skill bundle frontmatter + managed root guidance |
+| OpenAI Codex | `.codex/agents/<slug>.toml`; SeoYeon remains `.codex/skills/seoyeon/SKILL.md` | Custom-agent TOML + managed project `AGENTS.md` |
 | Windsurf | Section in `.windsurfrules` | Inline heading |
 
 ---

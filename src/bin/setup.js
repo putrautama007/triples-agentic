@@ -176,7 +176,6 @@ function allAgents() {
         model: parseComment(content, 'model'),
         codexModel: parseComment(content, 'codex-model'),
         tools: parseComment(content, 'tools'),
-        codexTools: parseCommentList(content, 'codex-tools'),
       };
     })
     .sort((a, b) => a.name.localeCompare(b.name));

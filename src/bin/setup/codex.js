@@ -64,6 +64,57 @@ const CODEX_AGENT_SKILL_METADATA = {
   },
 };
 
+const CODEX_HUMAN_INPUT_RELAY = `## Codex Human-Input Relay (Mandatory)
+
+These Codex-specific rules override any earlier instruction to call an ask-user tool, address the user directly, wait inside this specialist thread, approve an artifact, or hand off to the next stage.
+
+- The parent Codex agent owns all user interaction. Do not call \`request_user_input\` or attempt to pause the user conversation yourself.
+- When clarification, approval, or escalation is required, return exactly one blocking request with at most three questions and then stop without continuing the stage.
+- Use two or three mutually exclusive options with exactly one recommendation when the decision supports choices. Omit \`options\` for genuinely free-form questions; the parent will use the plain-text fallback.
+- Use an opaque unique \`request_id\`. Include every affected workspace artifact and one of these resume actions: \`revise_and_evaluate\`, \`advance_pipeline\`, or \`retry_current_task\`.
+- Emit the request in this shape:
+
+\`\`\`text
+TRIPLES_USER_INPUT_REQUIRED
+{
+  "version": 1,
+  "request_id": "<opaque-unique-id>",
+  "kind": "clarification|approval|escalation",
+  "owner": "<agent-name>",
+  "stage": "<pipeline-stage>",
+  "artifact_paths": ["workspace/..."],
+  "questions": [
+    {
+      "id": "q1",
+      "prompt": "<specific decision needed>",
+      "options": [
+        {
+          "label": "<short label>",
+          "description": "<impact or tradeoff>",
+          "recommended": true
+        },
+        {
+          "label": "<alternative label>",
+          "description": "<alternative impact or tradeoff>",
+          "recommended": false
+        }
+      ]
+    }
+  ],
+  "resume_action": "revise_and_evaluate|advance_pipeline|retry_current_task"
+}
+TRIPLES_END_USER_INPUT_REQUIRED
+\`\`\`
+
+- When an artifact passes its quality gate, return \`READY\` to the parent with its score when required, artifact paths, summary, assumptions, and risks. Do not ask for approval or emit an approved signal; the parent creates and owns the approval request.
+- After the parent re-invokes you, it will include the correlated answer envelope below. Verify the \`request_id\` and consume only answers for the listed question IDs. If any required answer is missing, return the same blocking request instead of continuing.
+
+\`\`\`text
+TRIPLES_USER_INPUT_RESPONSE
+{"version":1,"request_id":"<same-id>","answers":[{"question_id":"q1","answer":"..."}]}
+\`\`\`
+`;
+
 function codexSkillMetadata(agent) {
   return CODEX_AGENT_SKILL_METADATA[agent.slug] || {
     description: `Use when the user wants help from the TripleS ${agent.displayName} workflow.`,
@@ -165,11 +216,8 @@ function codexAgentTomlContent(agent, helpers) {
     `description = "${tomlEscape(meta.description)}"`,
   ];
   if (agent.codexModel) lines.push(`model = "${tomlEscape(agent.codexModel)}"`);
-  if (agent.codexTools && agent.codexTools.length) {
-    const arr = agent.codexTools.map(t => `"${tomlEscape(t)}"`).join(', ');
-    lines.push(`tools = [${arr}]`);
-  }
-  lines.push(`developer_instructions = ${tomlMultilineLiteral(stripAgentMetadataComments(agent.content))}`);
+  const instructions = `${stripAgentMetadataComments(agent.content).trimEnd()}\n\n${CODEX_HUMAN_INPUT_RELAY}`;
+  lines.push(`developer_instructions = ${tomlMultilineLiteral(instructions)}`);
   return lines.join('\n') + '\n';
 }
 

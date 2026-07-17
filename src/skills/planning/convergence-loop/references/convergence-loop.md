@@ -22,8 +22,8 @@ For every planning artifact:
    - Minimum score threshold: **0.9**. If score < 0.9, the agent must escalate to the human with specific clarification questions before revising.
    - Only output `READY` when score ≥ 0.9.
 4. **Human review** — ALWAYS required before moving to the next stage, regardless of evaluation result:
-   - If `GAPS FOUND`: ask the user specific questions to resolve the gaps, then revise and re-evaluate.
-   - If `READY`: present the artifact summary and ask the user for explicit approval. Do NOT proceed until the user approves.
+   - If `GAPS FOUND`: on Claude Code, use the available `AskUserQuestion` flow; on Codex, return specific questions to the parent, which asks the user and re-invokes the owner with the answers.
+   - If `READY`: on Codex, return the artifact summary so the parent can own the explicit approval request. Preserve the direct human gate on platforms that expose it to the specialist. Do NOT proceed until the user approves.
 5. **Revise** — incorporate decisions, preserve approved sections, and record meaningful changes.
 6. **Repeat** — continue Review → Evaluate → Human review until the user explicitly approves the artifact.
 
@@ -85,8 +85,15 @@ Next action: {one line — the exact unit to resume}
 - (one line per test / bug during QA)
 
 ## Open decisions / approvals pending
-- none
+- [!] {request-id} — {kind} — {owner} — {stage} — pending
+  - Artifacts: {workspace paths}
+  - Resume: {revise_and_evaluate | advance_pipeline | retry_current_task}
+  - Answers: {none | q1: summary; q2: summary}
 ```
+
+When every required answer is present, change `[!]` to `[x] — resolved` and
+retain the concise answer summary for the rest of the run. This remains compatible
+with `triples-run-state: v1`; no separate migration is required.
 
 ### Write rule (every agent)
 
@@ -103,22 +110,25 @@ A run may start at a later stage (`/seoyeon run --from rfc|dev|…`) using upstr
 
 On `/seoyeon resume` (or "continue"):
 1. Read `workspace/RUN_STATE.md`.
-2. The resume point is the first `[~]` unit; if none, the first `[ ]` unit under the active stage.
-3. Re-invoke the owning agent with: "These units are `[x]` — do not redo them. Resume at {unit}." The agent re-reads its artifacts and continues.
-4. If no ledger exists, fall back to artifact inference (existing behavior).
+2. If `## Open decisions / approvals pending` contains `[!]`, re-present only the unanswered questions and do not advance.
+3. Otherwise the resume point is the first `[~]` unit; if none, the first `[ ]` unit under the active stage.
+4. Re-invoke the owning agent with: "These units are `[x]` — do not redo them. Resume at {unit}." The agent re-reads its artifacts and continues.
+5. If no ledger exists, fall back to artifact inference (existing behavior).
 
 Never trust conversation memory to know where a run stopped — trust the ledger.
 
 ## Cross-Platform Invocation Contract
 
-Claude Code may expose agents as slash commands. Codex exposes them as skills. The orchestrator should write handoffs in both forms so either tool can continue the run.
+Claude Code and Codex expose specialists as custom subagents; SeoYeon remains the
+orchestrator skill. The orchestrator should write handoffs in both forms so either
+tool can continue the run.
 
 Use this format:
 
 ```text
 Next agent: JiWoo PRD
-Claude: /jiwoo-prd
-Codex: Use $jiwoo-prd
+Claude: invoke the `jiwoo-prd` subagent (Agent tool)
+Codex: ask Codex to spawn the `jiwoo-prd` agent
 Input artifacts: workspace/prd/PRD-{slug}.md
 Task: Review and revise until READY.
 Open decisions: [numbered list or "none"]

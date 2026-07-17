@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.13.2] — 2026-07-17
+
+### Fixed
+- stop emitting unsupported Codex custom-agent `tools` arrays that caused JiWoo, HyeRin, and YooYeon to be ignored
+- relay specialist clarification, approval, and escalation requests through the Codex parent with resumable run-state tracking
+
+### Added
+- add installer regression tests for all 13 Codex agents and Claude `AskUserQuestion` compatibility
+
+[2.13.2]: https://github.com/putrautama007/triples-agentic/compare/v2.13.1...v2.13.2
+
 ## [2.13.1] — 2026-06-22
 
 ### Changed
