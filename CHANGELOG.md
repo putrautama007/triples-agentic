@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.14.0] — 2026-07-17
+
+### Added
+- add commandless SeoYeon document routing (#3) (`2017348`)
+
+[2.14.0]: https://github.com/putrautama007/triples-agentic/compare/v2.13.3...v2.14.0
+
 ## [2.13.3] — 2026-07-17
 
 ### Fixed
