@@ -139,49 +139,87 @@ Human approval is required at these gates even when the producing agent reports 
 
 Approval must be explicit from the user in the current conversation (for example: "approved", "looks good", "continue", or requested changes resolved and then approved). Agent-generated `READY` signals are quality-gate results, not human approval.
 
-### Codex Parent Human-Input Relay
+### Codex Planning-Gate Parent Relay
 
-On Codex, SeoYeon or the parent agent owns every clarification, approval, and
-escalation interaction. A spawned specialist must return a
-`TRIPLES_USER_INPUT_REQUIRED` payload instead of trying to ask the user or wait
-inside its own thread.
+On Codex, SeoYeon or the invoking parent owns user interaction for the five
+planning specialists: JiWoo, HyeRin, YooYeon, NaKyoung, and Lynn. This contract
+applies whether SeoYeon orchestrated the child or the user invoked one of those
+specialists directly. It does not change developer, checker, setup, or QA blocker
+handling.
 
-When a blocking payload arrives:
+#### Receive and validate
 
-1. Validate `version`, `request_id`, `kind`, `owner`, `stage`, artifact paths,
-   one to three questions, and `resume_action`. Treat a malformed payload as a
-   blocker; do not infer missing decisions.
-2. Before asking the user, add a `[!]` entry under `## Open decisions / approvals
-   pending` in `workspace/RUN_STATE.md`. Record request ID, owner, stage, kind,
-   artifact paths, `pending` status, and resume action. Do not route another
-   agent or advance the stage while the entry is pending.
-3. If `request_user_input` is callable and every question has two or three
-   mutually exclusive options with exactly one recommendation, use it without
-   an automatic timeout. Ask at most three questions. Otherwise use the
-   plain-text fallback: render the same numbered prompts, options, recommendation,
-   and impacts, then end the turn for the user's response.
-4. Correlate the response to the only matching pending `request_id`. A duplicate,
-   unrelated, or partially answered response remains pending; ask only the
-   unanswered questions and do not resume the workflow.
-5. After all answers are present, mark the ledger entry `[x] — resolved`, append
-   a concise answer summary, and re-invoke the owning specialist with the
-   artifact paths plus this envelope:
+1. Retain the exact child `target` returned when the specialist was spawned.
+   A planning child may return a sentinel-wrapped `TRIPLES_USER_INPUT_REQUIRED`
+   request instead of asking the user itself.
+2. Accept both request versions during migration:
+   - v2 uses `artifacts`, `questions[].question_id`, and an explicit question
+     `type` of `choice` or `free_text`.
+   - v1 uses `artifact_paths`, `questions[].id`, and infers choice from the
+     presence of `options`.
+   Normalize either version internally, but never ask the child to emit v1.
+3. Validate a stable non-empty `request_id`, owner, planning stage, one or more
+   workspace artifacts, and one to three uniquely identified questions. A choice
+   question must contain two or three mutually exclusive options with exactly one
+   recommendation. A `free_text` question must omit options and is valid only
+   when choices are not meaningful.
+4. On the first malformed payload, send one corrective follow-up to the **same
+   child target** listing the validation failures and require a corrected v2
+   payload with the same request ID when recoverable. If that child response is
+   malformed again, do not guess: record `protocol_error` and both validation
+   attempts in `workspace/RUN_STATE.md`, keep the gate blocked, and report the
+   protocol error to the user.
 
-   ```text
-   TRIPLES_USER_INPUT_RESPONSE
-   {"version":1,"request_id":"<same-id>","answers":[{"question_id":"q1","answer":"..."}]}
-   ```
+#### Persist and prompt FIFO
 
-   Re-invoke the owning specialist even when its earlier thread is still visible;
-   artifacts and the ledger are the source of truth after interruption, compaction, or context loss.
-   Use `revise_and_evaluate` for artifact gaps and `retry_current_task` for
-   implementation or QA blockers.
+1. Before asking the user, append the normalized request under `## Planning input
+   queue` in `workspace/RUN_STATE.md`. Record arrival order, request version and
+   ID, exact child target, owner, stage, kind, artifacts, question IDs, status
+   `pending`, answer summaries, and protocol-attempt count.
+2. Concurrent planning requests are a FIFO queue. Preserve arrival order, present
+   only the oldest pending request, and never let a later answer or approval
+   overtake it. Resolved entries remain in the ledger as `[x] — resolved`.
+3. Use native `request_user_input` only when it is callable and every question is
+   native-compatible: one to three `choice` questions, each with two or three
+   options and exactly one recommendation. Call it **without a timeout or auto
+   resolution**. Otherwise render the same numbered prompts, options,
+   recommendation, and impacts as plain text; for `free_text`, show the prompt
+   and expected answer format. Then wait for the user's response.
+4. Correlate answers by both `request_id` and `question_id`. Duplicate, unrelated,
+   or partial answers do not resolve the request. Persist accepted answers and
+   ask only the unanswered questions when the request reaches the FIFO head.
 
-When a specialist returns `READY`, SeoYeon creates an `approval` request at the
-parent level using the same ledger and prompting rules. Only an explicit approval
-may use `advance_pipeline`; a request for changes must re-invoke the artifact
-owner and repeat evaluation. A pending or partially answered approval must never
-advance the pipeline.
+#### Resume the same child
+
+After every required answer is present, mark the queue entry `[x] — resolved`,
+append a concise answer summary, and send this envelope to the **same idle child
+target** using the same-target follow-up mechanism (for example, `followup_task`):
+
+```text
+TRIPLES_USER_INPUT_RESPONSE
+{"version":2,"request_id":"<same-id>","answers":[{"question_id":"q1","answer":"..."}]}
+```
+
+Include the canonical artifacts and tell the child to revise and re-evaluate.
+Continue processing that child's result in the same parent turn. Respawn only
+when the original target is unavailable or its context was lost; seed the
+replacement with the artifacts, the resolved ledger entry, and
+the correlated v2 response. Never respawn merely because the original child is
+idle. After resuming the head request, continue with the next FIFO entry as soon
+as the workflow permits.
+
+#### READY and human approval
+
+`READY` returns to the parent; it is not approval. Verify the score when required,
+then create a parent-owned approval queue entry and offer exactly **Approve** and
+**Request changes**, with the artifact summary, assumptions, and risks. A pending
+or partial approval never advances the pipeline.
+
+- **Approve:** mark the approval resolved and advance to the next pipeline stage
+  in this same turn. For a directly invoked specialist, finish the direct task.
+- **Request changes:** collect the requested edits, persist them, and follow up
+  the same producing child target. The child revises and re-evaluates, then
+  returns `READY` again; repeat the parent-owned approval gate.
 
 ### After-Approval Continuation
 

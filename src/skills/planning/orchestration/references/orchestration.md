@@ -42,27 +42,39 @@ PRD, RFC, and Test Case evaluations MUST produce a numeric quality score (0.0–
 
 If the user requests changes, route feedback to the owning agent, then repeat the approval gate when the agent returns the updated artifact.
 
-### Codex Parent Human-Input Relay
+### Codex Planning-Gate Parent Relay
 
-Codex specialists do not own the user conversation. On `GAPS FOUND`, `BLOCKED`,
-or another human decision, they return a sentinel-wrapped
-`TRIPLES_USER_INPUT_REQUIRED` JSON payload with one to three questions and stop.
-The orchestrator must:
+Only the five planning specialists (JiWoo, HyeRin, YooYeon, NaKyoung, and Lynn)
+relay human decisions to the Codex parent. The same rules apply to SeoYeon
+orchestration and direct specialist invocation. Developer, checker, setup, and QA
+blockers are outside this relay and keep their existing behavior.
 
-1. Persist the request ID, kind, owner, stage, artifact paths, pending status, and
-   resume action in `workspace/RUN_STATE.md` before asking anything.
-2. Use `request_user_input` only when it is callable and every question has two
-   or three mutually exclusive choices with exactly one recommendation. Otherwise
-   use a plain-text fallback.
-3. Keep the gate blocked for partial, duplicate, unrelated, or malformed answers.
-4. Mark the request resolved only after all required answers exist, then re-invoke
-   the owner with `TRIPLES_USER_INPUT_RESPONSE` and the canonical artifact paths.
-5. Create approval requests at the parent level after `READY`; never accept a
-   specialist's self-approval as a human gate.
-
-This relay applies to planning gates, developer clarification, QA blockers, and
-direct specialist invocation. Re-invocation is required after context loss; do
-not depend on an earlier child thread's memory.
+1. Retain the exact spawned child target. Accept sentinel-wrapped
+   `TRIPLES_USER_INPUT_REQUIRED` v1 and v2 requests during migration, normalize
+   v1 `artifact_paths`/question `id` to v2 `artifacts`/`question_id`, and respond
+   only with `TRIPLES_USER_INPUT_RESPONSE` v2 correlated by request and question
+   IDs. Generated children emit v2 only.
+2. Validate stable request ID, owner, stage, affected artifacts, and one to three
+   questions. Choice questions require two or three mutually exclusive options
+   and exactly one recommendation. Use `free_text` only when choices are not
+   meaningful.
+3. Persist pending and resolved requests in `workspace/RUN_STATE.md` with arrival
+   order, exact child target, correlation IDs, answers, and protocol-attempt count.
+   Concurrent requests form a FIFO queue: present only its oldest pending entry.
+4. Use `request_user_input` without a timeout only when callable and all questions
+   are native-compatible choices. Otherwise render the same questions and option
+   impacts in plain text. Partial, duplicate, and unrelated answers stay pending.
+5. On a first malformed payload, send one corrective follow-up to the same child
+   target. If its next response is malformed, record `protocol_error`, keep the
+   gate blocked, and do not infer or guess a decision.
+6. Once complete, mark the request resolved and use the same-target follow-up
+   mechanism to continue the **same idle child target in the same parent turn**.
+   Respawn only if the target is unavailable or its context is lost, seeding the
+   replacement from artifacts, ledger state, and the correlated v2 response.
+7. `READY` returns to the parent. The parent owns **Approve / Request changes**.
+   Approve advances the orchestrated pipeline in the same turn (or completes a
+   direct task); requested changes go to the same producing child for revision
+   and another evaluation.
 
 ## Delegation Protocol
 

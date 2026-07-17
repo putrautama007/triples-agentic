@@ -163,12 +163,12 @@ Human review is required at five stages. Each gate follows the same pattern:
 1. Agent **creates** artifact using its template
 2. Agent **reviews** against its quality gate checklist
 3. Agent **evaluates**: all gates pass → `READY`; any fail → `GAPS: [numbered list]`
-4. Agent returns specific questions; on Codex this is a structured `TRIPLES_USER_INPUT_REQUIRED` payload
+4. Agent returns one to three specific questions; on Codex this is a stable-ID `TRIPLES_USER_INPUT_REQUIRED` v2 payload
 5. The interaction owner **presents** it to the human: the specialist on Claude Code, SeoYeon/the parent on Codex
 6. Human **provides** clarifications
-7. On Codex, the parent re-invokes the owning agent with `TRIPLES_USER_INPUT_RESPONSE`; Claude Code resumes its direct interaction flow
+7. On Codex, the parent follows up the same child target with a correlated v2 `TRIPLES_USER_INPUT_RESPONSE`; Claude Code resumes its direct interaction flow
 8. Agent **updates** artifact and loops back to step 2
-9. Loop exits when `READY`; on Codex the parent owns the explicit approval request, while Claude Code preserves its direct human gate
+9. Loop exits when `READY`; on Codex the parent owns **Approve / Request changes**, while Claude Code preserves its direct human gate
 
 | Gate | Agent | Artifact |
 |------|-------|---------|
@@ -217,19 +217,31 @@ Use artifact paths as the source of truth. Do not rely on hidden conversation me
 ### Codex human-input relay
 
 Codex custom subagents inherit the parent task's tool surface and do not own the
-user conversation. When any specialist needs clarification or escalation, it
-returns at most three questions between `TRIPLES_USER_INPUT_REQUIRED` and
-`TRIPLES_END_USER_INPUT_REQUIRED`, then stops. SeoYeon or the invoking parent:
+user conversation. Only the five planning specialists—JiWoo, HyeRin, YooYeon,
+NaKyoung, and Lynn—receive the child relay contract. They emit v2 only, with a
+stable request ID, owner, stage, artifacts, and one to three typed questions.
+A choice question contains two or three options with exactly one recommendation;
+`free_text` is used only when meaningful choices do not exist.
 
-1. Records the request ID, owner, stage, artifact paths, status, and resume action
-   in `workspace/RUN_STATE.md`.
-2. Uses native `request_user_input` when callable and choice-compatible, otherwise
-   renders a plain-text question.
-3. Refuses to advance on missing, partial, duplicate, or unrelated answers.
-4. Re-invokes the owner with the correlated response after all answers exist.
+SeoYeon or the directly invoking parent:
 
-The parent creates approval requests after `READY`; a specialist never approves
-its own artifact or advances the next stage.
+1. Accepts v1 and v2 requests during migration, normalizes v1 field names, and
+   sends only v2 responses correlated by request and question IDs.
+2. Records pending and resolved requests, arrival order, exact child target,
+   artifacts, answers, and protocol attempts in `workspace/RUN_STATE.md`.
+3. Queues concurrent requests FIFO and presents only the oldest pending request.
+4. Uses native `request_user_input` without timeout when callable and all
+   questions are choice-compatible; otherwise renders the same prompts in plain
+   text. Missing, partial, duplicate, or unrelated answers remain pending.
+5. Sends one corrective follow-up to the same target for a malformed payload. A
+   second malformed response is a recorded `protocol_error`; no answer is guessed.
+6. After all answers exist, follows up the same idle child target and continues
+   in the same turn. It respawns only when that target is unavailable or its
+   context is lost, restoring context from artifacts and the ledger.
+
+`READY` returns to the parent, which owns **Approve / Request changes**. Approve
+advances the pipeline in the same turn; changes return to the same producing
+child. This relay does not alter implementation, checker, setup, or QA blockers.
 
 ---
 

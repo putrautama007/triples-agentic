@@ -64,28 +64,30 @@ const CODEX_AGENT_SKILL_METADATA = {
   },
 };
 
-const CODEX_HUMAN_INPUT_RELAY = `## Codex Human-Input Relay (Mandatory)
+const CODEX_PLANNING_GATE_CHILD_CONTRACT = `## Codex Planning-Gate Child Contract (Mandatory, v2)
 
-These Codex-specific rules override any earlier instruction to call an ask-user tool, address the user directly, wait inside this specialist thread, approve an artifact, or hand off to the next stage.
+These Codex-specific rules apply only to this planning specialist and override any earlier instruction to call an ask-user tool, address the user directly, wait inside this specialist thread, approve an artifact, or hand off to the next stage.
 
-- The parent Codex agent owns all user interaction. Do not call \`request_user_input\` or attempt to pause the user conversation yourself.
-- When clarification, approval, or escalation is required, return exactly one blocking request with at most three questions and then stop without continuing the stage.
-- Use two or three mutually exclusive options with exactly one recommendation when the decision supports choices. Omit \`options\` for genuinely free-form questions; the parent will use the plain-text fallback.
-- Use an opaque unique \`request_id\`. Include every affected workspace artifact and one of these resume actions: \`revise_and_evaluate\`, \`advance_pipeline\`, or \`retry_current_task\`.
-- Emit the request in this shape:
+- The parent Codex agent owns all user interaction. Do not call \`request_user_input\`, ask the user directly, or wait inside this child thread.
+- When clarification or escalation blocks the planning gate, return exactly one sentinel-wrapped request containing one to three questions, then stop without revising, approving, or advancing the stage.
+- Create a stable \`request_id\` from the owner, stage, and blocking topic (for example, \`jiwoo-prd:prd:audience-scope\`). Reuse that ID unchanged for corrective retries and until the correlated response is consumed; never replace it with a timestamp or a new random ID.
+- Set \`owner\` to this agent's slug, \`stage\` to its planning stage, and \`artifacts\` to every affected workspace path.
+- A \`choice\` question has two or three mutually exclusive options and exactly one option with \`"recommended": true\`. Use \`free_text\` only when meaningful choices cannot be supplied, and omit \`options\` for it.
+- Generated Codex planning agents emit version 2 only, in this shape:
 
 \`\`\`text
 TRIPLES_USER_INPUT_REQUIRED
 {
-  "version": 1,
-  "request_id": "<opaque-unique-id>",
-  "kind": "clarification|approval|escalation",
+  "version": 2,
+  "request_id": "<stable-owner-stage-topic-id>",
+  "kind": "clarification|escalation",
   "owner": "<agent-name>",
   "stage": "<pipeline-stage>",
-  "artifact_paths": ["workspace/..."],
+  "artifacts": ["workspace/..."],
   "questions": [
     {
-      "id": "q1",
+      "question_id": "q1",
+      "type": "choice",
       "prompt": "<specific decision needed>",
       "options": [
         {
@@ -100,18 +102,17 @@ TRIPLES_USER_INPUT_REQUIRED
         }
       ]
     }
-  ],
-  "resume_action": "revise_and_evaluate|advance_pipeline|retry_current_task"
+  ]
 }
 TRIPLES_END_USER_INPUT_REQUIRED
 \`\`\`
 
-- When an artifact passes its quality gate, return \`READY\` to the parent with its score when required, artifact paths, summary, assumptions, and risks. Do not ask for approval or emit an approved signal; the parent creates and owns the approval request.
-- After the parent re-invokes you, it will include the correlated answer envelope below. Verify the \`request_id\` and consume only answers for the listed question IDs. If any required answer is missing, return the same blocking request instead of continuing.
+- When an artifact passes its quality gate, return \`READY\` to the parent with its score when required, artifact paths, summary, assumptions, and risks. Do not ask for approval or emit an approved signal; the parent owns the **Approve / Request changes** gate.
+- The parent will follow up this same child target with the version 2 response below. Verify both \`request_id\` and every \`question_id\`; consume only correlated answers. If any required answer is missing, return the same stable blocking request instead of continuing.
 
 \`\`\`text
 TRIPLES_USER_INPUT_RESPONSE
-{"version":1,"request_id":"<same-id>","answers":[{"question_id":"q1","answer":"..."}]}
+{"version":2,"request_id":"<same-id>","answers":[{"question_id":"q1","answer":"..."}]}
 \`\`\`
 `;
 
@@ -216,7 +217,8 @@ function codexAgentTomlContent(agent, helpers) {
     `description = "${tomlEscape(meta.description)}"`,
   ];
   if (agent.codexModel) lines.push(`model = "${tomlEscape(agent.codexModel)}"`);
-  const instructions = `${stripAgentMetadataComments(agent.content).trimEnd()}\n\n${CODEX_HUMAN_INPUT_RELAY}`;
+  const childContract = agent.humanInLoop ? `\n\n${CODEX_PLANNING_GATE_CHILD_CONTRACT}` : '';
+  const instructions = `${stripAgentMetadataComments(agent.content).trimEnd()}${childContract}`;
   lines.push(`developer_instructions = ${tomlMultilineLiteral(instructions)}`);
   return lines.join('\n') + '\n';
 }
