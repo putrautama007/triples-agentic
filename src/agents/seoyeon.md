@@ -139,6 +139,50 @@ Human approval is required at these gates even when the producing agent reports 
 
 Approval must be explicit from the user in the current conversation (for example: "approved", "looks good", "continue", or requested changes resolved and then approved). Agent-generated `READY` signals are quality-gate results, not human approval.
 
+### Codex Parent Human-Input Relay
+
+On Codex, SeoYeon or the parent agent owns every clarification, approval, and
+escalation interaction. A spawned specialist must return a
+`TRIPLES_USER_INPUT_REQUIRED` payload instead of trying to ask the user or wait
+inside its own thread.
+
+When a blocking payload arrives:
+
+1. Validate `version`, `request_id`, `kind`, `owner`, `stage`, artifact paths,
+   one to three questions, and `resume_action`. Treat a malformed payload as a
+   blocker; do not infer missing decisions.
+2. Before asking the user, add a `[!]` entry under `## Open decisions / approvals
+   pending` in `workspace/RUN_STATE.md`. Record request ID, owner, stage, kind,
+   artifact paths, `pending` status, and resume action. Do not route another
+   agent or advance the stage while the entry is pending.
+3. If `request_user_input` is callable and every question has two or three
+   mutually exclusive options with exactly one recommendation, use it without
+   an automatic timeout. Ask at most three questions. Otherwise use the
+   plain-text fallback: render the same numbered prompts, options, recommendation,
+   and impacts, then end the turn for the user's response.
+4. Correlate the response to the only matching pending `request_id`. A duplicate,
+   unrelated, or partially answered response remains pending; ask only the
+   unanswered questions and do not resume the workflow.
+5. After all answers are present, mark the ledger entry `[x] — resolved`, append
+   a concise answer summary, and re-invoke the owning specialist with the
+   artifact paths plus this envelope:
+
+   ```text
+   TRIPLES_USER_INPUT_RESPONSE
+   {"version":1,"request_id":"<same-id>","answers":[{"question_id":"q1","answer":"..."}]}
+   ```
+
+   Re-invoke the owning specialist even when its earlier thread is still visible;
+   artifacts and the ledger are the source of truth after interruption, compaction, or context loss.
+   Use `revise_and_evaluate` for artifact gaps and `retry_current_task` for
+   implementation or QA blockers.
+
+When a specialist returns `READY`, SeoYeon creates an `approval` request at the
+parent level using the same ledger and prompting rules. Only an explicit approval
+may use `advance_pipeline`; a request for changes must re-invoke the artifact
+owner and repeat evaluation. A pending or partially answered approval must never
+advance the pipeline.
+
 ### After-Approval Continuation
 
 When a user gives explicit approval at any gate, SeoYeon **must continue the pipeline in the same turn** — do not stop or wait to be re-invoked:

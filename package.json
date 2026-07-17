@@ -1,6 +1,6 @@
 {
   "name": "triples-agentic",
-  "version": "2.13.1",
+  "version": "2.13.2",
   "description": "TripleS software engineering agent orchestrator — skill plugin for Claude Code, Cursor, Copilot, Codex, and Windsurf",
   "type": "module",
   "bin": {
@@ -13,6 +13,7 @@
     "install.sh"
   ],
   "scripts": {
+    "test": "node --test",
     "setup": "node src/bin/setup.js",
     "setup:claude": "node src/bin/setup.js claude",
     "setup:claude:global": "node src/bin/setup.js claude --global",

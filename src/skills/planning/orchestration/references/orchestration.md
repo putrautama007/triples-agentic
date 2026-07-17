@@ -42,6 +42,28 @@ PRD, RFC, and Test Case evaluations MUST produce a numeric quality score (0.0–
 
 If the user requests changes, route feedback to the owning agent, then repeat the approval gate when the agent returns the updated artifact.
 
+### Codex Parent Human-Input Relay
+
+Codex specialists do not own the user conversation. On `GAPS FOUND`, `BLOCKED`,
+or another human decision, they return a sentinel-wrapped
+`TRIPLES_USER_INPUT_REQUIRED` JSON payload with one to three questions and stop.
+The orchestrator must:
+
+1. Persist the request ID, kind, owner, stage, artifact paths, pending status, and
+   resume action in `workspace/RUN_STATE.md` before asking anything.
+2. Use `request_user_input` only when it is callable and every question has two
+   or three mutually exclusive choices with exactly one recommendation. Otherwise
+   use a plain-text fallback.
+3. Keep the gate blocked for partial, duplicate, unrelated, or malformed answers.
+4. Mark the request resolved only after all required answers exist, then re-invoke
+   the owner with `TRIPLES_USER_INPUT_RESPONSE` and the canonical artifact paths.
+5. Create approval requests at the parent level after `READY`; never accept a
+   specialist's self-approval as a human gate.
+
+This relay applies to planning gates, developer clarification, QA blockers, and
+direct specialist invocation. Re-invocation is required after context loss; do
+not depend on an earlier child thread's memory.
+
 ## Delegation Protocol
 
 When handing off to another agent, include:

@@ -163,10 +163,12 @@ Human review is required at five stages. Each gate follows the same pattern:
 1. Agent **creates** artifact using its template
 2. Agent **reviews** against its quality gate checklist
 3. Agent **evaluates**: all gates pass → `READY`; any fail → `GAPS: [numbered list]`
-4. Agent **presents** gaps to the human with specific questions
-5. Human **provides** clarifications
-6. Agent **updates** artifact and loops back to step 2
-7. Loop exits when `READY`
+4. Agent returns specific questions; on Codex this is a structured `TRIPLES_USER_INPUT_REQUIRED` payload
+5. The interaction owner **presents** it to the human: the specialist on Claude Code, SeoYeon/the parent on Codex
+6. Human **provides** clarifications
+7. On Codex, the parent re-invokes the owning agent with `TRIPLES_USER_INPUT_RESPONSE`; Claude Code resumes its direct interaction flow
+8. Agent **updates** artifact and loops back to step 2
+9. Loop exits when `READY`; on Codex the parent owns the explicit approval request, while Claude Code preserves its direct human gate
 
 | Gate | Agent | Artifact |
 |------|-------|---------|
@@ -211,6 +213,23 @@ Open decisions: none
 ```
 
 Use artifact paths as the source of truth. Do not rely on hidden conversation memory between tools.
+
+### Codex human-input relay
+
+Codex custom subagents inherit the parent task's tool surface and do not own the
+user conversation. When any specialist needs clarification or escalation, it
+returns at most three questions between `TRIPLES_USER_INPUT_REQUIRED` and
+`TRIPLES_END_USER_INPUT_REQUIRED`, then stops. SeoYeon or the invoking parent:
+
+1. Records the request ID, owner, stage, artifact paths, status, and resume action
+   in `workspace/RUN_STATE.md`.
+2. Uses native `request_user_input` when callable and choice-compatible, otherwise
+   renders a plain-text question.
+3. Refuses to advance on missing, partial, duplicate, or unrelated answers.
+4. Re-invokes the owner with the correlated response after all answers exist.
+
+The parent creates approval requests after `READY`; a specialist never approves
+its own artifact or advances the next stage.
 
 ---
 

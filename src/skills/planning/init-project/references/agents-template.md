@@ -34,6 +34,7 @@ This project has local TripleS Agentic support for Codex and other coding agents
 - Treat artifacts in `workspace/` as the source of truth during TripleS workflows; `workspace/RUN_STATE.md` is the resumable run ledger.
 - Keep `.codex/agents/` and `.codex/skills/` as the canonical Codex instruction source; this file is supplemental guidance.
 - Do not skip human approval gates for PRD, design, RFC, task breakdown, or test cases.
+- If a specialist returns `TRIPLES_USER_INPUT_REQUIRED`, the parent must not advance the workflow. Persist the pending request in `workspace/RUN_STATE.md`, use `request_user_input` only when it is callable and the supplied choices are native-compatible, and otherwise ask the same questions in plain text. After every question is answered, re-invoke the owning specialist with `TRIPLES_USER_INPUT_RESPONSE`; never rely on the old child thread's memory.
 - Run `npx triples-agentic update` to refresh installed agents, skills, and managed guidance.
 
 <!-- triples-agentic:end -->
