@@ -15,8 +15,9 @@ This project has local TripleS Agentic support for Codex and other coding agents
 
 ### Start here in Codex
 
+- Use a natural `$seoyeon` request for document work, such as `$seoyeon draft the PRD for account recovery`. SeoYeon reads `workspace/RUN_STATE.md`, then automatically starts or resumes PRD, Design, RFC, Task Breakdown, or Test Case drafting without a `run` or `resume` subcommand.
+- A natural `$seoyeon continue` resumes the ledger's active run after a token-limit reset or closed session.
 - Use `$seoyeon` for the full PRD → Design → RFC → Tasks → Development → Check → Test Cases → QA pipeline — SeoYeon delegates to each specialist agent automatically.
-- Ask SeoYeon to `resume` to continue a run after a token-limit reset or closed session — she reads `workspace/RUN_STATE.md` and picks up from the last in-flight unit of work.
 - Use `/skills` to browse the orchestrator skill and bundled knowledge references.
 - Or ask Codex to spawn a specialist agent directly when you need a single stage (Codex agents are explicit-invocation only — name the agent in your request):
   - `jiwoo-prd` — Product Requirements Document (gpt-5.5)
@@ -33,49 +34,12 @@ This project has local TripleS Agentic support for Codex and other coding agents
 
 - Treat artifacts in `workspace/` as the source of truth during TripleS workflows; `workspace/RUN_STATE.md` is the resumable run ledger.
 - Keep `.codex/agents/` and `.codex/skills/` as the canonical Codex instruction source; this file is supplemental guidance.
+- Codex Plan mode is mandatory before SeoYeon mutates a document run or invokes JiWoo, HyeRin, YooYeon, NaKyoung, or Lynn, including direct invocation of those five document agents. Read the ledger first, then confirm `request_user_input` is callable. If it is unavailable, do not mutate or spawn; stop with: "Select Codex Plan mode and resend the same `$seoyeon` request. SeoYeon will automatically start or resume the document workflow."
+- Setup, implementation, checker, and QA specialists do not require the document Plan-mode preflight and keep their normal Codex interaction behavior.
 - Do not skip human approval gates for PRD, design, RFC, task breakdown, or test cases.
+- Every `TRIPLES_USER_INPUT_REQUIRED` question must provide two or three mutually exclusive options with exactly one recommendation; custom answers use the interactive UI's built-in free-form choice. On the first malformed payload, give the same child one corrective retry. On a second malformed payload, record `protocol_error` and keep the workflow blocked.
+- Persist valid pending requests in `workspace/RUN_STATE.md`, then use `request_user_input` without a timeout or automatic resolution. If the tool becomes unavailable or fails, retain the pending request, do not ask it in chat, and require the same natural `$seoyeon` request to be resent in Plan mode. After every question is answered, re-invoke the owning specialist with `TRIPLES_USER_INPUT_RESPONSE`; never rely on the old child thread's memory.
+- When a specialist returns `READY`, the parent owns the approval and presents exactly **Approve** and **Request changes** through `request_user_input`. A pending approval never advances the workflow.
 - Run `npx triples-agentic update` to refresh installed agents, skills, and managed guidance.
-
-### Codex planning-gate relay (orchestrated and direct invocation)
-
-This relay applies only to the five planning specialists: `jiwoo-prd`,
-`hyerin-design`, `yooyeon-rfc`, `nakyoung-tasks`, and `lynn-testcase`. Developer,
-checker, setup, and QA blockers keep their existing behavior.
-
-- Retain the exact child target when spawning a planning specialist. If it returns
-  `TRIPLES_USER_INPUT_REQUIRED`, the parent owns the user interaction and must not
-  advance the workflow.
-- Accept v1 and v2 requests during migration. Normalize v1 `artifact_paths` and
-  `questions[].id` to v2 `artifacts` and `questions[].question_id`. Generated
-  specialists emit v2 only; parent responses are always correlated v2:
-
-  ```text
-  TRIPLES_USER_INPUT_RESPONSE
-  {"version":2,"request_id":"<same-id>","answers":[{"question_id":"q1","answer":"..."}]}
-  ```
-
-- Validate the stable request ID, owner, stage, artifacts, and one to three
-  questions. A choice question has two or three options with exactly one
-  recommendation; `free_text` is allowed only when meaningful choices do not
-  exist.
-- Persist every pending and resolved request in `workspace/RUN_STATE.md`, including
-  arrival order, exact child target, request/question IDs, artifacts, answers,
-  status, and protocol attempts. Queue concurrent requests FIFO and present only
-  the oldest pending item.
-- Use `request_user_input` without timeout or auto-resolution only when it is
-  callable and all questions are native-compatible choices. Otherwise ask the
-  same numbered questions and options in plain text. Partial, duplicate, or
-  unrelated answers remain pending.
-- On the first malformed payload, send one corrective follow-up to the same target.
-  A second malformed response becomes a recorded `protocol_error`; keep the gate
-  blocked and never guess.
-- Once all answers are correlated by request and question IDs, mark the request
-  resolved and follow up the **same idle child target** in the same parent turn.
-  Respawn only if that target is unavailable or its context is lost, seeding the
-  replacement from artifacts and the ledger.
-- `READY` returns to the parent. The parent owns an **Approve / Request changes**
-  gate: Approve advances in the same turn (or completes a direct invocation),
-  while changes are collected and routed to the same producing child target for
-  revision and another `READY` evaluation.
 
 <!-- triples-agentic:end -->

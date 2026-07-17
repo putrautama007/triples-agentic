@@ -35,8 +35,8 @@ Next action: {one line — the exact unit to resume}
 
 ## Planning input queue
 - [!] 001 — {request-id} — clarification — pending
-  - Protocol: request v1|v2; response v2; attempts 1/2
-  - Target: {exact spawned planning-child target}
+  - Protocol: request v1; response v1; attempts 1/2
+  - Target: {owning document specialist}
   - Owner / stage: {owner} / {stage}
   - Artifacts: {workspace paths}
   - Questions: {q1: pending; q2: answered — summary}
@@ -45,8 +45,8 @@ Next action: {one line — the exact unit to resume}
 The orchestrator owns the planning-input queue. It stores pending and resolved
 entries in arrival order, processes concurrent requests FIFO, and records a
 second malformed response as `protocol_error` rather than guessing. Planning
-children are followed up on the same target after answers; respawn occurs only
-when that target is unavailable or its context is lost.
+children are re-invoked with the correlated response after answers; artifacts
+and the ledger restore context after interruption or compaction.
 
 **Write rule (flush after each unit, never batch):**
 1. **Before** starting a unit (task, test case, QA test, bug fix, check), mark its row `[~]` and set `Next action`.
@@ -65,9 +65,10 @@ Emit exactly one when your stage ends:
 
 For Codex planning specialists only (JiWoo, HyeRin, YooYeon, NaKyoung, Lynn), a
 blocking clarification is returned to the parent as
-`TRIPLES_USER_INPUT_REQUIRED` v2. `READY` also returns to the parent, which owns
-the human **Approve / Request changes** gate. This does not alter implementation,
-checker, setup, or QA blocker handling.
+`TRIPLES_USER_INPUT_REQUIRED` v1 with two or three options and exactly one
+recommendation per question. `READY` also returns to the parent, which owns the
+human **Approve / Request changes** gate through Codex Plan mode. This does not
+alter implementation, checker, setup, or QA blocker handling.
 
 ## Handoff format
 

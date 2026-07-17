@@ -163,12 +163,12 @@ Human review is required at five stages. Each gate follows the same pattern:
 1. Agent **creates** artifact using its template
 2. Agent **reviews** against its quality gate checklist
 3. Agent **evaluates**: all gates pass → `READY`; any fail → `GAPS: [numbered list]`
-4. Agent returns one to three specific questions; on Codex this is a stable-ID `TRIPLES_USER_INPUT_REQUIRED` v2 payload
+4. Agent returns specific questions; on Codex this is a structured `TRIPLES_USER_INPUT_REQUIRED` payload
 5. The interaction owner **presents** it to the human: the specialist on Claude Code, SeoYeon/the parent on Codex
 6. Human **provides** clarifications
-7. On Codex, the parent follows up the same child target with a correlated v2 `TRIPLES_USER_INPUT_RESPONSE`; Claude Code resumes its direct interaction flow
+7. On Codex, the parent re-invokes the owning agent with `TRIPLES_USER_INPUT_RESPONSE`; Claude Code resumes its direct interaction flow
 8. Agent **updates** artifact and loops back to step 2
-9. Loop exits when `READY`; on Codex the parent owns **Approve / Request changes**, while Claude Code preserves its direct human gate
+9. Loop exits when `READY`; on Codex the parent owns the explicit approval request, while Claude Code preserves its direct human gate
 
 | Gate | Agent | Artifact |
 |------|-------|---------|
@@ -216,32 +216,40 @@ Use artifact paths as the source of truth. Do not rely on hidden conversation me
 
 ### Codex human-input relay
 
-Codex custom subagents inherit the parent task's tool surface and do not own the
-user conversation. Only the five planning specialists—JiWoo, HyeRin, YooYeon,
-NaKyoung, and Lynn—receive the child relay contract. They emit v2 only, with a
-stable request ID, owner, stage, artifacts, and one to three typed questions.
-A choice question contains two or three options with exactly one recommendation;
-`free_text` is used only when meaningful choices do not exist.
+Natural `$seoyeon <request>` is the default Codex entry for document work.
+SeoYeon reads `workspace/RUN_STATE.md`, re-presents its oldest pending planning
+item, resumes its in-progress document owner, or infers PRD, Design, RFC, Task
+Breakdown, or Test Cases from the request. Explicit `run` and `resume` commands
+remain compatibility aliases.
 
-SeoYeon or the directly invoking parent:
+The five document subagents inherit the parent task's tool surface and do not own
+the user conversation. When JiWoo, HyeRin, YooYeon, NaKyoung, or Lynn needs
+clarification or escalation, the agent returns at most three questions between
+`TRIPLES_USER_INPUT_REQUIRED` and `TRIPLES_END_USER_INPUT_REQUIRED`, then stops.
+SeoYeon or the invoking parent:
 
-1. Accepts v1 and v2 requests during migration, normalizes v1 field names, and
-   sends only v2 responses correlated by request and question IDs.
-2. Records pending and resolved requests, arrival order, exact child target,
-   artifacts, answers, and protocol attempts in `workspace/RUN_STATE.md`.
-3. Queues concurrent requests FIFO and presents only the oldest pending request.
-4. Uses native `request_user_input` without timeout when callable and all
-   questions are choice-compatible; otherwise renders the same prompts in plain
-   text. Missing, partial, duplicate, or unrelated answers remain pending.
-5. Sends one corrective follow-up to the same target for a malformed payload. A
-   second malformed response is a recorded `protocol_error`; no answer is guessed.
-6. After all answers exist, follows up the same idle child target and continues
-   in the same turn. It respawns only when that target is unavailable or its
-   context is lost, restoring context from artifacts and the ledger.
+1. Reads the ledger, then requires Codex Plan mode before a document mutation,
+   document delegation, or direct call to one of those five agents. If
+   `request_user_input` is unavailable, it preserves state and asks the user to
+   select Plan mode and resend the same natural `$seoyeon` request.
+2. Validates that each question has two or three mutually exclusive options and
+   exactly one recommendation. The UI's built-in free-form choice handles custom
+   answers.
+3. Gives the same child one corrective retry for a malformed payload. A second
+   malformed response is recorded as `protocol_error` and remains blocked.
+4. Records the valid request ID, owner, stage, artifact paths, status, resume
+   action, and validation-attempt count in `workspace/RUN_STATE.md`.
+5. Uses `request_user_input` without a timeout or automatic resolution. If the
+   tool fails after persistence, it retains the pending request and requires the
+   natural request to be resent in Plan mode instead of asking in chat.
+6. Refuses to advance on missing, partial, duplicate, unrelated, or malformed
+   answers.
+7. Re-invokes the owner with the correlated response after all answers exist.
 
-`READY` returns to the parent, which owns **Approve / Request changes**. Approve
-advances the pipeline in the same turn; changes return to the same producing
-child. This relay does not alter implementation, checker, setup, or QA blockers.
+The parent creates approval requests after `READY` with exactly **Approve** and
+**Request changes**. A specialist never approves its own artifact or advances
+the next stage. Setup, implementation, checker, and QA specialists keep their
+standard Codex relay and do not require the document Plan-mode preflight.
 
 ---
 
