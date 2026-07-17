@@ -113,8 +113,9 @@ Every `src/agents/*.md` file should include:
 - State tool constraints explicitly.
 - If a gate depends on human review, say `STOP and wait`.
 - Set `human-in-loop: true` only for planning specialists that participate in the
-  Codex planning-gate relay; the installer uses it to inject the child v2
-  contract. Do not set it for implementation, checker, setup, or QA blockers.
+  Codex document relay. Generated Codex definitions for those five specialists
+  require Plan mode and option-only protocol-v1 requests. Do not set it for
+  implementation, checker, setup, or QA blockers.
 - If quality scoring applies, state formula, minimum threshold, below-threshold behavior, and re-evaluation loop.
 
 ## Knowledge Skill Authoring

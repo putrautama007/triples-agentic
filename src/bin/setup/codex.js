@@ -3,9 +3,9 @@ import { join } from 'path';
 
 const CODEX_AGENT_SKILL_METADATA = {
   seoyeon: {
-    description: 'Coordinate the full TripleS delivery pipeline across PRD, design, RFC, task breakdown, development, test cases, and QA — with convergence loops and defect rework until human-approved delivery. Use when the user wants end-to-end orchestration, status, routing, cross-platform handoff, or delivery summaries.',
+    description: 'Coordinate the full TripleS delivery pipeline and automatically start or resume PRD, design, RFC, task-breakdown, or test-case drafting from a natural $seoyeon request. Use when the user wants document drafting, end-to-end orchestration, status, routing, cross-platform handoff, or delivery summaries.',
     shortDescription: 'Orchestrate PRD→QA with convergence loops',
-    defaultPrompt: 'Use $seoyeon to orchestrate this feature from PRD through QA with human review gates and a QA rework loop.',
+    defaultPrompt: 'Use $seoyeon with my natural document request. Inspect workspace/RUN_STATE.md and automatically start or resume the correct document-drafting stage.',
   },
   'chaewon-init-setup': {
     description: 'Explain, audit, and initialize local TripleS project setup for Claude, Codex, and other coding agents. Use when the user needs setup guidance, installed file explanations, root doc guidance, or update/reinstall help.',
@@ -64,30 +64,40 @@ const CODEX_AGENT_SKILL_METADATA = {
   },
 };
 
-const CODEX_PLANNING_GATE_CHILD_CONTRACT = `## Codex Planning-Gate Child Contract (Mandatory, v2)
+const CODEX_DOCUMENT_AGENT_SLUGS = new Set([
+  'jiwoo-prd',
+  'hyerin-design',
+  'yooyeon-rfc',
+  'nakyoung-tasks',
+  'lynn-testcase',
+]);
+const CODEX_PLAN_MODE_SLUGS = new Set(['seoyeon', ...CODEX_DOCUMENT_AGENT_SLUGS]);
+const CODEX_PLAN_MODE_REQUIREMENT = 'Requires Codex Plan mode: before invocation the parent must confirm `request_user_input` is callable and stop before spawning if unavailable.';
+const CODEX_PLAN_MODE_REQUIRED_MESSAGE = 'Select Codex Plan mode and resend the same `$seoyeon` request. SeoYeon will automatically start or resume the document workflow.';
 
-These Codex-specific rules apply only to this planning specialist and override any earlier instruction to call an ask-user tool, address the user directly, wait inside this specialist thread, approve an artifact, or hand off to the next stage.
+const CODEX_DOCUMENT_HUMAN_INPUT_RELAY = `## Codex Human-Input Relay (Mandatory)
 
-- The parent Codex agent owns all user interaction. Do not call \`request_user_input\`, ask the user directly, or wait inside this child thread.
-- When clarification or escalation blocks the planning gate, return exactly one sentinel-wrapped request containing one to three questions, then stop without revising, approving, or advancing the stage.
-- Create a stable \`request_id\` from the owner, stage, and blocking topic (for example, \`jiwoo-prd:prd:audience-scope\`). Reuse that ID unchanged for corrective retries and until the correlated response is consumed; never replace it with a timestamp or a new random ID.
-- Set \`owner\` to this agent's slug, \`stage\` to its planning stage, and \`artifacts\` to every affected workspace path.
-- A \`choice\` question has two or three mutually exclusive options and exactly one option with \`"recommended": true\`. Use \`free_text\` only when meaningful choices cannot be supplied, and omit \`options\` for it.
-- Generated Codex planning agents emit version 2 only, in this shape:
+These Codex-specific rules override any earlier instruction to call an ask-user tool, address the user directly, wait inside this specialist thread, approve an artifact, or hand off to the next stage.
+
+- This specialist may be invoked only after the parent confirms that \`request_user_input\` is callable in Codex Plan mode. If it is unavailable, the parent must not spawn this specialist and must stop with: "${CODEX_PLAN_MODE_REQUIRED_MESSAGE}"
+- The parent Codex agent owns all user interaction. Do not call \`request_user_input\` or attempt to pause the user conversation yourself.
+- When clarification, approval, or escalation is required, return exactly one blocking request with at most three questions and then stop without continuing the stage.
+- Every question must contain two or three mutually exclusive options with exactly one recommendation. The interactive UI supplies its own free-form choice when the user needs a custom answer; never omit \`options\`.
+- Use an opaque unique \`request_id\`. Include every affected workspace artifact and one of these resume actions: \`revise_and_evaluate\`, \`advance_pipeline\`, or \`retry_current_task\`.
+- Emit the request in this shape:
 
 \`\`\`text
 TRIPLES_USER_INPUT_REQUIRED
 {
-  "version": 2,
-  "request_id": "<stable-owner-stage-topic-id>",
-  "kind": "clarification|escalation",
+  "version": 1,
+  "request_id": "<opaque-unique-id>",
+  "kind": "clarification|approval|escalation",
   "owner": "<agent-name>",
   "stage": "<pipeline-stage>",
-  "artifacts": ["workspace/..."],
+  "artifact_paths": ["workspace/..."],
   "questions": [
     {
-      "question_id": "q1",
-      "type": "choice",
+      "id": "q1",
       "prompt": "<specific decision needed>",
       "options": [
         {
@@ -102,25 +112,93 @@ TRIPLES_USER_INPUT_REQUIRED
         }
       ]
     }
-  ]
+  ],
+  "resume_action": "revise_and_evaluate|advance_pipeline|retry_current_task"
 }
 TRIPLES_END_USER_INPUT_REQUIRED
 \`\`\`
 
-- When an artifact passes its quality gate, return \`READY\` to the parent with its score when required, artifact paths, summary, assumptions, and risks. Do not ask for approval or emit an approved signal; the parent owns the **Approve / Request changes** gate.
-- The parent will follow up this same child target with the version 2 response below. Verify both \`request_id\` and every \`question_id\`; consume only correlated answers. If any required answer is missing, return the same stable blocking request instead of continuing.
+- The parent validates the payload before prompting. If it returns validation failures, correct the payload once using the same recoverable \`request_id\`; never continue the stage while the request is invalid.
+- The parent presents valid questions with \`request_user_input\` without a timeout or automatic resolution. If the tool is unavailable or fails after persistence, the request remains pending and the workflow remains blocked until it resumes in Plan mode.
+- When an artifact passes its quality gate, return \`READY\` to the parent with its score when required, artifact paths, summary, assumptions, and risks. Do not ask for approval or emit an approved signal; the parent creates and owns the approval request.
+- After the parent re-invokes you, it will include the correlated answer envelope below. Verify the \`request_id\` and consume only answers for the listed question IDs. If any required answer is missing, return the same blocking request instead of continuing.
 
 \`\`\`text
 TRIPLES_USER_INPUT_RESPONSE
-{"version":2,"request_id":"<same-id>","answers":[{"question_id":"q1","answer":"..."}]}
+{"version":1,"request_id":"<same-id>","answers":[{"question_id":"q1","answer":"..."}]}
 \`\`\`
 `;
 
+const CODEX_STANDARD_HUMAN_INPUT_RELAY = `## Codex Human-Input Relay (Mandatory)
+
+These Codex-specific rules override any earlier instruction to call an ask-user tool, address the user directly, wait inside this specialist thread, approve an artifact, or hand off to the next stage.
+
+- The parent Codex agent owns all user interaction. Do not call \`request_user_input\` or attempt to pause the user conversation yourself.
+- When clarification, approval, or escalation is required, return exactly one blocking request with at most three questions and then stop without continuing the stage.
+- Use two or three mutually exclusive options with exactly one recommendation when the decision supports choices. Omit \`options\` for genuinely free-form questions; the parent may use its available interaction format.
+- Use an opaque unique \`request_id\`. Include every affected workspace artifact and one of these resume actions: \`revise_and_evaluate\`, \`advance_pipeline\`, or \`retry_current_task\`.
+- Emit the request in this shape:
+
+\`\`\`text
+TRIPLES_USER_INPUT_REQUIRED
+{
+  "version": 1,
+  "request_id": "<opaque-unique-id>",
+  "kind": "clarification|approval|escalation",
+  "owner": "<agent-name>",
+  "stage": "<pipeline-stage>",
+  "artifact_paths": ["workspace/..."],
+  "questions": [
+    {
+      "id": "q1",
+      "prompt": "<specific decision needed>",
+      "options": [
+        {
+          "label": "<short label>",
+          "description": "<impact or tradeoff>",
+          "recommended": true
+        },
+        {
+          "label": "<alternative label>",
+          "description": "<alternative impact or tradeoff>",
+          "recommended": false
+        }
+      ]
+    }
+  ],
+  "resume_action": "revise_and_evaluate|advance_pipeline|retry_current_task"
+}
+TRIPLES_END_USER_INPUT_REQUIRED
+\`\`\`
+
+- When an artifact passes its quality gate, return \`READY\` to the parent with its score when required, artifact paths, summary, assumptions, and risks. Do not ask for approval or emit an approved signal; the parent creates and owns the approval request.
+- After the parent re-invokes you, it will include the correlated answer envelope below. Verify the \`request_id\` and consume only answers for the listed question IDs. If any required answer is missing, return the same blocking request instead of continuing.
+
+\`\`\`text
+TRIPLES_USER_INPUT_RESPONSE
+{"version":1,"request_id":"<same-id>","answers":[{"question_id":"q1","answer":"..."}]}
+\`\`\`
+`;
+
+function codexHumanInputRelay(agent) {
+  return CODEX_DOCUMENT_AGENT_SLUGS.has(agent.slug)
+    ? CODEX_DOCUMENT_HUMAN_INPUT_RELAY
+    : CODEX_STANDARD_HUMAN_INPUT_RELAY;
+}
+
 function codexSkillMetadata(agent) {
-  return CODEX_AGENT_SKILL_METADATA[agent.slug] || {
+  const metadata = CODEX_AGENT_SKILL_METADATA[agent.slug] || {
     description: `Use when the user wants help from the TripleS ${agent.displayName} workflow.`,
     shortDescription: `Use the ${agent.displayName} TripleS workflow`,
     defaultPrompt: `Use $${agent.slug} for this TripleS workflow.`,
+  };
+
+  if (!CODEX_PLAN_MODE_SLUGS.has(agent.slug)) return metadata;
+
+  return {
+    ...metadata,
+    description: `${metadata.description} ${CODEX_PLAN_MODE_REQUIREMENT}`,
+    defaultPrompt: `In Codex Plan mode, first confirm \`request_user_input\` is callable. ${metadata.defaultPrompt}`,
   };
 }
 
@@ -169,7 +247,7 @@ function codexSkillUiYaml(agent, helpers) {
     `  default_prompt: "${yamlEscape(meta.defaultPrompt)}"`,
     '',
     'policy:',
-    '  allow_implicit_invocation: true',
+    '  allow_implicit_invocation: false',
     '',
   ].join('\n');
 }
@@ -217,8 +295,7 @@ function codexAgentTomlContent(agent, helpers) {
     `description = "${tomlEscape(meta.description)}"`,
   ];
   if (agent.codexModel) lines.push(`model = "${tomlEscape(agent.codexModel)}"`);
-  const childContract = agent.humanInLoop ? `\n\n${CODEX_PLANNING_GATE_CHILD_CONTRACT}` : '';
-  const instructions = `${stripAgentMetadataComments(agent.content).trimEnd()}${childContract}`;
+  const instructions = `${stripAgentMetadataComments(agent.content).trimEnd()}\n\n${codexHumanInputRelay(agent)}`;
   lines.push(`developer_instructions = ${tomlMultilineLiteral(instructions)}`);
   return lines.join('\n') + '\n';
 }

@@ -235,22 +235,34 @@ shion-qa           [sonnet]  Execute tests and produce Go/No-Go report
 ```
 
 ### In Codex
-Use `$seoyeon` to orchestrate the full pipeline, or `/skills` to browse the orchestrator skill and bundled knowledge references. Specialist agents are Codex custom subagents — they're explicit-invocation only, so name the agent in your request:
+Use a natural `$seoyeon` request to draft or continue PRDs, design specs, RFCs,
+task breakdowns, and test cases. SeoYeon reads `workspace/RUN_STATE.md` and
+automatically starts or resumes the correct document owner; `/seoyeon run` and
+`/seoyeon resume` remain optional compatibility aliases. Use `/skills` to browse
+the orchestrator skill and bundled knowledge references. Specialist agents are
+Codex custom subagents — they're explicit-invocation only, so name the agent in
+your request:
 
 ```text
-$seoyeon to orchestrate this feature from PRD through QA with human review gates and a QA rework loop.
+$seoyeon draft the PRD for account recovery.
+$seoyeon continue the current document workflow.
 Ask Codex to spawn the jiwoo-prd agent to draft the PRD for this feature.
 Ask Codex to spawn the kaede-backend agent to implement the backend task from the breakdown.
 Ask Codex to spawn the chaewon-init-setup agent to explain or audit the local TripleS setup.
 ```
 
+Use Codex Plan mode for natural SeoYeon document requests and direct invocation
+of JiWoo, HyeRin, YooYeon, NaKyoung, or Lynn. SeoYeon reads the ledger first,
+then confirms the native `request_user_input` control is callable before a
+document mutation or delegation. If it is unavailable, TripleS preserves state
+and asks you to select Plan mode and resend the same natural request. Setup,
+implementation, checker, and QA specialists keep their normal invocation flow.
+
 Codex specialists inherit the parent task's available tools. TripleS does not
 emit a custom-agent tool array because that is not part of the supported Codex
-agent schema. The five planning specialists return human decisions to SeoYeon or
-the invoking parent as `TRIPLES_USER_INPUT_REQUIRED` v2. The parent persists and
-presents each request, then follows up the same child target with a correlated v2
-answer. Implementation, checker, setup, and QA agents do not receive this relay
-contract.
+agent schema. Human decisions are returned to SeoYeon or the invoking parent as
+`TRIPLES_USER_INPUT_REQUIRED`; the parent presents the question and re-invokes
+the specialist with the correlated answer.
 
 ### Claude + Codex continuity
 
@@ -279,26 +291,23 @@ JiWoo, HyeRin, YooYeon, NaKyoung, and Lynn all have built-in review loops:
 1. Agent creates artifact
 2. Agent reviews against quality gate checklist
 3. Agent evaluates: `READY` or `GAPS: [list]`
-4. On gaps: the agent produces one to three specific questions; choice questions have two or three options and exactly one recommendation, while free text is reserved for decisions without meaningful options
-5. Claude may present them directly with `AskUserQuestion`; on Codex the specialist returns a stable-ID v2 request to SeoYeon/the parent
-6. On Codex, the parent queues requests FIFO in `workspace/RUN_STATE.md`, presents the oldest pending request, and follows up the same child target with v2 answers correlated by request and question IDs
+4. On gaps: the agent produces up to three specific questions
+5. Claude may present them directly with `AskUserQuestion`; on Codex the specialist returns them to SeoYeon/the parent
+6. On Codex, the parent persists the request, presents it, and re-invokes the specialist with the correlated answers
 7. Agent updates and loops → repeat until `READY`
-8. On Codex, `READY` returns to the parent for **Approve / Request changes**; approval advances in the same turn and changes return to the same producing child
 
 This ensures PRD, design spec, RFC, task breakdown, and test cases are implementation-ready before moving forward.
 
-On Codex, the parent accepts v1 and v2 child requests during migration but sends
-v2 responses only. `request_user_input` is called without a timeout only when it
-is callable and every question is a native-compatible choice; otherwise the same
-questions are asked in plain text. Partial answers stay pending. The first
-malformed payload gets one corrective same-target follow-up; a second is recorded
-as a protocol error without guessing. A child is respawned only when its original
-target is unavailable or its context is lost.
+On Codex, document-planning decisions are presented through `request_user_input`
+without a timeout or automatic resolution. Questions always provide two or three
+options with one recommendation; the UI's built-in free-form choice accepts
+custom answers. If the interactive control fails after persistence, the request
+remains pending until the same natural `$seoyeon` request is resent in Plan mode.
 
 ### Codex troubleshooting
 
 After upgrading an existing Codex installation, refresh the generated files and
-start a new task so Codex reloads its custom-agent definitions:
+start a new Plan-mode task so Codex reloads its custom-agent definitions:
 
 ```bash
 npx triples-agentic update
@@ -308,7 +317,9 @@ codex doctor --json
 The doctor's `config.load` check should not contain a startup warning naming a
 TripleS agent as malformed. If it does, confirm the affected `.codex/agents/*.toml`
 file does not contain a top-level `tools = [...]` array, rerun the update, and
-restart Codex.
+restart Codex. If TripleS reports that interactive review requires Plan mode,
+select Plan mode and resend the same natural `$seoyeon` request. SeoYeon resumes
+the pending run without discarding its ledger state.
 
 ## Code Quality Check Loop
 
